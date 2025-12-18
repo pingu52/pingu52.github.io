@@ -3,6 +3,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import PostCard from "@/components/PostCard.astro";
 import PostListItem from "@/components/PostListItem.astro";
 import { getAllPosts } from "@/lib/posts";
+import Pagination from "@/components/Pagination.astro";
 
 const posts = await getAllPosts();
 
@@ -38,5 +39,3 @@ const pagePosts = posts.slice(0, PAGE_SIZE);
   </div>
 </BaseLayout>
 
----
-import Pagination from "@/components/Pagination.astro";

@@ -1,6 +1,8 @@
 ---
 import type { Post } from "@/lib/posts";
 import { buildCategoryTree, collectTags, formatDate, getPostUrl } from "@/lib/posts";
+import CategoryTree from "@/components/CategoryTree.astro";
+import TagList from "@/components/TagList.astro";
 
 const { posts } = Astro.props as { posts: Post[] };
 
@@ -108,6 +110,3 @@ const popular = posts.filter(p => p.data.popular).slice(0, 5);
   </div>
 </div>
 
----
-import CategoryTree from "@/components/CategoryTree.astro";
-import TagList from "@/components/TagList.astro";

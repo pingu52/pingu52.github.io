@@ -21,7 +21,7 @@ const { nodes } = Astro.props as { nodes: CategoryNode[] };
               <span>전체</span>
               <span class="cnt">{n.count}</span>
             </a>
-            <CategoryTree nodes={n.children} />
+	    <Astro.self nodes={n.children} />
           </div>
         </details>
       ) : (
