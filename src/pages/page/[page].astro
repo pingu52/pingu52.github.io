@@ -4,9 +4,11 @@ import PostListItem from "@/components/PostListItem.astro";
 import Pagination from "@/components/Pagination.astro";
 import { getAllPosts } from "@/lib/posts";
 
-const PAGE_SIZE = 10;
 
 export async function getStaticPaths() {
+
+  const PAGE_SIZE = 10;
+
   const posts = await getAllPosts();
   const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
 
