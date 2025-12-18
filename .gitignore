@@ -186,6 +186,9 @@ dist
 
 # Optional stylelint cache
 
+# astro 
+.astro/
+
 # SvelteKit build / generate output
 .svelte-kit
 
