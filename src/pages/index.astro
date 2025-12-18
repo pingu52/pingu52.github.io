@@ -1,0 +1,42 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import PostCard from "@/components/PostCard.astro";
+import PostListItem from "@/components/PostListItem.astro";
+import { getAllPosts } from "@/lib/posts";
+
+const posts = await getAllPosts();
+
+const recent = posts.slice(0, 3);
+
+const PAGE_SIZE = 10;
+const currentPage = 1;
+const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
+const pagePosts = posts.slice(0, PAGE_SIZE);
+---
+
+<BaseLayout title="pingu52 | Home">
+  <div class="card" style="padding: 18px 18px 8px; margin-bottom: 18px;">
+    <h1 class="page-title">최근 올라온 글</h1>
+
+    <div class="recent-grid">
+      {recent.map((p) => (
+        <PostCard post={p} />
+      ))}
+    </div>
+  </div>
+
+  <div class="card" style="padding: 18px;">
+    <div class="block-title">전체 게시글</div>
+
+    <div class="post-list">
+      {pagePosts.map((p) => (
+        <PostListItem post={p} />
+      ))}
+    </div>
+
+    <Pagination currentPage={currentPage} totalPages={totalPages} />
+  </div>
+</BaseLayout>
+
+---
+import Pagination from "@/components/Pagination.astro";

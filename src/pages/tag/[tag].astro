@@ -1,0 +1,30 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import PostListItem from "@/components/PostListItem.astro";
+import { getAllPosts } from "@/lib/posts";
+
+export async function getStaticPaths() {
+  const posts = await getAllPosts();
+  const tags = new Set<string>();
+  for (const p of posts) for (const t of (p.data.tags ?? [])) tags.add(String(t));
+
+  return Array.from(tags).map((tag) => ({
+    params: { tag },
+  }));
+}
+
+const { tag } = Astro.params;
+const posts = (await getAllPosts()).filter((p) => (p.data.tags ?? []).includes(tag));
+---
+
+<BaseLayout title={`#${tag} | pingu52`}>
+  <div class="card" style="padding: 18px;">
+    <h1 class="page-title">#{tag}</h1>
+
+    <div class="post-list">
+      {posts.map((p) => (
+        <PostListItem post={p} />
+      ))}
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,21 @@
+---
+import type { Post } from "@/lib/posts";
+import { formatDate, getPostUrl } from "@/lib/posts";
+
+const { post } = Astro.props as { post: Post };
+---
+
+<a class="post-card" href={getPostUrl(post)}>
+  <div class="img">
+    {post.data.thumbnail ? (
+      <img src={post.data.thumbnail} alt="" loading="lazy" decoding="async" />
+    ) : null}
+  </div>
+  <div class="body">
+    <strong>{post.data.title}</strong>
+    <div class="meta">
+      <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+      {post.data.company ? <span>{post.data.company}</span> : null}
+    </div>
+  </div>
+</a>

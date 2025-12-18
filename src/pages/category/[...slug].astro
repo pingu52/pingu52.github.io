@@ -1,0 +1,51 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import PostListItem from "@/components/PostListItem.astro";
+import { getAllPosts, normalizeCategories } from "@/lib/posts";
+
+export async function getStaticPaths() {
+  const posts = await getAllPosts();
+  const paths = new Set<string>();
+
+  for (const p of posts) {
+    const cats = normalizeCategories(p.data.categories);
+    if (!cats.length) continue;
+
+    // create all prefixes: A, A/B, A/B/C ...
+    for (let i = 1; i <= cats.length; i++) {
+      paths.add(cats.slice(0, i).join("/"));
+    }
+  }
+
+  return Array.from(paths).map((slug) => ({
+    params: { slug },
+  }));
+}
+
+const slug = Astro.params.slug ?? "";
+const segments = String(slug).split("/").filter(Boolean);
+
+const posts = (await getAllPosts()).filter((p) => {
+  const cats = normalizeCategories(p.data.categories);
+  if (!cats.length) return false;
+  if (segments.length > cats.length) return false;
+  for (let i = 0; i < segments.length; i++) {
+    if (cats[i] !== segments[i]) return false;
+  }
+  return true;
+});
+
+const title = segments.length ? segments.join(" / ") : "Category";
+---
+
+<BaseLayout title={`${title} | pingu52`}>
+  <div class="card" style="padding: 18px;">
+    <h1 class="page-title">{title}</h1>
+
+    <div class="post-list">
+      {posts.map((p) => (
+        <PostListItem post={p} />
+      ))}
+    </div>
+  </div>
+</BaseLayout>

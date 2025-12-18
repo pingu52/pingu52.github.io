@@ -1,0 +1,38 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import { formatDate } from "@/lib/posts";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("posts", ({ data }) => !data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props as any;
+const { Content } = await post.render();
+---
+
+<BaseLayout title={post.data.title} description={post.data.description ?? post.data.title}>
+  <article class="post card" style="padding: 20px;">
+    <h1>{post.data.title}</h1>
+    <div class="meta">
+      <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+      {post.data.company ? <span>{post.data.company}</span> : null}
+    </div>
+
+    <div class="content">
+      <Content />
+    </div>
+
+    {post.data.tags?.length ? (
+      <div class="post-tags">
+        {post.data.tags.map((t: string) => (
+          <a class="tag" href={`/tag/${encodeURIComponent(t)}/`}>#{t}</a>
+        ))}
+      </div>
+    ) : null}
+  </article>
+</BaseLayout>

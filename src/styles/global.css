@@ -1,0 +1,348 @@
+:root{
+  --bg:#0b0f14;
+  --panel:#0f172a;
+  --panel-2:#111827;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --border:#1f2937;
+  --accent:#60a5fa;
+  --accent-2:#34d399;
+  --shadow: 0 8px 30px rgba(0,0,0,.35);
+
+  --sidebar-w: 320px;
+  --max-w: 960px;
+  --radius: 14px;
+  --gap: 22px;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Apple SD Gothic Neo, Noto Sans KR, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  background: var(--bg);
+  color: var(--text);
+  line-height:1.65;
+}
+
+a{color:inherit; text-decoration:none}
+a:hover{color: var(--accent)}
+img{max-width:100%; display:block}
+
+hr{border:0;border-top:1px solid var(--border); margin: 18px 0}
+
+/* Layout */
+.shell{
+  display:flex;
+  min-height:100vh;
+}
+
+.sidebar{
+  width: var(--sidebar-w);
+  flex: 0 0 var(--sidebar-w);
+  border-right:1px solid var(--border);
+  background: linear-gradient(180deg, rgba(15,23,42,.7), rgba(15,23,42,.35));
+  position: sticky;
+  top:0;
+  height:100vh;
+  overflow:auto;
+}
+
+.main{
+  flex: 1 1 auto;
+  padding: 36px 24px;
+}
+
+.container{
+  max-width: var(--max-w);
+  margin: 0 auto;
+}
+
+/* Cards */
+.card{
+  background: linear-gradient(180deg, rgba(17,24,39,.65), rgba(17,24,39,.35));
+  border:1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+/* Sidebar */
+.sidebar-inner{
+  padding: 22px 18px;
+  display:flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile{
+  padding: 16px;
+}
+.profile .row{
+  display:flex;
+  gap: 12px;
+  align-items:center;
+}
+.avatar{
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: radial-gradient(circle at 30% 30%, rgba(96,165,250,.35), rgba(52,211,153,.12), transparent 70%);
+}
+.profile .name{font-weight: 700; letter-spacing: .2px}
+.profile .bio{color: var(--muted); font-size: 13px; margin-top: 2px}
+
+.sidebar h2{
+  margin: 0 0 10px;
+  font-size: 14px;
+  letter-spacing: .2px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.section{
+  padding: 14px 16px;
+}
+
+.adbox{
+  display:grid;
+  place-items:center;
+  height: 250px;
+  border-radius: 12px;
+  border: 1px dashed rgba(148,163,184,.35);
+  color: rgba(148,163,184,.7);
+  font-size: 13px;
+}
+
+.count .total{
+  font-size: 28px;
+  font-weight: 800;
+  margin: 6px 0;
+}
+.count p{
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Category tree */
+.cat a{display:flex; justify-content:space-between; gap: 10px; padding: 6px 0; color: rgba(229,231,235,.92)}
+.cat a .cnt{color: rgba(156,163,175,.9); font-size: 12px}
+.cat details{padding-left: 10px}
+.cat summary{
+  cursor:pointer;
+  list-style:none;
+  display:flex;
+  justify-content:space-between;
+  gap: 10px;
+  padding: 6px 0;
+  color: rgba(229,231,235,.92);
+}
+.cat summary::-webkit-details-marker{display:none}
+.cat summary .left{display:flex; gap: 8px; align-items:center}
+.chev{
+  width: 10px;
+  height: 10px;
+  display:inline-block;
+  border-right:2px solid rgba(156,163,175,.9);
+  border-bottom:2px solid rgba(156,163,175,.9);
+  transform: rotate(-45deg);
+  transition: transform .15s ease;
+  margin-top: 2px;
+}
+details[open] > summary .chev{ transform: rotate(45deg); }
+
+/* Tabs (Recent / Popular) */
+.tabs .tab-head{
+  display:flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.tab-btn{
+  border:1px solid var(--border);
+  background: rgba(17,24,39,.35);
+  color: rgba(229,231,235,.9);
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  cursor:pointer;
+}
+.tabs input{display:none}
+.tabs input#tab-recent:checked ~ .tab-head label[for="tab-recent"],
+.tabs input#tab-popular:checked ~ .tab-head label[for="tab-popular"]{
+  border-color: rgba(96,165,250,.55);
+  background: rgba(96,165,250,.12);
+  color: var(--accent);
+}
+.tab-panel{display:none}
+.tabs input#tab-recent:checked ~ .tab-panels #panel-recent{display:block}
+.tabs input#tab-popular:checked ~ .tab-panels #panel-popular{display:block}
+
+.mini-list{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap: 10px}
+.mini-list a{
+  display:grid;
+  grid-template-columns: 44px 1fr;
+  gap: 10px;
+  align-items:center;
+}
+.mini-thumb{
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(2,6,23,.35);
+  overflow:hidden;
+}
+.mini-title{font-size: 13px; line-height: 1.35}
+.mini-date{font-size: 12px; color: var(--muted); margin-top: 2px}
+
+/* Tags */
+.tags{display:flex; flex-wrap:wrap; gap: 8px}
+.tag{
+  display:inline-flex;
+  align-items:center;
+  border:1px solid var(--border);
+  background: rgba(17,24,39,.35);
+  color: rgba(229,231,235,.92);
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+.tag:hover{border-color: rgba(96,165,250,.55); background: rgba(96,165,250,.12); color: var(--accent)}
+.tags details{width:100%}
+.tags summary{cursor:pointer; color: var(--muted); font-size: 12px; margin-top: 8px}
+
+/* Main */
+.page-title{
+  font-size: 30px;
+  letter-spacing: -0.3px;
+  margin: 0 0 18px;
+}
+.block-title{
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0 0 10px;
+  text-transform: uppercase;
+  letter-spacing: .2px;
+}
+
+.recent-grid{
+  display:grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.post-card{
+  overflow:hidden;
+  border-radius: var(--radius);
+  border:1px solid var(--border);
+  background: rgba(17,24,39,.35);
+}
+.post-card .img{
+  aspect-ratio: 16/9;
+  border-bottom: 1px solid var(--border);
+  background: rgba(2,6,23,.35);
+}
+.post-card .img img{width:100%; height:100%; object-fit:cover}
+.post-card .body{padding: 14px 14px 12px}
+.post-card strong{display:block; font-size: 14px; line-height:1.35; margin-bottom: 6px}
+.post-card .meta{display:flex; gap: 10px; align-items:center; color: var(--muted); font-size: 12px}
+
+.post-list{
+  margin-top: 18px;
+  display:flex;
+  flex-direction:column;
+  gap: 12px;
+}
+
+.post-row{
+  display:grid;
+  grid-template-columns: 200px 1fr;
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(17,24,39,.25);
+}
+.post-row:hover{border-color: rgba(96,165,250,.45)}
+.post-row .img{
+  border-radius: 12px;
+  overflow:hidden;
+  border: 1px solid var(--border);
+  background: rgba(2,6,23,.35);
+  aspect-ratio: 16/9;
+}
+.post-row .img img{width:100%; height:100%; object-fit:cover}
+.post-row .info strong{display:block; font-size: 16px; margin: 2px 0 6px}
+.post-row .info p{margin:0 0 8px; color: rgba(229,231,235,.82); font-size: 13px}
+.post-row .info time{color: var(--muted); font-size: 12px}
+
+/* Pagination */
+.pagination{
+  margin: 18px 0 0;
+  display:flex;
+  gap: 8px;
+  align-items:center;
+  justify-content:flex-start;
+  flex-wrap:wrap;
+}
+.pagination .page,
+.pagination .icon{
+  border:1px solid var(--border);
+  background: rgba(17,24,39,.35);
+  color: rgba(229,231,235,.9);
+  padding: 7px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+.pagination .selected{
+  border-color: rgba(96,165,250,.55);
+  background: rgba(96,165,250,.12);
+  color: var(--accent);
+}
+.pagination .disabled{opacity:.45; pointer-events:none}
+
+/* Post page */
+article.post h1{
+  font-size: 34px;
+  letter-spacing: -0.4px;
+  margin: 0 0 10px;
+}
+article.post .meta{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 18px;
+}
+article.post .content{
+  border-top: 1px solid var(--border);
+  padding-top: 18px;
+}
+article.post .content :global(h2){margin-top: 28px}
+article.post .content :global(pre){
+  background: rgba(2,6,23,.55);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  overflow:auto;
+}
+article.post .content :global(code){
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: .95em;
+}
+.post-tags{margin-top: 18px; display:flex; flex-wrap:wrap; gap: 8px}
+
+/* Responsive */
+@media (max-width: 1100px){
+  :root{--sidebar-w: 300px}
+  .recent-grid{grid-template-columns: 1fr}
+  .post-row{grid-template-columns: 140px 1fr}
+}
+@media (max-width: 860px){
+  .shell{flex-direction: column}
+  .sidebar{position:relative; width:100%; height:auto; border-right:0; border-bottom:1px solid var(--border)}
+  .main{padding: 20px 16px}
+  .container{max-width: 100%}
+}

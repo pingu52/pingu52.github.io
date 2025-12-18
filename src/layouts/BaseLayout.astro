@@ -1,0 +1,36 @@
+---
+import "@/styles/global.css";
+import Sidebar from "@/components/Sidebar.astro";
+import { getAllPosts } from "@/lib/posts";
+
+const {
+  title = "pingu52",
+  description = "개발 기록 / 공부 기록 / 포트폴리오",
+} = Astro.props;
+
+const allPosts = await getAllPosts();
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/favicon.svg" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <Sidebar posts={allPosts} />
+      </aside>
+
+      <div class="main">
+        <div class="container">
+          <slot />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
