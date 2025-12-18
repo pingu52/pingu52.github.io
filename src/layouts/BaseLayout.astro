@@ -21,8 +21,50 @@ const allPosts = await getAllPosts();
     <link rel="icon" href="/favicon.svg" />
   </head>
   <body>
+    <!--
+      Sidebar toggle
+      - Desktop(>=861px): default open
+      - Mobile(<861px): default closed
+      The state is remembered in localStorage.
+    -->
+    <input id="sidebar-toggle" class="sidebar-toggle" type="checkbox" aria-hidden="true" />
+
+    <header class="topbar">
+      <div class="topbar-wrap">
+        <!-- Left column aligns with the sidebar width (desktop). -->
+        <div class="topbar-left">
+          <label class="menu-btn" for="sidebar-toggle" aria-label="메뉴 열기/닫기" role="button">
+            <span class="menu-icon" aria-hidden="true"></span>
+          </label>
+        </div>
+
+        <!-- Main column aligns with the content container. -->
+        <div class="topbar-main">
+          <div class="topbar-inner">
+            <!-- Banner + Home link -->
+            <a class="brand" href="/" aria-label="홈으로">
+              <span class="brand-mark" aria-hidden="true"></span>
+              <span class="brand-text">
+                <span class="brand-title">pingu52</span>
+                <span class="brand-sub">Security · Embedded · Dev</span>
+              </span>
+            </a>
+
+            <div class="topbar-spacer"></div>
+
+            <div class="topbar-right" aria-hidden="true">
+              <span class="pill">Blog</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Mobile overlay (click to close) -->
+    <label class="overlay" for="sidebar-toggle" aria-label="메뉴 닫기"></label>
+
     <div class="shell">
-      <aside class="sidebar">
+      <aside class="sidebar" aria-label="사이드바">
         <Sidebar posts={allPosts} />
       </aside>
 
@@ -32,5 +74,30 @@ const allPosts = await getAllPosts();
         </div>
       </div>
     </div>
+
+    <script is:inline>
+      (() => {
+        const KEY = "pingu.sidebar_open";
+        const cb = document.getElementById("sidebar-toggle");
+        if (!(cb instanceof HTMLInputElement)) return;
+
+        const mq = window.matchMedia("(min-width: 861px)");
+        const saved = localStorage.getItem(KEY);
+        if (saved === null) {
+          cb.checked = mq.matches;
+        } else {
+          cb.checked = saved === "1";
+        }
+
+        cb.addEventListener("change", () => {
+          localStorage.setItem(KEY, cb.checked ? "1" : "0");
+        });
+
+        // If there's no saved preference, follow breakpoint changes.
+        mq.addEventListener?.("change", (e) => {
+          if (localStorage.getItem(KEY) === null) cb.checked = e.matches;
+        });
+      })();
+    </script>
   </body>
 </html>
