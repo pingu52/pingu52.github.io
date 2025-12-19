@@ -2,7 +2,7 @@
 
 Một mẫu blog tĩnh được xây bằng [Astro](https://astro.build).
 
-[**🖥️ Xem bản dùng thử (Vercel)**](https://fuwari.vercel.app)
+[**🖥️ Xem bản dùng thử (Vercel)**](https://pingu52.github.io)
 
 ![Hình ảnh xem trước](https://raw.githubusercontent.com/saicaca/resource/main/fuwari/home.png)
 

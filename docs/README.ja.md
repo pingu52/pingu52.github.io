@@ -2,7 +2,7 @@
 
 [Astro](https://astro.build) で構築された静的ブログテンプレート
 
-[**🖥️ライブデモ (Vercel)**](https://fuwari.vercel.app)
+[**🖥️ライブデモ (Vercel)**](https://pingu52.github.io)
 
 ![Preview Image](https://raw.githubusercontent.com/saicaca/resource/main/fuwari/home.png)
 
