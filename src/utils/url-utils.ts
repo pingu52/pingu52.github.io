@@ -26,9 +26,12 @@ export function getCategoryUrl(category: string | null): string {
 		!category ||
 		category.trim() === "" ||
 		category.trim().toLowerCase() === i18n(I18nKey.uncategorized).toLowerCase()
-	)
-		return url("/archive/?uncategorized=true");
-	return url(`/archive/?category=${encodeURIComponent(category.trim())}`);
+	) {
+		// return url("/archive/?uncategorized=true");
+		return url("/category/uncategorized/");
+	}
+	// return url(`/archive/?category=${encodeURIComponent(category.trim())}`);
+	return url(`/category/${encodeURIComponent(category.trim())}/`);
 }
 
 export function getDir(path: string): string {
