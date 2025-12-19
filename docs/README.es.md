@@ -2,7 +2,7 @@
 
 Un tema estático para blogs construido con [Astro](https://astro.build).
 
-[**🖥️ Demostración en Vivo (Vercel)**](https://pingu52.github.io)
+[**🖥️ Demostración en Vivo (Vercel)**](https://fuwari.vercel.app)
 
 ![Imagen de Vista Previa](https://raw.githubusercontent.com/saicaca/resource/main/fuwari/home.png)
 

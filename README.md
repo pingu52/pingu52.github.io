@@ -6,18 +6,18 @@
 
 A static blog template built with [Astro](https://astro.build).
 
-[**🖥️ Live Demo (Vercel)**](https://pingu52.github.io)
+[**🖥️ Live Demo (Vercel)**](https://fuwari.vercel.app)
 
 ![Preview Image](https://raw.githubusercontent.com/saicaca/resource/main/fuwari/home.png)
 
 🌏 README in
-[**中文**](https://github.com/pingu52/pingu52.github.io/docs/README.zh-CN.md) /
-[**日本語**](https://github.com/pingu52/pingu52.github.io/docs/README.ja.md) /
-[**한국어**](https://github.com/pingu52/pingu52.github.io/docs/README.ko.md) /
-[**Español**](https://github.com/pingu52/pingu52.github.io/docs/README.es.md) /
-[**ไทย**](https://github.com/pingu52/pingu52.github.io/docs/README.th.md) /
-[**Tiếng Việt**](https://github.com/pingu52/pingu52.github.io/docs/README.vi.md) /
-[**Bahasa Indonesia**](https://github.com/pingu52/pingu52.github.io/docs/README.id.md) (Provided by the community and may not always be up-to-date)
+[**中文**](https://github.com/saicaca/fuwari/blob/main/docs/README.zh-CN.md) /
+[**日本語**](https://github.com/saicaca/fuwari/blob/main/docs/README.ja.md) /
+[**한국어**](https://github.com/saicaca/fuwari/blob/main/docs/README.ko.md) /
+[**Español**](https://github.com/saicaca/fuwari/blob/main/docs/README.es.md) /
+[**ไทย**](https://github.com/saicaca/fuwari/blob/main/docs/README.th.md) /
+[**Tiếng Việt**](https://github.com/saicaca/fuwari/blob/main/docs/README.vi.md) /
+[**Bahasa Indonesia**](https://github.com/saicaca/fuwari/blob/main/docs/README.id.md) (Provided by the community and may not always be up-to-date)
 
 ## ✨ Features
 
