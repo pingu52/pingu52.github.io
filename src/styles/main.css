@@ -59,7 +59,7 @@
     }
 
     .btn-card.disabled {
-        @apply pointer-events-none text-black/10 dark:text-white/10;
+        @apply pointer-events-none text-black/10 dark:text-white/10!;
     }
 
     .btn-plain {
@@ -82,7 +82,7 @@
     }
 
     .btn-regular {
-        @apply flex items-center justify-center bg-[var(--btn-regular-bg)] text-[var(--btn-content)] transition hover:bg-[var(--btn-regular-bg-hover)] active:bg-[var(--btn-regular-bg-active)] dark:text-white/75;
+        @apply flex items-center justify-center bg-[var(--btn-regular-bg)] text-[var(--btn-content)] transition hover:bg-[var(--btn-regular-bg-hover)] active:bg-[var(--btn-regular-bg-active)] dark:text-white/75!;
     }
 
     .link-underline {
@@ -108,23 +108,23 @@
     }
 
     .text-90 {
-        @apply text-black/90 dark:text-white/90;
+        @apply text-black/90 dark:text-white/90!;
     }
 
     .text-75 {
-        @apply text-black/75 dark:text-white/75;
+        @apply text-black/75 dark:text-white/75!;
     }
 
     .text-50 {
-        @apply text-black/50 dark:text-white/50;
+        @apply text-black/50 dark:text-white/50!;
     }
 
     .text-30 {
-        @apply text-black/30 dark:text-white/30;
+        @apply text-black/30 dark:text-white/30!;
     }
 
     .text-25 {
-        @apply text-black/25 dark:text-white/25;
+        @apply text-black/25 dark:text-white/25!;
     }
 
     .meta-icon {
