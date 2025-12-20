@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import "./tailwind-base.css";
 
 /*
   These stylesheets contain Tailwind directives like @apply, so they must be
@@ -9,15 +9,6 @@
 @import "./photoswipe.css";
 @import "./expressive-code.css";
 @import "./markdown.css";
-
-/* Tailwind v4-compatible plugins are registered in CSS */
-@plugin "@tailwindcss/typography";
-
-@variant dark (&:where(.dark, .dark *));
-
-@theme {
-  --font-family-sans: Roboto, ui-sans-serif, system-ui, sans-serif;
-}
 
 @layer components {
     /* 1. 다른 클래스에서 참조하는 애니메이션을 최상단으로 이동 */

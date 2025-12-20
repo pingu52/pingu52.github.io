@@ -1,7 +1,7 @@
 {
-    "name": "Pingu's Blog",
+    "name": "fuwari",
     "type": "module",
-    "version": "1.0.0",
+    "version": "0.0.1",
     "scripts": {
         "dev": "astro dev",
         "start": "astro dev",
@@ -72,5 +72,6 @@
         "@types/sanitize-html": "^2.16.0",
         "postcss-import": "^16.1.1",
         "postcss-nesting": "^13.0.2"
-    }
+    },
+    "packageManager": "pnpm@10.26.1"
 }

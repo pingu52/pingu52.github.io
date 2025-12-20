@@ -1,3 +1,5 @@
+@reference "./tailwind-base.css";
+
 .pswp__button {
     /* Tailwind v4: `@apply ... !important` 금지 → 각 유틸 뒤에 `!` */
     @apply transition! bg-black/40! hover:bg-black/50! active:bg-black/60! flex! items-center! justify-center! mr-0! w-12! h-12!;

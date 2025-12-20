@@ -1,6 +1,7 @@
+@reference "./tailwind-base.css";
+
 .expressive-code {
     .frame {
-        /* Tailwind v4: prefer suffix `!` for important utilities in @apply */
         @apply shadow-none!;
     }
 
