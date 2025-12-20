@@ -4,7 +4,7 @@
 @plugin "@tailwindcss/typography";
 
 /* Match this theme's dark-mode toggle (class-based) */
-@variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --font-family-sans: Roboto, ui-sans-serif, system-ui, sans-serif;
