@@ -128,11 +128,11 @@
     }
 
     .meta-icon {
-        @apply mr-2 flex h-8 w-8 items-center justify-center rounded-md bg-[var(--btn-regular-bg)] text-[var(--btn-content)] transition!;
+        @apply mr-2 flex h-8! w-8! items-center! justify-center! rounded-md bg-[var(--btn-regular-bg)] text-[var(--btn-content)] transition!;
     }
 
     .with-divider {
-        @apply before:ml-1.5! before:mr-1.5! before:text-sm! before:font-medium! before:text-[var(--meta-divider)] before:transition before:content-['/'] before:first-of-type:hidden!;
+        @apply before:ml-1.5 before:mr-1.5 before:text-sm before:font-medium before:text-[var(--meta-divider)] before:transition before:content-['/'] before:first-of-type:hidden;
     }
 
     .btn-regular-dark {
