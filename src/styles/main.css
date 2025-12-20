@@ -63,7 +63,7 @@
     }
 
     .btn-plain {
-        @apply relative flex items-center justify-center bg-none text-black/75 transition hover:text-[var(--primary)] dark:text-white/75 dark:hover:text-[var(--primary)]!;
+        @apply relative flex items-center justify-center bg-none text-black/75 transition hover:text-[var(--primary)] dark:text-white/75! dark:hover:text-[var(--primary)]!;
 
         &:not(.scale-animation) {
             @apply hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)];
