@@ -1,0 +1,25 @@
+---
+import type { GetStaticPaths } from "astro";
+import { PAGE_SIZE } from "@constants/constants";
+import I18nKey from "@i18n/i18nKey";
+import { i18nFormat } from "@i18n/translation";
+import { getSortedPosts } from "@utils/content-utils";
+import TaxonomyFeedPage from "@components/TaxonomyFeedPage.astro";
+import { buildTagStaticPaths, decodeTaxonomySegment } from "@utils/taxonomy-utils";
+
+export const getStaticPaths = (async ({ paginate }) => {
+	const allBlogPosts = await getSortedPosts();
+	return buildTagStaticPaths(paginate, allBlogPosts, PAGE_SIZE);
+}) satisfies GetStaticPaths;
+
+const { page, taxonomyTitle } = Astro.props;
+
+const tagParam = Astro.params.tag ?? "";
+const tagTitle = typeof taxonomyTitle === "string" && taxonomyTitle !== "" ? taxonomyTitle : decodeTaxonomySegment(tagParam);
+---
+
+<TaxonomyFeedPage
+	title={tagTitle}
+	page={page}
+	description={i18nFormat(I18nKey.taxonomyTagDescription, { name: tagTitle })}
+/>

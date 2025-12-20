@@ -3,7 +3,7 @@ import { onMount } from "svelte";
 
 import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
-import { getPostUrlBySlug } from "../utils/url-utils";
+import { getCategoryUrl, getPostUrlBySlug, getTagUrl } from "../utils/url-utils";
 
 export let tags: string[];
 export let categories: string[];
@@ -42,6 +42,26 @@ function formatTag(tagList: string[]) {
 }
 
 onMount(async () => {
+	// If the user came from legacy query-based links, guide them to the canonical taxonomy routes.
+	// We only redirect for the simple single-taxonomy case to avoid breaking multi-filter usage.
+	const redirectParams = new URLSearchParams(window.location.search);
+	const qTags = redirectParams.getAll("tag");
+	const qCategories = redirectParams.getAll("category");
+	const qUncategorized = redirectParams.get("uncategorized");
+
+	if (qTags.length === 1 && qCategories.length === 0 && !qUncategorized) {
+		window.location.replace(getTagUrl(qTags[0]));
+		return;
+	}
+	if (qCategories.length === 1 && qTags.length === 0 && !qUncategorized) {
+		window.location.replace(getCategoryUrl(qCategories[0]));
+		return;
+	}
+	if (qUncategorized && qTags.length === 0 && qCategories.length === 0) {
+		window.location.replace(getCategoryUrl(null));
+		return;
+	}
+
 	let filteredPosts: Post[] = sortedPosts;
 
 	if (tags.length > 0) {

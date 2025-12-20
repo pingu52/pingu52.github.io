@@ -1,97 +1,28 @@
 ---
 import type { GetStaticPaths } from "astro";
-
-import MainGridLayout from "@layouts/MainGridLayout.astro";
-import PostPage from "@components/PostPage.astro";
-import Pagination from "@components/control/Pagination.astro";
-
 import { PAGE_SIZE } from "@constants/constants";
-import { getSortedPosts } from "@utils/content-utils";
-
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { i18n, i18nFormat } from "@i18n/translation";
+import { getSortedPosts } from "@utils/content-utils";
+import TaxonomyFeedPage from "@components/TaxonomyFeedPage.astro";
+import { UNCATEGORIZED_SLUG, buildCategoryStaticPaths, decodeTaxonomySegment } from "@utils/taxonomy-utils";
 
-/**
- * ✅ 핵심: 카테고리별로 "홈과 동일하게 paginate" 해서 정적 페이지를 만들어준다.
- * - /category/<category>/        (1페이지)
- * - /category/<category>/2       (2페이지)
- */
 export const getStaticPaths = (async ({ paginate }) => {
-  const allPosts = await getSortedPosts();
-
-  const categorySet = new Set<string>();
-  let hasUncategorized = false;
-
-  for (const entry of allPosts) {
-    const raw = entry.data.category;
-    const cat = typeof raw === "string" ? raw.trim() : "";
-
-    if (!cat) {
-      hasUncategorized = true;
-      continue;
-    }
-    categorySet.add(cat);
-  }
-
-  const categories = Array.from(categorySet).sort((a, b) =>
-    a.localeCompare(b, undefined, { sensitivity: "base" })
-  );
-
-  const paths = [];
-
-  // 일반 카테고리들
-  for (const category of categories) {
-    const filtered = allPosts.filter((e) => (e.data.category ?? "").trim() === category);
-    paths.push(
-      ...paginate(filtered, {
-        pageSize: PAGE_SIZE,
-        params: { category },
-      })
-    );
-  }
-
-  // Uncategorized (카테고리 없는 글)
-  if (hasUncategorized) {
-    const filtered = allPosts.filter((e) => !e.data.category || e.data.category.trim() === "");
-    paths.push(
-      ...paginate(filtered, {
-        pageSize: PAGE_SIZE,
-        params: { category: "uncategorized" },
-      })
-    );
-  }
-
-  return paths;
+	const allBlogPosts = await getSortedPosts();
+	return buildCategoryStaticPaths(paginate, allBlogPosts, PAGE_SIZE);
 }) satisfies GetStaticPaths;
 
-const { page } = Astro.props;
+const { page, taxonomyTitle } = Astro.props;
 
-const categoryParam = Astro.params.category;
+const categoryParam = Astro.params.category ?? "";
 const categoryTitle =
-  categoryParam === "uncategorized"
-    ? i18n(I18nKey.uncategorized)
-    : categoryParam;
-
-const len = page.data.length;
+	categoryParam === UNCATEGORIZED_SLUG
+		? i18n(I18nKey.uncategorized)
+		: (typeof taxonomyTitle === "string" && taxonomyTitle !== "" ? taxonomyTitle : decodeTaxonomySegment(categoryParam));
 ---
 
-<MainGridLayout title={categoryTitle}>
-  <!-- (선택) 카테고리 제목이 필요 없으면 이 블록 삭제하면 홈과 더 똑같아짐 -->
-  <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-20 mb-4">
-    <div class="card-base z-10 px-9 py-6 relative w-full">
-        <h1 class="text-xl md:text-2xl font-bold text-[var(--primary)]">
-            {categoryTitle}
-          </h1>
-    </div>
-  </div>
-
-  <!-- ✅ 홈과 동일한 카드 피드 -->
-  <PostPage page={page} />
-
-  <!-- ✅ 홈과 동일한 페이지네이션 -->
-  <Pagination
-    class="mx-auto onload-animation"
-    page={page}
-    style={`animation-delay: calc(var(--content-delay) + ${len * 50}ms)`}
-  />
-</MainGridLayout>
+<TaxonomyFeedPage
+	title={categoryTitle}
+	page={page}
+	description={i18nFormat(I18nKey.taxonomyCategoryDescription, { name: categoryTitle })}
+/>

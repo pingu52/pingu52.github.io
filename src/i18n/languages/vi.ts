@@ -35,4 +35,11 @@ export const vi: Translation = {
 	[Key.author]: "Tác giả",
 	[Key.publishedAt]: "Đăng vào lúc",
 	[Key.license]: "Giấy phép bản quyền",
+
+	[Key.taxonomyCategoryDescription]: "Posts in category {name}.",
+	[Key.taxonomyTagDescription]: "Posts tagged {name}.",
+	[Key.taxonomySummaryCount]: "{count} posts",
+	[Key.taxonomySummaryPage]: "Page {current}/{total}",
+	[Key.archiveNoJsNotice]: "JavaScript is required for archive filtering and legacy redirects. Use the sidebar Tags/Categories or open the canonical /tag/... or /category/... URLs.",
+	[Key.archiveDescription]: "Browse all posts by publication date. Use tags/categories for filtered feeds.",
 };

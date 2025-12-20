@@ -35,4 +35,11 @@ export const ja: Translation = {
 	[Key.author]: "作者",
 	[Key.publishedAt]: "公開日",
 	[Key.license]: "ライセンス",
+
+	[Key.taxonomyCategoryDescription]: "Posts in category {name}.",
+	[Key.taxonomyTagDescription]: "Posts tagged {name}.",
+	[Key.taxonomySummaryCount]: "{count} posts",
+	[Key.taxonomySummaryPage]: "Page {current}/{total}",
+	[Key.archiveNoJsNotice]: "JavaScript is required for archive filtering and legacy redirects. Use the sidebar Tags/Categories or open the canonical /tag/... or /category/... URLs.",
+	[Key.archiveDescription]: "Browse all posts by publication date. Use tags/categories for filtered feeds.",
 };

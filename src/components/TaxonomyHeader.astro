@@ -1,0 +1,37 @@
+---
+import I18nKey from "@i18n/i18nKey";
+import { i18nFormat } from "@i18n/translation";
+
+interface Props {
+	title: string;
+	count?: number;
+	currentPage?: number;
+	lastPage?: number;
+}
+const { title, count, currentPage, lastPage } = Astro.props as Props;
+
+const hasPagingInfo =
+	typeof currentPage === "number" && typeof lastPage === "number" && lastPage > 1;
+
+const subtitleParts: string[] = [];
+if (typeof count === "number") {
+	subtitleParts.push(i18nFormat(I18nKey.taxonomySummaryCount, { count }));
+}
+if (hasPagingInfo) {
+	subtitleParts.push(
+		i18nFormat(I18nKey.taxonomySummaryPage, { current: currentPage, total: lastPage }),
+	);
+}
+const subtitle = subtitleParts.join(" · ");
+---
+
+<div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-20 mb-4">
+	<div class="card-base z-10 px-9 py-6 relative w-full">
+		<h1 class="text-xl md:text-2xl font-bold text-[var(--primary)]">{title}</h1>
+		{subtitle && (
+			<p class="mt-1 text-sm text-black/40 dark:text-white/40" aria-label={subtitle}>
+				{subtitle}
+			</p>
+		)}
+	</div>
+</div>

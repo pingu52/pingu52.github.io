@@ -1,5 +1,6 @@
-import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { isUncategorizedCategory, normalizeCategoryName } from "@utils/category-utils";
+import { encodeTaxonomySegment } from "@utils/taxonomy-utils";
+import { isBlank, trimOrEmpty } from "@utils/string-utils";
 
 export function pathsEqual(path1: string, path2: string) {
 	const normalizedPath1 = path1.replace(/^\/|\/$/g, "").toLowerCase();
@@ -17,21 +18,14 @@ export function getPostUrlBySlug(slug: string): string {
 }
 
 export function getTagUrl(tag: string): string {
-	if (!tag) return url("/archive/");
-	return url(`/archive/?tag=${encodeURIComponent(tag.trim())}`);
+	if (isBlank(tag)) return url("/archive/");
+	return url(`/tag/${encodeTaxonomySegment(tag)}/`);
 }
 
 export function getCategoryUrl(category: string | null): string {
-	if (
-		!category ||
-		category.trim() === "" ||
-		category.trim().toLowerCase() === i18n(I18nKey.uncategorized).toLowerCase()
-	) {
-		// return url("/archive/?uncategorized=true");
-		return url("/category/uncategorized/");
-	}
-	// return url(`/archive/?category=${encodeURIComponent(category.trim())}`);
-	return url(`/category/${encodeURIComponent(category.trim())}/`);
+	// Category pages are rendered as main-feed style pages under /category/:category/...
+	if (isUncategorizedCategory(category)) return url("/category/uncategorized/");
+	return url(`/category/${encodeTaxonomySegment(normalizeCategoryName(category))}/`);
 }
 
 export function getDir(path: string): string {

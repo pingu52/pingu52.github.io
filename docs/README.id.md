@@ -2,7 +2,7 @@
 
 Template blog statis yang dibangun dengan [Astro](https://astro.build).
 
-[**🖥️ Demo Langsung (Vercel)**](https://fuwari.vercel.app)
+[**🖥️ Demo Langsung (Vercel)**](https://pingu52.github.io)
 
 ![Gambar Pratinjau](https://raw.githubusercontent.com/saicaca/resource/main/fuwari/home.png)
 

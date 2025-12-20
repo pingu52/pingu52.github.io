@@ -3,6 +3,13 @@ import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 
+// Global styles
+// Tailwind v4 entrypoint (includes Tailwind + our project CSS that uses @apply)
+import "../styles/main.css";
+// Theme tokens + Markdown extensions are authored in Stylus (no Tailwind directives inside)
+import "../styles/variables.styl";
+import "../styles/markdown-extend.styl";
+
 import ConfigCarrier from "@components/ConfigCarrier.astro";
 import { profileConfig, siteConfig } from "@/config";
 import {
@@ -63,6 +70,16 @@ if (!lang) {
 }
 const siteLang = lang.replace("_", "-");
 
+// Canonical URL should not include query/hash to avoid duplicate-indexing issues.
+// (e.g., /archive/?tag=... should canonicalize to /archive/; taxonomy routes have their own canonical URLs.)
+const canonicalUrl = Astro.site
+	? new URL(Astro.url.pathname, Astro.site).toString()
+	: `${Astro.url.origin}${Astro.url.pathname}`;
+const metaDescription = (description && description.trim() !== "") ? description : (siteConfig.subtitle || pageTitle);
+const ogLocale = siteLang.toLowerCase().startsWith("ko") ? "ko_KR" : siteLang.replace("-", "_");
+const ogImagePath = "/og.png";
+const ogImageUrl = Astro.site ? new URL(url(ogImagePath), Astro.site).toString() : url(ogImagePath);
+
 const bannerOffsetByPosition = {
 	top: `${BANNER_HEIGHT_EXTEND}vh`,
 	center: `${BANNER_HEIGHT_EXTEND / 2}vh`,
@@ -80,14 +97,19 @@ const bannerOffset =
 
 		<title>{pageTitle}</title>
 
+		<link rel="canonical" href={canonicalUrl} />
+
 		<meta charset="UTF-8" />
-		<meta name="description" content={description || pageTitle}>
+		<meta name="description" content={metaDescription} />
 		<meta name="author" content={profileConfig.name}>
 
-		<meta property="og:site_name" content={siteConfig.title}>
-		<meta property="og:url" content={Astro.url}>
-		<meta property="og:title" content={pageTitle}>
-		<meta property="og:description" content={description || pageTitle}>
+		<meta property="og:site_name" content={siteConfig.title} />
+		<meta property="og:url" content={canonicalUrl} />
+		<meta property="og:title" content={pageTitle} />
+		<meta property="og:description" content={metaDescription} />
+		<meta property="og:locale" content={ogLocale} />
+		<meta property="og:image" content={ogImageUrl} />
+		<meta property="og:image:alt" content="Open Graph image for the site" />
 		{setOGTypeArticle ? (
         <meta property="og:type" content="article" />
         ) : (
@@ -95,11 +117,13 @@ const bannerOffset =
         )}
 
 		<meta name="twitter:card" content="summary_large_image">
-		<meta property="twitter:url" content={Astro.url}>
+		<meta property="twitter:url" content={canonicalUrl} />
 		<meta name="twitter:title" content={pageTitle}>
-		<meta name="twitter:description" content={description || pageTitle}>
+		<meta name="twitter:description" content={metaDescription} />
+		<meta name="twitter:image" content={ogImageUrl} />
+		<meta name="twitter:image:alt" content="Open Graph image for the site" />
 
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="generator" content={Astro.generator} />
 		{favicons.map(favicon => (
 			<link rel="icon"
@@ -111,6 +135,9 @@ const bannerOffset =
 
 		<!-- Set the theme before the page is rendered to avoid a flash -->
 		<script is:inline define:vars={{DEFAULT_THEME, LIGHT_MODE, DARK_MODE, AUTO_MODE, BANNER_HEIGHT_EXTEND, PAGE_WIDTH, configHue}}>
+			// Flag JS-enabled for progressive enhancement styles (e.g., archive SSR fallback)
+			document.documentElement.classList.add('js');
+
 			// Load the theme from local storage
 			const theme = localStorage.getItem('theme') || DEFAULT_THEME;
 			switch (theme) {
@@ -145,12 +172,13 @@ const bannerOffset =
 
 		<slot name="head"></slot>
 
-		<link rel="alternate" type="application/rss+xml" title={profileConfig.name} href={`${Astro.site}rss.xml`}/>
+		<link rel="alternate" type="application/rss+xml" title={profileConfig.name} href={new URL("rss.xml", Astro.site).toString()} />
 
 	</head>
 	<body class=" min-h-screen transition " class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner}]}
 		  data-overlayscrollbars-initialize
 	>
+		<a class="skip-link" href="#swup-container">본문으로 건너뛰기</a>
 		<ConfigCarrier></ConfigCarrier>
 		<slot />
 
@@ -164,32 +192,37 @@ const bannerOffset =
 	'banner-height-home': `${BANNER_HEIGHT_HOME}vh`,
 	'banner-height': `${BANNER_HEIGHT}vh`,
 }}>
-@tailwind components;
+@import "tailwindcss" reference;
 @layer components {
 	.enable-banner.is-home #banner-wrapper {
-		@apply h-[var(--banner-height-home)] translate-y-[var(--banner-height-extend)]
+		height: var(--banner-height-home);
+		transform: translateY(var(--banner-height-extend));
 	}
 	.enable-banner #banner-wrapper {
-		@apply h-[var(--banner-height-home)]
+		height: var(--banner-height-home);
 	}
 
 	.enable-banner.is-home #banner {
-		@apply h-[var(--banner-height-home)] translate-y-0
+		height: var(--banner-height-home);
+		transform: translateY(0);
 	}
 	.enable-banner #banner {
-		@apply h-[var(--banner-height-home)] translate-y-[var(--bannerOffset)]
+		height: var(--banner-height-home);
+		transform: translateY(var(--bannerOffset));
 	}
 	.enable-banner.is-home #main-grid {
-		@apply translate-y-[var(--banner-height-extend)];
+		transform: translateY(var(--banner-height-extend));
 	}
 	.enable-banner #top-row {
-		@apply h-[calc(var(--banner-height-home)_-_4.5rem)] transition-all duration-300
+		height: calc(var(--banner-height-home) - 4.5rem);
+		transition: all 300ms;
 	}
 	.enable-banner.is-home #sidebar-sticky {
-		@apply top-[calc(1rem_-_var(--banner-height-extend))]
+		top: calc(1rem - var(--banner-height-extend));
 	}
 	.navbar-hidden {
-		@apply opacity-0 -translate-y-16
+		opacity: 0;
+		transform: translateY(-4rem);
 	}
 }
 </style>

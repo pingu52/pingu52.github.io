@@ -12,6 +12,8 @@ let result: SearchResult[] = [];
 let isSearching = false;
 let pagefindLoaded = false;
 let initialized = false;
+let mobilePanelOpen = false;
+let lastFocus: HTMLElement | null = null;
 
 const fakeResult: SearchResult[] = [
 	{
@@ -31,9 +33,45 @@ const fakeResult: SearchResult[] = [
 	},
 ];
 
+const getFocusableElements = (root: HTMLElement): HTMLElement[] => {
+    const selectors = [
+        'a[href]',
+        'button:not([disabled])',
+        'input:not([disabled])',
+        'select:not([disabled])',
+        'textarea:not([disabled])',
+        '[tabindex]:not([tabindex="-1"])',
+    ];
+    return Array.from(root.querySelectorAll<HTMLElement>(selectors.join(',')))
+        .filter((el) => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true');
+};
+
+const setMobilePanelOpen = (open: boolean): void => {
+    const panel = document.getElementById("search-panel") as HTMLElement | null;
+    if (!panel) return;
+
+    mobilePanelOpen = open;
+
+    if (open) {
+        lastFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        panel.classList.remove("float-panel-closed");
+        panel.setAttribute("aria-hidden", "false");
+        panel.removeAttribute("inert");
+        requestAnimationFrame(() => {
+            const input = document.getElementById("search-input-mobile") as HTMLInputElement | null;
+            input?.focus();
+        });
+    } else {
+        panel.classList.add("float-panel-closed");
+        panel.setAttribute("aria-hidden", "true");
+        panel.setAttribute("inert", "");
+        lastFocus?.focus();
+        lastFocus = null;
+    }
+};
+
 const togglePanel = () => {
-	const panel = document.getElementById("search-panel");
-	panel?.classList.toggle("float-panel-closed");
+    setMobilePanelOpen(!mobilePanelOpen);
 };
 
 const setPanelVisibility = (show: boolean, isDesktop: boolean): void => {
@@ -42,8 +80,12 @@ const setPanelVisibility = (show: boolean, isDesktop: boolean): void => {
 
 	if (show) {
 		panel.classList.remove("float-panel-closed");
+		panel.setAttribute("aria-hidden", "false");
+		panel.removeAttribute("inert");
 	} else {
 		panel.classList.add("float-panel-closed");
+		panel.setAttribute("aria-hidden", "true");
+		panel.setAttribute("inert", "");
 	}
 };
 
@@ -87,6 +129,46 @@ const search = async (keyword: string, isDesktop: boolean): Promise<void> => {
 };
 
 onMount(() => {
+	const panel = document.getElementById("search-panel") as HTMLElement | null;
+	if (panel) {
+		panel.setAttribute("aria-hidden", "true");
+		panel.setAttribute("inert", "");
+	}
+
+	const onDocumentKeydown = (e: KeyboardEvent) => {
+		if (!mobilePanelOpen) return;
+		if (e.key === "Escape") {
+			e.preventDefault();
+			setMobilePanelOpen(false);
+			return;
+		}
+		if (e.key === "Tab" && panel) {
+			const focusables = getFocusableElements(panel);
+			if (focusables.length === 0) return;
+			const first = focusables[0];
+			const last = focusables[focusables.length - 1];
+			if (e.shiftKey && document.activeElement === first) {
+				e.preventDefault();
+				last.focus();
+			} else if (!e.shiftKey && document.activeElement === last) {
+				e.preventDefault();
+				first.focus();
+			}
+		}
+	};
+
+	const onDocumentPointerDown = (e: PointerEvent) => {
+		if (!mobilePanelOpen) return;
+		const target = e.target as Node | null;
+		const btn = document.getElementById("search-switch");
+		if (!panel || !target) return;
+		if (panel.contains(target) || btn?.contains(target)) return;
+		setMobilePanelOpen(false);
+	};
+
+	document.addEventListener("keydown", onDocumentKeydown);
+	document.addEventListener("pointerdown", onDocumentPointerDown, true);
+
 	const initializeSearch = () => {
 		initialized = true;
 		pagefindLoaded =
@@ -123,6 +205,11 @@ onMount(() => {
 			}
 		}, 2000); // Adjust timeout as needed
 	}
+
+	return () => {
+		document.removeEventListener("keydown", onDocumentKeydown);
+		document.removeEventListener("pointerdown", onDocumentPointerDown, true);
+	};
 });
 
 $: if (initialized && keywordDesktop) {
@@ -151,14 +238,31 @@ $: if (initialized && keywordMobile) {
 </div>
 
 <!-- toggle btn for phone/tablet view -->
-<button on:click={togglePanel} aria-label="Search Panel" id="search-switch"
+<button
+	type="button"
+	on:click={togglePanel}
+	aria-label="Search"
+	aria-controls="search-panel"
+	aria-expanded={mobilePanelOpen}
+	id="search-switch"
         class="btn-plain scale-animation lg:!hidden rounded-lg w-11 h-11 active:scale-90">
     <Icon icon="material-symbols:search" class="text-[1.25rem]"></Icon>
 </button>
 
 <!-- search panel -->
-<div id="search-panel" class="float-panel float-panel-closed search-panel absolute md:w-[30rem]
+<div
+	id="search-panel"
+	role="dialog"
+	aria-label="Search"
+	aria-hidden="true"
+	tabindex="-1"
+	inert
+	class="float-panel float-panel-closed search-panel absolute md:w-[30rem]
 top-20 left-4 md:left-[unset] right-4 shadow-2xl rounded-2xl p-2">
+
+	<p id="search-status" class="sr-only" aria-live="polite">
+		{isSearching ? "Searching" : result.length ? `${result.length} results` : ""}
+	</p>
 
     <!-- search bar inside panel for phone/tablet -->
     <div id="search-bar-inside" class="flex relative lg:hidden transition-all items-center h-11 rounded-xl
@@ -166,7 +270,7 @@ top-20 left-4 md:left-[unset] right-4 shadow-2xl rounded-2xl p-2">
       dark:bg-white/5 dark:hover:bg-white/10 dark:focus-within:bg-white/10
   ">
         <Icon icon="material-symbols:search" class="absolute text-[1.25rem] pointer-events-none ml-3 transition my-auto text-black/30 dark:text-white/30"></Icon>
-        <input placeholder="Search" bind:value={keywordMobile}
+		<input id="search-input-mobile" placeholder={i18n(I18nKey.search)} bind:value={keywordMobile}
                class="pl-10 absolute inset-0 text-sm bg-transparent outline-0
                focus:w-60 text-black/50 dark:text-white/50"
         >

@@ -1,5 +1,6 @@
 ---
 import ArchivePanel from "@components/ArchivePanel.svelte";
+import ArchivePanelStatic from "@components/ArchivePanelStatic.astro";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
@@ -8,7 +9,37 @@ import { getSortedPostsList } from "../utils/content-utils";
 const sortedPostsList = await getSortedPostsList();
 ---
 
-<MainGridLayout title={i18n(I18nKey.archive)}>
-    <ArchivePanel sortedPosts={sortedPostsList} client:only="svelte"></ArchivePanel>
+<MainGridLayout
+	title={i18n(I18nKey.archive)}
+	description={i18n(I18nKey.archiveDescription)}
+>
+	<!--
+	Progressive enhancement:
+	- No-JS (and many bots): server-rendered archive list is visible for SEO/accessibility.
+	- JS enabled: interactive archive panel (with legacy query redirect + filtering).
+	-->
+	<div class="no-js-only">
+		<div class="card-base px-8 py-6 mb-4">
+			<p class="text-sm text-black/50 dark:text-white/50">
+				{i18n(I18nKey.archiveNoJsNotice)}
+			</p>
+			<div class="mt-2 text-sm text-black/50 dark:text-white/50">
+				<ul class="list-disc pl-5 space-y-1">
+					<li>
+						Tag feed: <code>/tag/&lt;tag&gt;/</code>
+					</li>
+					<li>
+						Category feed: <code>/category/&lt;category&gt;/</code>
+					</li>
+				</ul>
+			</div>
+		</div>
+
+		<ArchivePanelStatic sortedPosts={sortedPostsList} />
+	</div>
+
+	<div class="js-only">
+		<ArchivePanel sortedPosts={sortedPostsList} client:only="svelte"></ArchivePanel>
+	</div>
 </MainGridLayout>
 

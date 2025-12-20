@@ -32,6 +32,14 @@ enum I18nKey {
 	author = "author",
 	publishedAt = "publishedAt",
 	license = "license",
+
+	// Taxonomy (Tag/Category) helpers
+	taxonomyCategoryDescription = "taxonomyCategoryDescription",
+	taxonomyTagDescription = "taxonomyTagDescription",
+	taxonomySummaryCount = "taxonomySummaryCount",
+	taxonomySummaryPage = "taxonomySummaryPage",
+	archiveNoJsNotice = "archiveNoJsNotice",
+	archiveDescription = "archiveDescription",
 }
 
 export default I18nKey;

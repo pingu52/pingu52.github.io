@@ -46,3 +46,15 @@ export function i18n(key: I18nKey): string {
 	const lang = siteConfig.lang || "en";
 	return getTranslation(lang)[key];
 }
+
+/**
+ * Simple template interpolation for translations.
+ * Replaces occurrences of `{name}` with the corresponding value in `params`.
+ */
+export function i18nFormat(key: I18nKey, params: Record<string, string | number>): string {
+	const template = i18n(key);
+	return template.replace(/\{(\w+)\}/g, (_m, k) => {
+		const v = params[k];
+		return v === undefined || v === null ? "" : String(v);
+	});
+}

@@ -1,0 +1,28 @@
+---
+import type { Page } from "astro";
+
+import Pagination from "@components/control/Pagination.astro";
+import PostPage from "@components/PostPage.astro";
+import TaxonomyHeader from "@components/TaxonomyHeader.astro";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+
+interface Props {
+	title: string;
+	page: Page;
+	description?: string;
+}
+
+const { title, page, description } = Astro.props;
+const len = page.data.length;
+---
+
+<MainGridLayout title={title} description={description}>
+	<TaxonomyHeader title={title} count={page.total} currentPage={page.currentPage} lastPage={page.lastPage} />
+
+	<PostPage page={page}></PostPage>
+	<Pagination
+		class="mx-auto onload-animation"
+		page={page}
+		style={`animation-delay: calc(var(--content-delay) + ${len * 50}ms)`}
+	></Pagination>
+</MainGridLayout>

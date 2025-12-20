@@ -35,4 +35,11 @@ export const ko: Translation = {
 	[Key.author]: "저자",
 	[Key.publishedAt]: "게시일",
 	[Key.license]: "라이선스",
+
+	[Key.taxonomyCategoryDescription]: "{name} 카테고리의 글 목록입니다.",
+	[Key.taxonomyTagDescription]: "{name} 태그의 글 목록입니다.",
+	[Key.taxonomySummaryCount]: "총 {count}개 글",
+	[Key.taxonomySummaryPage]: "{current}/{total} 페이지",
+	[Key.archiveNoJsNotice]: "아카이브 필터 및 구형 링크 리다이렉트는 JavaScript가 필요합니다. 사이드바의 태그/카테고리를 이용하거나 /tag/... 또는 /category/... 주소로 이동해주세요.",
+	[Key.archiveDescription]: "게시일 기준으로 전체 글을 모아봅니다. 필터된 피드는 태그/카테고리를 이용하세요.",
 };
