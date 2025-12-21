@@ -1,7 +1,7 @@
 # Pingu52 Blog (Astro + Tailwind v4)
 
 ![Node.js >= 20](https://img.shields.io/badge/node.js-%3E%3D20-5FA04E.svg?logo=node.js) ![pnpm 10.26.1](https://img.shields.io/badge/pnpm-10.26.1-F69220.svg?logo=pnpm) ![Astro 5.16.6](https://img.shields.io/badge/astro-5.16.6-BC52EE.svg?logo=astro) ![Tailwind 4.1.18](https://img.shields.io/badge/tailwindcss-4.1.18-06B6D4.svg?logo=tailwindcss)
-![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpingu52%2Fpingu52.github.io.svg?type=small)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpingu52%2Fpingu52.github.io.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fpingu52%2Fpingu52.github.io?ref=badge_small)
 
 개인 블로그입니다. **Astro 5** 기반의 정적 사이트로 빌드되며, **Tailwind CSS v4**를 사용해 테마(라이트/다크), 배너, 타이포그래피를 구성했습니다.
 
