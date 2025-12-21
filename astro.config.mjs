@@ -1,6 +1,6 @@
 import sitemap from "@astrojs/sitemap";
 import svelte from "@astrojs/svelte";
-import tailwindcss from "@tailwindcss/vite"; // ✅ 변경
+import tailwindcss from "@tailwindcss/vite"; // 변경
 import { pluginCollapsibleSections } from "@expressive-code/plugin-collapsible-sections";
 import { pluginLineNumbers } from "@expressive-code/plugin-line-numbers";
 import swup from "@swup/astro";
@@ -29,7 +29,7 @@ export default defineConfig({
 	base: "/",
 	trailingSlash: "always",
 	integrations: [
-		// ❌ tailwind() 제거
+		// tailwind() 제거
 		swup({
 			theme: false,
 			animationClass: "transition-swup-",
@@ -148,7 +148,7 @@ export default defineConfig({
 		],
 	},
 	vite: {
-		plugins: [tailwindcss()], // ✅ 여기에 추가
+		plugins: [tailwindcss()], //
 		build: {
 			rollupOptions: {
 				onwarn(warning, warn) {
