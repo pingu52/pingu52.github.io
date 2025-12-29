@@ -38,6 +38,7 @@ if (!isUmami && !isGoatcounter) {
 
 const activeProvider = isUmami ? "umami" : "goatcounter";
 const providerLabel = isUmami ? "Umami" : "GoatCounter";
+const dailyLabel = i18n(I18nKey.visitorCounterDaily);
 const recentLabel = i18nFormat(I18nKey.visitorCounterRecent, { days: rangeDays });
 const totalLabel = i18n(I18nKey.visitorCounterTotal);
 ---
@@ -57,6 +58,7 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 		data-goatcounter-base={goatcounterBaseUrl}
 		data-goatcounter-path={goatcounterPath}
 		data-range-days={String(rangeDays)}
+		data-daily-label={dailyLabel}
 		data-recent-label={recentLabel}
 		data-total-label={totalLabel}
 		data-loading-text={i18n(I18nKey.visitorCounterLoading)}
@@ -81,7 +83,11 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 			</div>
 		</div>
 
-		<div class="grid grid-cols-2 gap-3">
+		<div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+			<div class="flex flex-col gap-1 p-3 rounded-xl bg-[var(--panel-bg,rgba(0,0,0,0.04))] dark:bg-white/5 border border-black/5 dark:border-white/5">
+				<div class="text-[0.8rem] text-neutral-500 dark:text-neutral-400">{dailyLabel}</div>
+				<div class="text-3xl font-bold text-neutral-900 dark:text-neutral-50 leading-tight" data-count-daily aria-live="polite">—</div>
+			</div>
 			<div class="flex flex-col gap-1 p-3 rounded-xl bg-[var(--panel-bg,rgba(0,0,0,0.04))] dark:bg-white/5 border border-black/5 dark:border-white/5">
 				<div class="text-[0.8rem] text-neutral-500 dark:text-neutral-400">{recentLabel}</div>
 				<div class="text-3xl font-bold text-neutral-900 dark:text-neutral-50 leading-tight" data-count-recent aria-live="polite">—</div>
@@ -101,10 +107,12 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 
 		const countRecentEl = root.querySelector("[data-count-recent]");
 		const countTotalEl = root.querySelector("[data-count-total]");
+		const countDailyEl = root.querySelector("[data-count-daily]");
 		const statusEl = root.querySelector("[data-status]");
 		const provider = root.dataset.provider;
 		const parsedRange = Number(root.dataset.rangeDays || "30");
 		const rangeDays = Number.isFinite(parsedRange) && parsedRange > 0 ? parsedRange : 30;
+		const dailyLabel = root.dataset.dailyLabel || "";
 		const recentLabel = root.dataset.recentLabel || "";
 		const totalLabel = root.dataset.totalLabel || "";
 		const loadingText = root.dataset.loadingText || "";
@@ -127,7 +135,11 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 
 		setStatus(loadingText);
 
-		const setCounts = (recent: number | null, total: number | null) => {
+		const setCounts = (daily: number | null, recent: number | null, total: number | null) => {
+			if (countDailyEl) {
+				countDailyEl.textContent =
+					typeof daily === "number" ? formatter.format(daily) : "—";
+			}
 			if (countRecentEl) {
 				countRecentEl.textContent =
 					typeof recent === "number" ? formatter.format(recent) : "—";
@@ -147,12 +159,12 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 			return null;
 		};
 
-		const fetchUmami = async () => {
+		const fetchUmamiRange = async (days: number) => {
 			if (!umamiShareId || !umamiBase) {
 				throw new Error("Missing Umami configuration.");
 			}
 			const endAt = Date.now();
-			const startAt = endAt - Math.max(1, rangeDays) * 24 * 60 * 60 * 1000;
+			const startAt = endAt - Math.max(1, days) * 24 * 60 * 60 * 1000;
 			const url = new URL(`/api/share/${umamiShareId}`, umamiBase);
 			url.searchParams.set("startAt", Math.floor(startAt).toString());
 			url.searchParams.set("endAt", Math.floor(endAt).toString());
@@ -173,31 +185,81 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 					values.push(entry?.pageviews, entry?.value, entry?.count);
 				}
 			}
-			const recent = extractNumber(values);
-
-			const totalUrl = new URL(`/api/share/${umamiShareId}`, umamiBase);
-			const totalResponse = await fetch(totalUrl.toString());
-			if (!totalResponse.ok) {
-				throw new Error(`Umami total responded with ${totalResponse.status}`);
-			}
-			const totalData = await totalResponse.json();
-			const totalValues: unknown[] = [
-				totalData?.pageviews?.value,
-				totalData?.pageviews,
-				totalData?.totals?.pageviews,
-				totalData?.metrics?.pageviews?.value,
-			];
-			if (Array.isArray(totalData?.pageviews)) {
-				for (const entry of totalData.pageviews) {
-					totalValues.push(entry?.pageviews, entry?.value, entry?.count);
-				}
-			}
-			const total = extractNumber(totalValues);
-
-			return { recent, total };
+			return extractNumber(values);
 		};
 
-		const fetchGoatcounter = async () => {
+		const fetchUmami = async () => {
+			const [recent, daily, total] = await Promise.all([
+				fetchUmamiRange(rangeDays),
+				fetchUmamiRange(1),
+				(async () => {
+					if (!umamiShareId || !umamiBase) {
+						throw new Error("Missing Umami configuration.");
+					}
+					const totalUrl = new URL(`/api/share/${umamiShareId}`, umamiBase);
+					const totalResponse = await fetch(totalUrl.toString());
+					if (!totalResponse.ok) {
+						throw new Error(`Umami total responded with ${totalResponse.status}`);
+					}
+					const totalData = await totalResponse.json();
+					const totalValues: unknown[] = [
+						totalData?.pageviews?.value,
+						totalData?.pageviews,
+						totalData?.totals?.pageviews,
+						totalData?.metrics?.pageviews?.value,
+					];
+					if (Array.isArray(totalData?.pageviews)) {
+						for (const entry of totalData.pageviews) {
+							totalValues.push(entry?.pageviews, entry?.value, entry?.count);
+						}
+					}
+					return extractNumber(totalValues);
+				})(),
+			]);
+
+			return { daily, recent, total };
+		};
+
+		const fetchGoatcounterDaily = async () => {
+			if (!goatcounterBase) return null;
+
+			const attemptFetch = async (params?: Record<string, string>) => {
+				const dailyUrl = new URL(
+					`/counter/${encodeURIComponent(goatcounterPath)}.json`,
+					goatcounterBase,
+				);
+				if (params) {
+					for (const [key, value] of Object.entries(params)) {
+						dailyUrl.searchParams.set(key, value);
+					}
+				}
+				const response = await fetch(dailyUrl.toString());
+				if (!response.ok) {
+					throw new Error(`GoatCounter daily responded with ${response.status}`);
+				}
+				const data = await response.json();
+				return extractNumber([data?.count, data?.hits, data?.views, data?.total]);
+			};
+
+			const candidates: Record<string, string>[] = [
+				{ period: "day" },
+				{ start: "today" },
+				{ period: "1d" },
+			];
+
+			for (const params of candidates) {
+				try {
+					const value = await attemptFetch(params);
+					if (value != null) return value;
+				} catch (error) {
+					console.debug("[VisitorCounter] GoatCounter daily attempt failed:", error);
+				}
+			}
+
+			return null;
+		};
+
+		const fetchGoatcounterTotal = async () => {
 			if (!goatcounterBase) {
 				throw new Error("Missing GoatCounter configuration.");
 			}
@@ -216,26 +278,39 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 				data?.views,
 				data?.total,
 			]);
-			return { recent: total, total };
+			return total;
+		};
+
+		const fetchGoatcounter = async () => {
+			const [total, daily] = await Promise.all([
+				fetchGoatcounterTotal(),
+				fetchGoatcounterDaily(),
+			]);
+			return { recent: total, total, daily };
 		};
 
 		const load = async () => {
 			try {
-				let result: { recent: number | null; total: number | null } | null = null;
+				let result:
+					| { recent: number | null; total: number | null; daily: number | null }
+					| null = null;
 				if (provider === "umami") {
 					result = await fetchUmami();
 				} else if (provider === "goatcounter") {
 					result = await fetchGoatcounter();
 				}
 
-				if (!result || (result.recent == null && result.total == null)) {
+				if (
+					!result ||
+					(result.recent == null && result.total == null && result.daily == null)
+				) {
 					throw new Error("Visitor count not available.");
 				}
-				setCounts(result.recent, result.total);
-				setStatus(`${recentLabel} • ${totalLabel}`);
+				setCounts(result.daily, result.recent, result.total);
+				setStatus(`${dailyLabel} • ${recentLabel} • ${totalLabel}`);
 			} catch (error) {
 				console.error("[VisitorCounter]", error);
-				setCounts(null, null);
+				setCounts(null, null, null);
 				setStatus(errorText);
 			}
 		};

@@ -15,6 +15,7 @@ export const id: Translation = {
 	[Key.visitorCounter]: "Jumlah Pengunjung",
 	[Key.visitorCounterProvider]: "Sumber: {provider}",
 	[Key.visitorCounterRange]: "Pengunjung dalam {days} hari terakhir",
+	[Key.visitorCounterDaily]: "1 hari terakhir",
 	[Key.visitorCounterTotal]: "Pengunjung sepanjang waktu",
 	[Key.visitorCounterRecent]: "{days} hari terakhir",
 	[Key.visitorCounterLoading]: "Memuat jumlah pengunjung…",

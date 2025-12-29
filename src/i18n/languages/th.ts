@@ -15,6 +15,7 @@ export const th: Translation = {
 	[Key.visitorCounter]: "จำนวนผู้เข้าชม",
 	[Key.visitorCounterProvider]: "แหล่งข้อมูล: {provider}",
 	[Key.visitorCounterRange]: "ผู้เข้าชมใน {days} วันที่ผ่านมา",
+	[Key.visitorCounterDaily]: "ย้อนหลัง 1 วัน",
 	[Key.visitorCounterTotal]: "ผู้เข้าชมทั้งหมด",
 	[Key.visitorCounterRecent]: "{days} วันที่ผ่านมา",
 	[Key.visitorCounterLoading]: "กำลังโหลดจำนวนผู้เข้าชม…",
