@@ -70,7 +70,8 @@ if (!lang) {
 }
 const siteLang = lang.replace("_", "-");
 
-const analyticsProvider = import.meta.env.PUBLIC_ANALYTICS_PROVIDER?.toLowerCase();
+const analyticsProvider =
+	import.meta.env.PUBLIC_ANALYTICS_PROVIDER?.toLowerCase();
 const goatcounterBaseUrl =
 	import.meta.env.PUBLIC_GOATCOUNTER_HOST?.replace(/\/$/, "") ||
 	(import.meta.env.PUBLIC_GOATCOUNTER_CODE
