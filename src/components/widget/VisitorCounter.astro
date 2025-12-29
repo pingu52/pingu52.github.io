@@ -121,6 +121,13 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 		const umamiBase = root.dataset.umamiBase;
 		const goatcounterBase = root.dataset.goatcounterBase;
 		const goatcounterPath = root.dataset.goatcounterPath || "/";
+		const normalizeGoatcounterPath = (path: string) => {
+			const trimmed = path.trim();
+			if (trimmed === "" || trimmed === "/") {
+				return "root";
+			}
+			return trimmed.replace(/^\/+/, "") || "root";
+		};
 
 		const formatter = new Intl.NumberFormat(
 			document.documentElement.lang || "en",
@@ -236,7 +243,7 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 			if (!goatcounterBase) return null;
 
 			const dailyUrl = new URL(
-				`/counter/${encodeURIComponent(goatcounterPath)}.json`,
+				`/counter/${encodeURIComponent(normalizeGoatcounterPath(goatcounterPath))}.json`,
 				goatcounterBase,
 			);
 			const kstDate = getKstDate();
@@ -255,7 +262,7 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 				throw new Error("Missing GoatCounter configuration.");
 			}
 			const url = new URL(
-				`/counter/${encodeURIComponent(goatcounterPath)}.json`,
+				`/counter/${encodeURIComponent(normalizeGoatcounterPath(goatcounterPath))}.json`,
 				goatcounterBase,
 			);
 			const response = await fetch(url.toString());
