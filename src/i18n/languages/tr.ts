@@ -12,6 +12,13 @@ export const tr: Translation = {
 	[Key.recentPosts]: "Son Paylaşımlar",
 
 	[Key.comments]: "Yorumlar",
+	[Key.visitorCounter]: "Ziyaretçi Sayısı",
+	[Key.visitorCounterProvider]: "Kaynak: {provider}",
+	[Key.visitorCounterRange]: "Son {days} gündeki ziyaretçiler",
+	[Key.visitorCounterTotal]: "Tüm zamanlar",
+	[Key.visitorCounterRecent]: "Son {days} gün",
+	[Key.visitorCounterLoading]: "Ziyaretçi sayısı yükleniyor…",
+	[Key.visitorCounterUnavailable]: "Ziyaretçi sayısı yüklenemedi",
 
 	[Key.untitled]: "Başlıksız",
 	[Key.uncategorized]: "Katagorisiz",

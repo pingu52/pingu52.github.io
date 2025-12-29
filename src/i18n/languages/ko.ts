@@ -12,6 +12,13 @@ export const ko: Translation = {
 	[Key.recentPosts]: "최근 게시물",
 
 	[Key.comments]: "댓글",
+	[Key.visitorCounter]: "방문자 수",
+	[Key.visitorCounterProvider]: "수집: {provider}",
+	[Key.visitorCounterRange]: "최근 {days}일 방문자",
+	[Key.visitorCounterTotal]: "누적 방문자",
+	[Key.visitorCounterRecent]: "최근 {days}일",
+	[Key.visitorCounterLoading]: "방문자 수 불러오는 중…",
+	[Key.visitorCounterUnavailable]: "방문자 수를 불러오지 못했습니다",
 
 	[Key.untitled]: "제목 없음",
 	[Key.uncategorized]: "분류되지 않음",

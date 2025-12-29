@@ -12,6 +12,13 @@ export const en: Translation = {
 	[Key.recentPosts]: "Recent Posts",
 
 	[Key.comments]: "Comments",
+	[Key.visitorCounter]: "Visitor Count",
+	[Key.visitorCounterProvider]: "Source: {provider}",
+	[Key.visitorCounterRange]: "Visitors in the last {days} days",
+	[Key.visitorCounterTotal]: "All-time visitors",
+	[Key.visitorCounterRecent]: "Last {days} days",
+	[Key.visitorCounterLoading]: "Loading visitor count…",
+	[Key.visitorCounterUnavailable]: "Unable to load visitor count",
 
 	[Key.untitled]: "Untitled",
 	[Key.uncategorized]: "Uncategorized",

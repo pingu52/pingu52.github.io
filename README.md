@@ -89,6 +89,26 @@ lang: ""
 
 ---
 
+## 🔢 방문자 카운터 (Umami/GoatCounter)
+
+사이드바 태그 위젯 아래에 방문자 수를 표기할 수 있도록 Umami 혹은 GoatCounter 기반 카운터를 추가했습니다.
+최근 N일 방문자와 누적 방문자를 함께 보여줍니다.
+
+1. `.env` (또는 배포 환경 변수)에 `PUBLIC_ANALYTICS_PROVIDER`를 설정합니다.  
+   - `umami` 또는 `goatcounter` 값을 사용합니다.
+2. Umami 사용 시
+   - `PUBLIC_UMAMI_SHARE_ID`: 공개 대시보드(share 링크)의 ID
+   - `PUBLIC_UMAMI_BASE_URL`(선택): Umami 호스트 URL. 기본값 `https://analytics.umami.is`
+   - `PUBLIC_VISITOR_COUNT_DAYS`(선택): 집계 기간(일 단위, 기본 30일)
+3. GoatCounter 사용 시
+   - `PUBLIC_GOATCOUNTER_HOST` 또는 `PUBLIC_GOATCOUNTER_CODE` 중 하나를 지정  
+     (예: `PUBLIC_GOATCOUNTER_HOST=https://example.goatcounter.com` 또는 `PUBLIC_GOATCOUNTER_CODE=example`)
+   - `PUBLIC_GOATCOUNTER_PATH`(선택): 카운트할 경로. 기본 `/`
+
+환경 변수가 올바르게 지정되면 사이드바에 방문자 수 카드가 나타납니다.
+
+---
+
 ## 🎨 스타일/테마 구조
 
 - Tailwind 엔트리: `src/styles/tailwind-base.css`

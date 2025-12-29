@@ -12,6 +12,13 @@ export const vi: Translation = {
 	[Key.recentPosts]: "Bài viết mới nhất",
 
 	[Key.comments]: "Bình luận",
+	[Key.visitorCounter]: "Lượt truy cập",
+	[Key.visitorCounterProvider]: "Nguồn: {provider}",
+	[Key.visitorCounterRange]: "Lượt truy cập trong {days} ngày qua",
+	[Key.visitorCounterTotal]: "Tổng lượt truy cập",
+	[Key.visitorCounterRecent]: "{days} ngày gần đây",
+	[Key.visitorCounterLoading]: "Đang tải lượt truy cập…",
+	[Key.visitorCounterUnavailable]: "Không thể tải lượt truy cập",
 
 	[Key.untitled]: "Không tiêu đề",
 	[Key.uncategorized]: "Chưa phân loại",

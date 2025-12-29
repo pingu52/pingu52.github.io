@@ -12,6 +12,13 @@ export const ja: Translation = {
 	[Key.recentPosts]: "最近の投稿",
 
 	[Key.comments]: "コメント",
+	[Key.visitorCounter]: "訪問者数",
+	[Key.visitorCounterProvider]: "情報元: {provider}",
+	[Key.visitorCounterRange]: "直近{days}日間の訪問者",
+	[Key.visitorCounterTotal]: "累計訪問者数",
+	[Key.visitorCounterRecent]: "直近{days}日",
+	[Key.visitorCounterLoading]: "訪問者数を読み込み中…",
+	[Key.visitorCounterUnavailable]: "訪問者数を読み込めませんでした",
 
 	[Key.untitled]: "タイトルなし",
 	[Key.uncategorized]: "カテゴリなし",
