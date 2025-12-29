@@ -159,6 +159,18 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 			return null;
 		};
 
+		const getKstDate = () => {
+			const now = new Date();
+			const utc = now.getTime() + now.getTimezoneOffset() * 60 * 1000;
+			const kst = new Date(utc + 9 * 60 * 60 * 1000);
+
+			const year = kst.getFullYear();
+			const month = String(kst.getMonth() + 1).padStart(2, "0");
+			const day = String(kst.getDate()).padStart(2, "0");
+
+			return `${year}-${month}-${day}`;
+		};
+
 		const fetchUmamiRange = async (days: number) => {
 			if (!umamiShareId || !umamiBase) {
 				throw new Error("Missing Umami configuration.");
@@ -223,40 +235,19 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 		const fetchGoatcounterDaily = async () => {
 			if (!goatcounterBase) return null;
 
-			const attemptFetch = async (params?: Record<string, string>) => {
-				const dailyUrl = new URL(
-					`/counter/${encodeURIComponent(goatcounterPath)}.json`,
-					goatcounterBase,
-				);
-				if (params) {
-					for (const [key, value] of Object.entries(params)) {
-						dailyUrl.searchParams.set(key, value);
-					}
-				}
-				const response = await fetch(dailyUrl.toString());
-				if (!response.ok) {
-					throw new Error(`GoatCounter daily responded with ${response.status}`);
-				}
-				const data = await response.json();
-				return extractNumber([data?.count, data?.hits, data?.views, data?.total]);
-			};
+			const dailyUrl = new URL(
+				`/counter/${encodeURIComponent(goatcounterPath)}.json`,
+				goatcounterBase,
+			);
+			const kstDate = getKstDate();
+			dailyUrl.searchParams.set("start", kstDate);
 
-			const candidates: Record<string, string>[] = [
-				{ period: "day" },
-				{ start: "today" },
-				{ period: "1d" },
-			];
-
-			for (const params of candidates) {
-				try {
-					const value = await attemptFetch(params);
-					if (value != null) return value;
-				} catch (error) {
-					console.debug("[VisitorCounter] GoatCounter daily attempt failed:", error);
-				}
+			const response = await fetch(dailyUrl.toString());
+			if (!response.ok) {
+				throw new Error(`GoatCounter daily responded with ${response.status}`);
 			}
-
-			return null;
+			const data = await response.json();
+			return extractNumber([data?.count, data?.hits, data?.views, data?.total]);
 		};
 
 		const fetchGoatcounterTotal = async () => {
@@ -284,7 +275,14 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 		const fetchGoatcounter = async () => {
 			const [total, daily] = await Promise.all([
 				fetchGoatcounterTotal(),
-				fetchGoatcounterDaily(),
+				(async () => {
+					try {
+						return await fetchGoatcounterDaily();
+					} catch (error) {
+						console.debug("[VisitorCounter] GoatCounter daily fetch failed:", error);
+						return null;
+					}
+				})(),
 			]);
 			return { recent: total, total, daily };
 		};
