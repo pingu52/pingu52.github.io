@@ -31,6 +31,7 @@ jobs:
           # PUBLIC_POKEAPI: 'https://pokeapi.co/api/v2' # 변수 값에는 작은따옴표를 사용합니다. (선택 사항)
           PUBLIC_GOATCOUNTER_CODE: ${{ vars.PUBLIC_GOATCOUNTER_CODE }}
           PUBLIC_GOATCOUNTER_HOST: ${{ vars.PUBLIC_GOATCOUNTER_HOST }}
+          PUBLIC_ANALYTICS_PROVIDER: ${{ vars.PUBLIC_ANALYTICS_PROVIDER }}
 
   deploy:
     needs: build
