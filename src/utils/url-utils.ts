@@ -1,6 +1,9 @@
-import { isUncategorizedCategory, normalizeCategoryName } from "@utils/category-utils";
+import {
+	isUncategorizedCategory,
+	normalizeCategoryName,
+} from "@utils/category-utils";
+import { isBlank } from "@utils/string-utils";
 import { encodeTaxonomySegment } from "@utils/taxonomy-utils";
-import { isBlank, trimOrEmpty } from "@utils/string-utils";
 
 export function pathsEqual(path1: string, path2: string) {
 	const normalizedPath1 = path1.replace(/^\/|\/$/g, "").toLowerCase();
@@ -25,7 +28,9 @@ export function getTagUrl(tag: string): string {
 export function getCategoryUrl(category: string | null): string {
 	// Category pages are rendered as main-feed style pages under /category/:category/...
 	if (isUncategorizedCategory(category)) return url("/category/uncategorized/");
-	return url(`/category/${encodeTaxonomySegment(normalizeCategoryName(category))}/`);
+	return url(
+		`/category/${encodeTaxonomySegment(normalizeCategoryName(category))}/`,
+	);
 }
 
 export function getDir(path: string): string {

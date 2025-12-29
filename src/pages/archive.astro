@@ -39,7 +39,11 @@ const sortedPostsList = await getSortedPostsList();
 	</div>
 
 	<div class="js-only">
-		<ArchivePanel sortedPosts={sortedPostsList} client:only="svelte"></ArchivePanel>
+		<ArchivePanel
+			sortedPosts={sortedPostsList}
+			tags={[]}
+			categories={[]}
+			client:only="svelte"
+		></ArchivePanel>
 	</div>
 </MainGridLayout>
-

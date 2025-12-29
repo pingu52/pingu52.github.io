@@ -34,44 +34,53 @@ const fakeResult: SearchResult[] = [
 ];
 
 const getFocusableElements = (root: HTMLElement): HTMLElement[] => {
-    const selectors = [
-        'a[href]',
-        'button:not([disabled])',
-        'input:not([disabled])',
-        'select:not([disabled])',
-        'textarea:not([disabled])',
-        '[tabindex]:not([tabindex="-1"])',
-    ];
-    return Array.from(root.querySelectorAll<HTMLElement>(selectors.join(',')))
-        .filter((el) => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true');
+	const selectors = [
+		"a[href]",
+		"button:not([disabled])",
+		"input:not([disabled])",
+		"select:not([disabled])",
+		"textarea:not([disabled])",
+		'[tabindex]:not([tabindex="-1"])',
+	];
+	return Array.from(
+		root.querySelectorAll<HTMLElement>(selectors.join(",")),
+	).filter(
+		(el) =>
+			!el.hasAttribute("disabled") && el.getAttribute("aria-hidden") !== "true",
+	);
 };
 
 const setMobilePanelOpen = (open: boolean): void => {
-    const panel = document.getElementById("search-panel") as HTMLElement | null;
-    if (!panel) return;
+	const panel = document.getElementById("search-panel") as HTMLElement | null;
+	if (!panel) return;
 
-    mobilePanelOpen = open;
+	mobilePanelOpen = open;
 
-    if (open) {
-        lastFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-        panel.classList.remove("float-panel-closed");
-        panel.setAttribute("aria-hidden", "false");
-        panel.removeAttribute("inert");
-        requestAnimationFrame(() => {
-            const input = document.getElementById("search-input-mobile") as HTMLInputElement | null;
-            input?.focus();
-        });
-    } else {
-        panel.classList.add("float-panel-closed");
-        panel.setAttribute("aria-hidden", "true");
-        panel.setAttribute("inert", "");
-        lastFocus?.focus();
-        lastFocus = null;
-    }
+	if (open) {
+		lastFocus =
+			document.activeElement instanceof HTMLElement
+				? document.activeElement
+				: null;
+		panel.classList.remove("float-panel-closed");
+		panel.setAttribute("aria-hidden", "false");
+		panel.removeAttribute("inert");
+		requestAnimationFrame(() => {
+			const input = document.getElementById(
+				"search-input-mobile",
+			) as HTMLInputElement | null;
+			input?.focus();
+		});
+	} else {
+		panel.classList.add("float-panel-closed");
+		panel.setAttribute("aria-hidden", "true");
+		panel.setAttribute("inert", "");
+		lastFocus?.focus();
+		lastFocus = null;
+	}
 };
 
 const togglePanel = () => {
-    setMobilePanelOpen(!mobilePanelOpen);
+	setMobilePanelOpen(!mobilePanelOpen);
 };
 
 const setPanelVisibility = (show: boolean, isDesktop: boolean): void => {

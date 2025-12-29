@@ -6,11 +6,15 @@ export function getUncategorizedLabel(): string {
 	return i18n(I18nKey.uncategorized);
 }
 
-export function normalizeCategoryName(category: string | null | undefined): string {
+export function normalizeCategoryName(
+	category: string | null | undefined,
+): string {
 	return trimOrEmpty(category);
 }
 
-export function isUncategorizedCategory(category: string | null | undefined): boolean {
+export function isUncategorizedCategory(
+	category: string | null | undefined,
+): boolean {
 	if (isBlank(category)) return true;
 	return normalizeLower(category) === normalizeLower(getUncategorizedLabel());
 }

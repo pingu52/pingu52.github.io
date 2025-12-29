@@ -142,6 +142,10 @@ export function GithubCardComponent(properties, children) {
 			target: "_blank",
 			repo,
 		},
-		[nTitle, nDescription, h("div", { class: "gc-infobar" }, [nStars, nForks, nLicense, nLanguage])],
+		[
+			nTitle,
+			nDescription,
+			h("div", { class: "gc-infobar" }, [nStars, nForks, nLicense, nLanguage]),
+		],
 	);
 }

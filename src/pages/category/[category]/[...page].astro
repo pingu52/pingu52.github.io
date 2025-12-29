@@ -1,11 +1,15 @@
 ---
-import type { GetStaticPaths } from "astro";
+import TaxonomyFeedPage from "@components/TaxonomyFeedPage.astro";
 import { PAGE_SIZE } from "@constants/constants";
 import I18nKey from "@i18n/i18nKey";
 import { i18n, i18nFormat } from "@i18n/translation";
 import { getSortedPosts } from "@utils/content-utils";
-import TaxonomyFeedPage from "@components/TaxonomyFeedPage.astro";
-import { UNCATEGORIZED_SLUG, buildCategoryStaticPaths, decodeTaxonomySegment } from "@utils/taxonomy-utils";
+import {
+	buildCategoryStaticPaths,
+	decodeTaxonomySegment,
+	UNCATEGORIZED_SLUG,
+} from "@utils/taxonomy-utils";
+import type { GetStaticPaths } from "astro";
 
 export const getStaticPaths = (async ({ paginate }) => {
 	const allBlogPosts = await getSortedPosts();
@@ -18,7 +22,9 @@ const categoryParam = Astro.params.category ?? "";
 const categoryTitle =
 	categoryParam === UNCATEGORIZED_SLUG
 		? i18n(I18nKey.uncategorized)
-		: (typeof taxonomyTitle === "string" && taxonomyTitle !== "" ? taxonomyTitle : decodeTaxonomySegment(categoryParam));
+		: typeof taxonomyTitle === "string" && taxonomyTitle !== ""
+			? taxonomyTitle
+			: decodeTaxonomySegment(categoryParam);
 ---
 
 <TaxonomyFeedPage
