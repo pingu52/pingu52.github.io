@@ -70,6 +70,26 @@ if (!lang) {
 }
 const siteLang = lang.replace("_", "-");
 
+const analyticsProvider = import.meta.env.PUBLIC_ANALYTICS_PROVIDER?.toLowerCase();
+const goatcounterBaseUrl =
+	import.meta.env.PUBLIC_GOATCOUNTER_HOST?.replace(/\/$/, "") ||
+	(import.meta.env.PUBLIC_GOATCOUNTER_CODE
+		? `https://${import.meta.env.PUBLIC_GOATCOUNTER_CODE}.goatcounter.com`
+		: undefined);
+const normalizeGoatcounterPath = (path?: string) => {
+	if (!path) return "/";
+	const trimmed = path.trim();
+	if (trimmed === "") return "/";
+	return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+};
+const goatcounterPath = normalizeGoatcounterPath(
+	import.meta.env.PUBLIC_GOATCOUNTER_PATH,
+);
+const isGoatcounter = analyticsProvider === "goatcounter" && goatcounterBaseUrl;
+const goatcounterEndpoint = isGoatcounter
+	? `${goatcounterBaseUrl}/count`
+	: undefined;
+
 // Canonical URL should not include query/hash to avoid duplicate-indexing issues.
 // (e.g., /archive/?tag=... should canonicalize to /archive/; taxonomy routes have their own canonical URLs.)
 const canonicalUrl = Astro.site
@@ -178,6 +198,24 @@ const bannerOffset =
 			'page-width': `${PAGE_WIDTH}rem`,
 		}}></style>  <!-- defines global css variables. This will be applied to <html> <body> and some other elements idk why -->
 
+
+		{isGoatcounter && goatcounterEndpoint && (
+			<>
+				<script is:inline define:vars={{ goatcounterPath }}>
+					const goatcounterWindow = window;
+
+					goatcounterWindow.goatcounter = goatcounterWindow.goatcounter || {};
+					goatcounterWindow.goatcounter.no_onload = true;
+					goatcounterWindow.goatcounter.path = () => goatcounterPath;
+				</script>
+				<script
+					is:inline
+					data-goatcounter={goatcounterEndpoint}
+					async
+					src="https://gc.zgo.at/count.js"
+				></script>
+			</>
+		)}
 
 		<slot name="head"></slot>
 
@@ -545,6 +583,44 @@ window.onresize = () => {
 }
 
 </script>
+
+{isGoatcounter && goatcounterEndpoint && (
+	<script is:inline define:vars={{ goatcounterPath }}>
+		const goatcounterWindow = window;
+		const GOATCOUNTER_MAX_RETRY = 10;
+		const GOATCOUNTER_RETRY_DELAY = 300;
+
+		const countGoatcounter = (attempt = 0) => {
+			const tracker = goatcounterWindow.goatcounter;
+			if (!tracker || typeof tracker.count !== "function") {
+				if (attempt >= GOATCOUNTER_MAX_RETRY) return;
+				window.setTimeout(
+					() => countGoatcounter(attempt + 1),
+					GOATCOUNTER_RETRY_DELAY,
+				);
+				return;
+			}
+			tracker.count({ path: goatcounterPath });
+		};
+
+		const registerSwupHandler = () => {
+			if (!goatcounterWindow.swup?.hooks) return;
+			goatcounterWindow.swup.hooks.on("page:view", () => countGoatcounter());
+		};
+
+		if (document.readyState === "complete") {
+			countGoatcounter();
+		} else {
+			window.addEventListener("load", () => countGoatcounter(), { once: true });
+		}
+
+		if (goatcounterWindow.swup?.hooks) {
+			registerSwupHandler();
+		} else {
+			document.addEventListener("swup:enable", registerSwupHandler, { once: true });
+		}
+	</script>
+)}
 
 <script>
 import PhotoSwipeLightbox from "photoswipe/lightbox"
