@@ -11,7 +11,9 @@ interface Props {
 const { title, count, currentPage, lastPage } = Astro.props as Props;
 
 const hasPagingInfo =
-	typeof currentPage === "number" && typeof lastPage === "number" && lastPage > 1;
+	typeof currentPage === "number" &&
+	typeof lastPage === "number" &&
+	lastPage > 1;
 
 const subtitleParts: string[] = [];
 if (typeof count === "number") {
@@ -19,7 +21,10 @@ if (typeof count === "number") {
 }
 if (hasPagingInfo) {
 	subtitleParts.push(
-		i18nFormat(I18nKey.taxonomySummaryPage, { current: currentPage, total: lastPage }),
+		i18nFormat(I18nKey.taxonomySummaryPage, {
+			current: currentPage,
+			total: lastPage,
+		}),
 	);
 }
 const subtitle = subtitleParts.join(" · ");

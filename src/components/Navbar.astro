@@ -63,6 +63,8 @@ let links: NavBarLink[] = navBarConfig.links.map(
 </nav>
 
 <script>
+type PanelElement = HTMLElement | null;
+
 function switchTheme() {
     if (localStorage.theme === 'dark') {
         document.documentElement.classList.remove('dark');
@@ -73,7 +75,7 @@ function switchTheme() {
     }
 }
 
-function getFocusableElements(root) {
+function getFocusableElements(root: HTMLElement): HTMLElement[] {
     const selectors = [
         'a[href]',
         'button:not([disabled])',
@@ -82,11 +84,14 @@ function getFocusableElements(root) {
         'textarea:not([disabled])',
         '[tabindex]:not([tabindex="-1"])',
     ];
-    return Array.from(root.querySelectorAll(selectors.join(',')))
-        .filter((el) => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true');
+    return Array.from(root.querySelectorAll<HTMLElement>(selectors.join(','))).filter(
+        (el) =>
+            !el.hasAttribute('disabled') &&
+            el.getAttribute('aria-hidden') !== 'true',
+    );
 }
 
-function disableFocusWithin(root) {
+function disableFocusWithin(root: HTMLElement) {
     const focusables = getFocusableElements(root);
     focusables.forEach((el) => {
         if (!el.hasAttribute('data-a11y-had-tabindex')) {
@@ -97,8 +102,8 @@ function disableFocusWithin(root) {
     });
 }
 
-function restoreFocusWithin(root) {
-    const nodes = Array.from(root.querySelectorAll('[data-a11y-had-tabindex]'));
+function restoreFocusWithin(root: HTMLElement) {
+    const nodes = Array.from(root.querySelectorAll<HTMLElement>('[data-a11y-had-tabindex]'));
     nodes.forEach((el) => {
         const had = el.getAttribute('data-a11y-had-tabindex');
         const val = el.getAttribute('data-a11y-tabindex');
@@ -112,11 +117,12 @@ function restoreFocusWithin(root) {
     });
 }
 
-function isOpen(panel) {
-    return panel && !panel.classList.contains('float-panel-closed');
+function isOpen(panel: PanelElement): panel is HTMLElement {
+    if (!panel) return false;
+    return !panel.classList.contains('float-panel-closed');
 }
 
-function closePanel(btn, panel, { returnFocus = true } = {}) {
+function closePanel(btn: HTMLElement | null, panel: PanelElement, { returnFocus = true } = {}) {
     if (!btn || !panel) return;
     if (!isOpen(panel)) return;
 
@@ -128,24 +134,34 @@ function closePanel(btn, panel, { returnFocus = true } = {}) {
     if (returnFocus) btn.focus();
 }
 
-function openPanel(btn, panel, { focusSelector } = {}) {
+function openPanel(
+    btn: HTMLElement | null,
+    panel: PanelElement,
+    { focusSelector }: { focusSelector?: string } = {},
+) {
     if (!btn || !panel) return;
     if (isOpen(panel)) return;
 
-    panel.classList.remove('float-panel-closed');
-    panel.setAttribute('aria-hidden', 'false');
-    panel.removeAttribute('inert');
-    restoreFocusWithin(panel);
+    const activePanel = panel as HTMLElement;
+
+    activePanel.classList.remove('float-panel-closed');
+    activePanel.setAttribute('aria-hidden', 'false');
+    activePanel.removeAttribute('inert');
+    restoreFocusWithin(activePanel);
     btn.setAttribute('aria-expanded', 'true');
 
     requestAnimationFrame(() => {
-        const target = focusSelector ? panel.querySelector(focusSelector) : null;
-        const focusable = target || getFocusableElements(panel)[0];
-        (focusable || panel).focus?.();
+        const target = focusSelector ? activePanel.querySelector<HTMLElement>(focusSelector) : null;
+        const focusable = target ?? getFocusableElements(activePanel)[0];
+        (focusable || activePanel).focus?.();
     });
 }
 
-function togglePanel(btn, panel, options) {
+function togglePanel(
+    btn: HTMLElement | null,
+    panel: PanelElement,
+    options?: { focusSelector?: string },
+) {
     if (!btn || !panel) return;
     if (isOpen(panel)) {
         closePanel(btn, panel);
@@ -166,7 +182,7 @@ function setupNavbarA11y() {
     const getSettingPanel = () => document.getElementById('display-setting');
     const getMenuPanel = () => document.getElementById('nav-menu-panel');
 
-    const ensurePanelInitialized = (panel) => {
+    const ensurePanelInitialized = (panel: PanelElement) => {
         if (!panel || panel.dataset.a11yInit === '1') return;
         panel.dataset.a11yInit = '1';
         if (panel.classList.contains('float-panel-closed')) {
@@ -212,9 +228,9 @@ function setupNavbarA11y() {
         const menuPanel = getMenuPanel();
         if (menuPanel) {
             ensurePanelInitialized(menuPanel);
-            menuPanel.addEventListener('click', (e) => {
+            menuPanel.addEventListener('click', (e: Event) => {
                 const target = e.target;
-                if (target && target.closest && target.closest('a[href]')) {
+                if (target instanceof Element && target.closest('a[href]')) {
                     closePanel(menuBtn, menuPanel, { returnFocus: false });
                 }
             });
@@ -260,7 +276,7 @@ function setupNavbarA11y() {
     // Click outside to close.
     document.addEventListener('pointerdown', (e) => {
         const target = e.target;
-        if (!target) return;
+        if (!(target instanceof Node)) return;
 
         const settingPanel = getSettingPanel();
         const menuPanel = getMenuPanel();

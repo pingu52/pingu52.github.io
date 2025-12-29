@@ -1,9 +1,8 @@
 ---
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
-import { getPostUrlBySlug } from "@utils/url-utils";
-
 import type { PostForList } from "@utils/content-utils";
+import { getPostUrlBySlug } from "@utils/url-utils";
 
 interface Props {
 	sortedPosts: PostForList[];
@@ -23,14 +22,23 @@ function formatTag(tags: string[] | undefined) {
 	return (tags ?? []).map((t) => `#${t}`).join(" ");
 }
 
-const grouped = sortedPosts.reduce((acc, post) => {
-	const year = post.data.published.getFullYear();
-	(acc[year] ??= []).push(post);
-	return acc;
-}, {} as Record<number, PostForList[]>);
+const grouped = sortedPosts.reduce(
+	(acc, post) => {
+		const year = post.data.published.getFullYear();
+		if (!acc[year]) {
+			acc[year] = [];
+		}
+		acc[year].push(post);
+		return acc;
+	},
+	{} as Record<number, PostForList[]>,
+);
 
 const groups: Group[] = Object.keys(grouped)
-	.map((y) => ({ year: Number.parseInt(y, 10), posts: grouped[Number.parseInt(y, 10)] }))
+	.map((y) => ({
+		year: Number.parseInt(y, 10),
+		posts: grouped[Number.parseInt(y, 10)],
+	}))
 	.sort((a, b) => b.year - a.year);
 ---
 
