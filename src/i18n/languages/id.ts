@@ -12,6 +12,13 @@ export const id: Translation = {
 	[Key.recentPosts]: "Postingan Terbaru",
 
 	[Key.comments]: "Komentar",
+	[Key.visitorCounter]: "Jumlah Pengunjung",
+	[Key.visitorCounterProvider]: "Sumber: {provider}",
+	[Key.visitorCounterRange]: "Pengunjung dalam {days} hari terakhir",
+	[Key.visitorCounterTotal]: "Pengunjung sepanjang waktu",
+	[Key.visitorCounterRecent]: "{days} hari terakhir",
+	[Key.visitorCounterLoading]: "Memuat jumlah pengunjung…",
+	[Key.visitorCounterUnavailable]: "Tidak dapat memuat jumlah pengunjung",
 
 	[Key.untitled]: "Tanpa Judul",
 	[Key.uncategorized]: "Tanpa Kategori",

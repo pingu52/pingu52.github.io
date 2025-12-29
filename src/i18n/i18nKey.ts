@@ -9,6 +9,13 @@ enum I18nKey {
 	recentPosts = "recentPosts",
 
 	comments = "comments",
+	visitorCounter = "visitorCounter",
+	visitorCounterProvider = "visitorCounterProvider",
+	visitorCounterRange = "visitorCounterRange",
+	visitorCounterTotal = "visitorCounterTotal",
+	visitorCounterRecent = "visitorCounterRecent",
+	visitorCounterLoading = "visitorCounterLoading",
+	visitorCounterUnavailable = "visitorCounterUnavailable",
 
 	untitled = "untitled",
 	uncategorized = "uncategorized",

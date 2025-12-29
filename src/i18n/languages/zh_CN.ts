@@ -12,6 +12,13 @@ export const zh_CN: Translation = {
 	[Key.recentPosts]: "最新文章",
 
 	[Key.comments]: "评论",
+	[Key.visitorCounter]: "访问量",
+	[Key.visitorCounterProvider]: "数据来源：{provider}",
+	[Key.visitorCounterRange]: "最近 {days} 天的访问量",
+	[Key.visitorCounterTotal]: "累计访问量",
+	[Key.visitorCounterRecent]: "最近 {days} 天",
+	[Key.visitorCounterLoading]: "正在加载访问量…",
+	[Key.visitorCounterUnavailable]: "无法加载访问量",
 
 	[Key.untitled]: "无标题",
 	[Key.uncategorized]: "未分类",

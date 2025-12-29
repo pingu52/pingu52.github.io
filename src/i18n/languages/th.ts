@@ -12,6 +12,13 @@ export const th: Translation = {
 	[Key.recentPosts]: "โพสต์ล่าสุด",
 
 	[Key.comments]: "ความคิดเห็น",
+	[Key.visitorCounter]: "จำนวนผู้เข้าชม",
+	[Key.visitorCounterProvider]: "แหล่งข้อมูล: {provider}",
+	[Key.visitorCounterRange]: "ผู้เข้าชมใน {days} วันที่ผ่านมา",
+	[Key.visitorCounterTotal]: "ผู้เข้าชมทั้งหมด",
+	[Key.visitorCounterRecent]: "{days} วันที่ผ่านมา",
+	[Key.visitorCounterLoading]: "กำลังโหลดจำนวนผู้เข้าชม…",
+	[Key.visitorCounterUnavailable]: "ไม่สามารถโหลดจำนวนผู้เข้าชมได้",
 
 	[Key.untitled]: "ไม่ได้ตั้งชื่อ",
 	[Key.uncategorized]: "ไม่ได้จัดหมวดหมู่",

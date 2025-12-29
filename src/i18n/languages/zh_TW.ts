@@ -12,6 +12,13 @@ export const zh_TW: Translation = {
 	[Key.recentPosts]: "最新文章",
 
 	[Key.comments]: "評論",
+	[Key.visitorCounter]: "訪客數",
+	[Key.visitorCounterProvider]: "資料來源：{provider}",
+	[Key.visitorCounterRange]: "最近 {days} 天的訪客數",
+	[Key.visitorCounterTotal]: "累計訪客數",
+	[Key.visitorCounterRecent]: "最近 {days} 天",
+	[Key.visitorCounterLoading]: "正在載入訪客數…",
+	[Key.visitorCounterUnavailable]: "無法載入訪客數",
 
 	[Key.untitled]: "無標題",
 	[Key.uncategorized]: "未分類",

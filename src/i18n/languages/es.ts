@@ -12,6 +12,13 @@ export const es: Translation = {
 	[Key.recentPosts]: "Publicaciones recientes",
 
 	[Key.comments]: "Comentarios",
+	[Key.visitorCounter]: "Conteo de visitas",
+	[Key.visitorCounterProvider]: "Fuente: {provider}",
+	[Key.visitorCounterRange]: "Visitas en los últimos {days} días",
+	[Key.visitorCounterTotal]: "Visitas totales",
+	[Key.visitorCounterRecent]: "Últimos {days} días",
+	[Key.visitorCounterLoading]: "Cargando el conteo de visitas…",
+	[Key.visitorCounterUnavailable]: "No se pudo cargar el conteo de visitas",
 
 	[Key.untitled]: "Sin título",
 	[Key.uncategorized]: "Sin categoría",

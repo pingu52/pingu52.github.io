@@ -1,0 +1,245 @@
+---
+import { Icon } from "astro-icon/components";
+import I18nKey from "../../i18n/i18nKey";
+import { i18n, i18nFormat } from "../../i18n/translation";
+import WidgetLayout from "./WidgetLayout.astro";
+
+interface Props {
+	class?: string;
+	style?: string;
+}
+
+const className = Astro.props.class;
+const style = Astro.props.style;
+
+const provider = import.meta.env.PUBLIC_ANALYTICS_PROVIDER?.toLowerCase();
+const parsedRange = Number(import.meta.env.PUBLIC_VISITOR_COUNT_DAYS || "30");
+const rangeDays =
+	Number.isFinite(parsedRange) && parsedRange > 0 ? parsedRange : 30;
+
+const umamiShareId = import.meta.env.PUBLIC_UMAMI_SHARE_ID;
+const umamiBaseUrl =
+	import.meta.env.PUBLIC_UMAMI_BASE_URL?.replace(/\/$/, "") ||
+	"https://analytics.umami.is";
+
+const goatcounterBaseUrl =
+	import.meta.env.PUBLIC_GOATCOUNTER_HOST?.replace(/\/$/, "") ||
+	(import.meta.env.PUBLIC_GOATCOUNTER_CODE
+		? `https://${import.meta.env.PUBLIC_GOATCOUNTER_CODE}.goatcounter.com`
+		: undefined);
+const goatcounterPath = import.meta.env.PUBLIC_GOATCOUNTER_PATH || "/";
+
+const isUmami = provider === "umami" && umamiShareId;
+const isGoatcounter = provider === "goatcounter" && goatcounterBaseUrl;
+
+if (!isUmami && !isGoatcounter) {
+	return;
+}
+
+const activeProvider = isUmami ? "umami" : "goatcounter";
+const providerLabel = isUmami ? "Umami" : "GoatCounter";
+const recentLabel = i18nFormat(I18nKey.visitorCounterRecent, { days: rangeDays });
+const totalLabel = i18n(I18nKey.visitorCounterTotal);
+---
+
+<WidgetLayout
+	name={i18n(I18nKey.visitorCounter)}
+	id="visitor-counter"
+	class={className}
+	style={style}
+>
+	<div
+		class="flex flex-col gap-3 px-1"
+		data-visitor-counter
+		data-provider={activeProvider}
+		data-umami-share-id={umamiShareId}
+		data-umami-base={umamiBaseUrl}
+		data-goatcounter-base={goatcounterBaseUrl}
+		data-goatcounter-path={goatcounterPath}
+		data-range-days={String(rangeDays)}
+		data-recent-label={recentLabel}
+		data-total-label={totalLabel}
+		data-loading-text={i18n(I18nKey.visitorCounterLoading)}
+		data-error-text={i18n(I18nKey.visitorCounterUnavailable)}
+	>
+		<div class="flex items-start justify-between gap-3">
+			<div class="flex flex-col gap-1">
+				<div class="flex items-center gap-2 text-sm font-semibold text-neutral-700 dark:text-neutral-200">
+					<Icon
+						name="material-symbols:analytics-outline-rounded"
+						class="text-xl text-[var(--primary)]"
+					/>
+					<span>{i18nFormat(I18nKey.visitorCounterProvider, { provider: providerLabel })}</span>
+				</div>
+				<div
+					class="text-xs text-neutral-500 dark:text-neutral-400"
+					data-status
+					aria-live="polite"
+				>
+					{i18n(I18nKey.visitorCounterLoading)}
+				</div>
+			</div>
+		</div>
+
+		<div class="grid grid-cols-2 gap-3">
+			<div class="flex flex-col gap-1 p-3 rounded-xl bg-[var(--panel-bg,rgba(0,0,0,0.04))] dark:bg-white/5 border border-black/5 dark:border-white/5">
+				<div class="text-[0.8rem] text-neutral-500 dark:text-neutral-400">{recentLabel}</div>
+				<div class="text-3xl font-bold text-neutral-900 dark:text-neutral-50 leading-tight" data-count-recent aria-live="polite">—</div>
+			</div>
+			<div class="flex flex-col gap-1 p-3 rounded-xl bg-[var(--panel-bg,rgba(0,0,0,0.04))] dark:bg-white/5 border border-black/5 dark:border-white/5">
+				<div class="text-[0.8rem] text-neutral-500 dark:text-neutral-400">{totalLabel}</div>
+				<div class="text-3xl font-bold text-neutral-900 dark:text-neutral-50 leading-tight" data-count-total aria-live="polite">—</div>
+			</div>
+		</div>
+	</div>
+</WidgetLayout>
+
+<script>
+	(() => {
+		const root = document.querySelector("[data-visitor-counter]") as HTMLElement | null;
+		if (!root) return;
+
+		const countRecentEl = root.querySelector("[data-count-recent]");
+		const countTotalEl = root.querySelector("[data-count-total]");
+		const statusEl = root.querySelector("[data-status]");
+		const provider = root.dataset.provider;
+		const parsedRange = Number(root.dataset.rangeDays || "30");
+		const rangeDays = Number.isFinite(parsedRange) && parsedRange > 0 ? parsedRange : 30;
+		const recentLabel = root.dataset.recentLabel || "";
+		const totalLabel = root.dataset.totalLabel || "";
+		const loadingText = root.dataset.loadingText || "";
+		const errorText = root.dataset.errorText || "";
+		const umamiShareId = root.dataset.umamiShareId;
+		const umamiBase = root.dataset.umamiBase;
+		const goatcounterBase = root.dataset.goatcounterBase;
+		const goatcounterPath = root.dataset.goatcounterPath || "/";
+
+		const formatter = new Intl.NumberFormat(
+			document.documentElement.lang || "en",
+			{ maximumFractionDigits: 0 },
+		);
+
+		const setStatus = (text: string) => {
+			if (statusEl) {
+				statusEl.textContent = text;
+			}
+		};
+
+		setStatus(loadingText);
+
+		const setCounts = (recent: number | null, total: number | null) => {
+			if (countRecentEl) {
+				countRecentEl.textContent =
+					typeof recent === "number" ? formatter.format(recent) : "—";
+			}
+			if (countTotalEl) {
+				countTotalEl.textContent =
+					typeof total === "number" ? formatter.format(total) : "—";
+			}
+		};
+
+		const extractNumber = (values: unknown[]): number | null => {
+			for (const value of values) {
+				if (typeof value === "number" && Number.isFinite(value)) {
+					return value;
+				}
+			}
+			return null;
+		};
+
+		const fetchUmami = async () => {
+			if (!umamiShareId || !umamiBase) {
+				throw new Error("Missing Umami configuration.");
+			}
+			const endAt = Date.now();
+			const startAt = endAt - Math.max(1, rangeDays) * 24 * 60 * 60 * 1000;
+			const url = new URL(`/api/share/${umamiShareId}`, umamiBase);
+			url.searchParams.set("startAt", Math.floor(startAt).toString());
+			url.searchParams.set("endAt", Math.floor(endAt).toString());
+
+			const response = await fetch(url.toString());
+			if (!response.ok) {
+				throw new Error(`Umami responded with ${response.status}`);
+			}
+			const data = await response.json();
+			const values: unknown[] = [
+				data?.pageviews?.value,
+				data?.pageviews,
+				data?.totals?.pageviews,
+				data?.metrics?.pageviews?.value,
+			];
+			if (Array.isArray(data?.pageviews)) {
+				for (const entry of data.pageviews) {
+					values.push(entry?.pageviews, entry?.value, entry?.count);
+				}
+			}
+			const recent = extractNumber(values);
+
+			const totalUrl = new URL(`/api/share/${umamiShareId}`, umamiBase);
+			const totalResponse = await fetch(totalUrl.toString());
+			if (!totalResponse.ok) {
+				throw new Error(`Umami total responded with ${totalResponse.status}`);
+			}
+			const totalData = await totalResponse.json();
+			const totalValues: unknown[] = [
+				totalData?.pageviews?.value,
+				totalData?.pageviews,
+				totalData?.totals?.pageviews,
+				totalData?.metrics?.pageviews?.value,
+			];
+			if (Array.isArray(totalData?.pageviews)) {
+				for (const entry of totalData.pageviews) {
+					totalValues.push(entry?.pageviews, entry?.value, entry?.count);
+				}
+			}
+			const total = extractNumber(totalValues);
+
+			return { recent, total };
+		};
+
+		const fetchGoatcounter = async () => {
+			if (!goatcounterBase) {
+				throw new Error("Missing GoatCounter configuration.");
+			}
+			const url = new URL(
+				`/counter/${encodeURIComponent(goatcounterPath)}.json`,
+				goatcounterBase,
+			);
+			const response = await fetch(url.toString());
+			if (!response.ok) {
+				throw new Error(`GoatCounter responded with ${response.status}`);
+			}
+			const data = await response.json();
+			const total = extractNumber([
+				data?.count,
+				data?.hits,
+				data?.views,
+				data?.total,
+			]);
+			return { recent: total, total };
+		};
+
+		const load = async () => {
+			try {
+				let result: { recent: number | null; total: number | null } | null = null;
+				if (provider === "umami") {
+					result = await fetchUmami();
+				} else if (provider === "goatcounter") {
+					result = await fetchGoatcounter();
+				}
+
+				if (!result || (result.recent == null && result.total == null)) {
+					throw new Error("Visitor count not available.");
+				}
+				setCounts(result.recent, result.total);
+				setStatus(`${recentLabel} • ${totalLabel}`);
+			} catch (error) {
+				console.error("[VisitorCounter]", error);
+				setCounts(null, null);
+				setStatus(errorText);
+			}
+		};
+
+		load();
+	})();
+</script>
