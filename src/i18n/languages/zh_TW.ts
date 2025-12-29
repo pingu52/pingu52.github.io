@@ -15,6 +15,7 @@ export const zh_TW: Translation = {
 	[Key.visitorCounter]: "訪客數",
 	[Key.visitorCounterProvider]: "資料來源：{provider}",
 	[Key.visitorCounterRange]: "最近 {days} 天的訪客數",
+	[Key.visitorCounterDaily]: "最近 1 天",
 	[Key.visitorCounterTotal]: "累計訪客數",
 	[Key.visitorCounterRecent]: "最近 {days} 天",
 	[Key.visitorCounterLoading]: "正在載入訪客數…",

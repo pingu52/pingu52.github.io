@@ -15,6 +15,7 @@ export const tr: Translation = {
 	[Key.visitorCounter]: "Ziyaretçi Sayısı",
 	[Key.visitorCounterProvider]: "Kaynak: {provider}",
 	[Key.visitorCounterRange]: "Son {days} gündeki ziyaretçiler",
+	[Key.visitorCounterDaily]: "Son 1 gün",
 	[Key.visitorCounterTotal]: "Tüm zamanlar",
 	[Key.visitorCounterRecent]: "Son {days} gün",
 	[Key.visitorCounterLoading]: "Ziyaretçi sayısı yükleniyor…",
