@@ -114,9 +114,14 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 		const goatcounterBase = root.dataset.goatcounterBase;
 		const goatcounterPath = root.dataset.goatcounterPath || "/";
 
-		const formatDate = (date: Date) => {
-			const tzAdjusted = new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
-			return tzAdjusted.toISOString().slice(0, 10);
+		const formatKstDate = (date: Date) => {
+			const kstDate = new Date(
+				date.toLocaleString("en-US", { timeZone: "Asia/Seoul" }),
+			);
+			const year = kstDate.getFullYear();
+			const month = String(kstDate.getMonth() + 1).padStart(2, "0");
+			const day = String(kstDate.getDate()).padStart(2, "0");
+			return `${year}-${month}-${day}`;
 		};
 
 		const buildGoatcounterUrl = (
@@ -230,12 +235,11 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 			if (!goatcounterBase) {
 				throw new Error("Missing GoatCounter configuration.");
 			}
-			const today = formatDate(new Date());
+			const today = formatKstDate(new Date());
 			const [dailyResponse, totalResponse] = await Promise.all([
 				fetch(
 					buildGoatcounterUrl(goatcounterPath, goatcounterBase, {
 						start: today,
-						end: today,
 					}).toString(),
 				),
 				fetch(buildGoatcounterUrl(goatcounterPath, goatcounterBase).toString()),
