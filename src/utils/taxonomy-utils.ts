@@ -143,7 +143,8 @@ export function buildCategoryStaticPaths(
 		paths.push(
 			...paginate(filtered, {
 				pageSize,
-				params: { category: categoryPath },
+				// Astro catch-all params expect strings; join with "/" so routing creates nested segments.
+				params: { category: categoryPath.join("/") },
 				props: { taxonomyTitle: categoryLabel, taxonomyKey: key },
 			}),
 		);
@@ -159,7 +160,7 @@ export function buildCategoryStaticPaths(
 		paths.push(
 			...paginate(filtered, {
 				pageSize,
-				params: { category: [UNCATEGORIZED_SLUG] },
+				params: { category: UNCATEGORIZED_SLUG },
 				props: { taxonomyTitle: UNCATEGORIZED_SLUG, taxonomyKey: "" },
 			}),
 		);

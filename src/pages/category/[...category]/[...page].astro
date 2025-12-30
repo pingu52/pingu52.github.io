@@ -25,10 +25,10 @@ const { page, taxonomyTitle } = Astro.props as {
 	taxonomyTitle?: string;
 };
 
-const categoryParam = Astro.params.category ?? [];
+const categoryParam = Astro.params.category ?? "";
 const categorySegments = (Array.isArray(categoryParam)
 	? categoryParam
-	: [categoryParam]
+	: String(categoryParam).split("/").filter(Boolean)
 ).map((segment) => String(segment));
 const decodedPath = decodeCategorySegments(categorySegments);
 

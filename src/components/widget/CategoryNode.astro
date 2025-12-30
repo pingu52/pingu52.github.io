@@ -1,0 +1,50 @@
+---
+import type { CategoryTreeNode } from "@utils/content-utils";
+import ButtonLink from "../control/ButtonLink.astro";
+
+interface Props {
+	node: CategoryTreeNode;
+	depth?: number;
+}
+
+const { node, depth = 0 } = Astro.props;
+const hasChildren = node.children && node.children.length > 0;
+---
+
+<li class="space-y-1">
+    {hasChildren ? (
+        <details class="group" open={depth === 0}>
+            <summary class="flex items-center gap-2 cursor-pointer select-none text-sm text-neutral-300/90 dark:text-neutral-200/90">
+                <span class="transition-transform group-open:rotate-90 text-neutral-400 dark:text-neutral-500">▶</span>
+                <span class="font-semibold text-neutral-800 dark:text-neutral-200">{node.name}</span>
+                <span class="ml-auto px-2 h-6 min-w-[2rem] rounded-lg text-xs font-bold text-[var(--btn-content)] dark:text-[var(--deep-text)] bg-[var(--btn-regular-bg)] dark:bg-[var(--primary)] flex items-center justify-center">
+                    {node.count}
+                </span>
+            </summary>
+            <div class="mt-2 pl-3 border-l border-dashed border-black/10 dark:border-white/15 space-y-2">
+                <ButtonLink
+                    url={node.url}
+                    badge={String(node.count)}
+                    label={`View all posts in the ${node.path.join(" / ") || node.name.trim()} category`}
+                >
+                    {node.name.trim()}
+                </ButtonLink>
+                {hasChildren && (
+                    <ul class="space-y-1">
+                        {node.children.map((child) => (
+                            <CategoryNode node={child} depth={depth + 1} />
+                        ))}
+                    </ul>
+                )}
+            </div>
+        </details>
+    ) : (
+        <ButtonLink
+            url={node.url}
+            badge={String(node.count)}
+            label={`View all posts in the ${node.path.join(" / ") || node.name.trim()} category`}
+        >
+            {node.name.trim()}
+        </ButtonLink>
+    )}
+</li>
