@@ -1,0 +1,52 @@
+---
+import CategoryTreeList from "./CategoryTreeList.astro";
+import { categorySlugPathToUrl } from "@utils/url-utils";
+import type { CategoryNode } from "../../utils/category-taxonomy";
+
+interface Props {
+	node: CategoryNode;
+	parentSlugPath?: string[];
+	activeSlugPath: string[];
+}
+
+const { node, parentSlugPath = [], activeSlugPath } = Astro.props;
+const slugPath = [...parentSlugPath, node.slug];
+
+const isExpanded = slugPath.every((slug, index) => activeSlugPath[index] === slug);
+const isActive =
+	slugPath.length === activeSlugPath.length &&
+	slugPath.every((slug, index) => activeSlugPath[index] === slug);
+
+const hasChildren = (node.children?.length ?? 0) > 0;
+---
+
+<li class="flex flex-col gap-1">
+	<a
+		href={categorySlugPathToUrl(slugPath)}
+		class:list={[
+			"btn-plain inline-flex items-center justify-between rounded-lg px-3 py-2 text-sm",
+			{
+				"bg-[var(--card-bg)] shadow-sm": isActive,
+				"hover:bg-[var(--btn-plain-bg-hover)]": !isActive,
+			},
+		]}
+		aria-current={isActive ? "page" : undefined}
+	>
+		<span class="font-semibold">{node.label}</span>
+		{hasChildren && (
+			<span class="text-30 text-xs" aria-hidden="true">
+				{isExpanded ? "▼" : "▶"}
+			</span>
+		)}
+	</a>
+
+	{hasChildren && isExpanded && (
+		<div class="ml-4 border-l border-dashed border-[var(--meta-divider)] pl-3 flex flex-col gap-1">
+			<CategoryTreeList
+				nodes={node.children ?? []}
+				parentSlugPath={slugPath}
+				activeSlugPath={activeSlugPath}
+			/>
+		</div>
+	)}
+</li>

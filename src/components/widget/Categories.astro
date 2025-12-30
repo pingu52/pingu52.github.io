@@ -1,16 +1,16 @@
 ---
-import categories from "@data/categories.json";
+import categoriesData from "@data/categories.json";
 import I18nKey from "../../i18n/i18nKey";
 import { i18n } from "../../i18n/translation";
+import CategoryTreeList from "./CategoryTreeList.astro";
 import { type CategoryNode } from "../../utils/category-taxonomy";
 import { categorySlugPathToUrl } from "../../utils/url-utils";
 import WidgetLayout from "./WidgetLayout.astro";
 
-const taxonomy = categories as CategoryNode[];
+const taxonomy = categoriesData as CategoryNode[];
 
 const COLLAPSED_HEIGHT = "7.5rem";
 const COLLAPSE_THRESHOLD = 5;
-
 const isCollapsed = taxonomy.length >= COLLAPSE_THRESHOLD;
 
 interface Props {
@@ -27,67 +27,14 @@ const rawSegments = currentPath.startsWith(categoryRoot)
 			.slice(categoryRoot.length)
 			.split("/")
 			.filter((segment) => segment.length > 0)
-	: [];
+		: [];
 
 if (rawSegments.at(-1)?.match(/^\d+$/)) rawSegments.pop();
 const activeSlugPath = rawSegments;
-
-const isExpanded = (slugPath: string[]) =>
-	slugPath.every((slug, index) => activeSlugPath[index] === slug);
-const isActive = (slugPath: string[]) =>
-	slugPath.length === activeSlugPath.length &&
-	slugPath.every((slug, index) => activeSlugPath[index] === slug);
-
-const renderCategories = (
-	nodes: CategoryNode[],
-	parentSlugPath: string[] = [],
-) =>
-	nodes.map((node) => {
-		const slugPath = [...parentSlugPath, node.slug];
-		const nodeLink = categorySlugPathToUrl(slugPath);
-		const expanded = isExpanded(slugPath);
-		const active = isActive(slugPath);
-		const hasChildren = (node.children?.length ?? 0) > 0;
-		const childList =
-			hasChildren && expanded
-				? renderCategories(node.children ?? [], slugPath)
-				: null;
-		return (
-			<li class="flex flex-col gap-1">
-				<a
-					href={nodeLink}
-					class:list={[
-						"btn-plain inline-flex items-center justify-between rounded-lg px-3 py-2 text-sm",
-						{
-							"bg-[var(--card-bg)] shadow-sm": active,
-							"hover:bg-[var(--btn-plain-bg-hover)]": !active,
-						},
-					]}
-					aria-current={active ? "page" : undefined}
-				>
-					<span class="font-semibold">{node.label}</span>
-					{hasChildren && (
-						<span class="text-30 text-xs" aria-hidden="true">
-							{expanded ? "▼" : "▶"}
-						</span>
-					)}
-				</a>
-				{childList && (
-					<ul class="ml-4 border-l border-dashed border-[var(--meta-divider)] pl-3 flex flex-col gap-1">
-						{childList}
-					</ul>
-				)}
-			</li>
-		);
-	});
-
-const rootChildren = taxonomy;
 ---
 
 <WidgetLayout name={i18n(I18nKey.categories)} id="categories" isCollapsed={isCollapsed} collapsedHeight={COLLAPSED_HEIGHT}
                 class={className} style={style}
 >
-	<ul class="flex flex-col gap-1">
-		{renderCategories(rootChildren)}
-	</ul>
+	<CategoryTreeList nodes={taxonomy} activeSlugPath={activeSlugPath} />
 </WidgetLayout>

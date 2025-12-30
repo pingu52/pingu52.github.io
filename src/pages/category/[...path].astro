@@ -26,119 +26,124 @@ type CategorizedPost = {
 	slugPath: string[] | null;
 };
 
-const taxonomy = categories as CategoryNode[];
-const missingCategoryWarnings = new Set<string>();
-
-const warnMissingCategory = (labelPath: string[]) => {
-	const label = labelPath.join(" / ");
-	if (missingCategoryWarnings.has(label)) return;
-	missingCategoryWarnings.add(label);
-	console.warn(
-		`[categories] Category "${label}" is not defined in categories.json`,
-	);
-};
-
-const toCategorySlugPath = (category: string | null | undefined) => {
-	const labelPath = parseCategoryLabelPath(category);
-	if (labelPath.length === 0) return [UNCATEGORIZED_SLUG];
-	const slugPath = labelPathToSlugPath(labelPath, taxonomy);
-	if (!slugPath) warnMissingCategory(labelPath);
-	return slugPath;
-};
-
-const buildPage = (
-	posts: CollectionEntry<"posts">[],
-	slugPath: string[],
-	pageNumber: number,
-	totalPages: number,
-): Page<CollectionEntry<"posts">> => {
-	const startIndex = (pageNumber - 1) * PAGE_SIZE;
-	const data = posts.slice(startIndex, startIndex + PAGE_SIZE);
-	const start = posts.length === 0 ? 0 : startIndex + 1;
-	const end = posts.length === 0 ? 0 : startIndex + data.length;
-
-	const current = categorySlugPathToUrl(slugPath, pageNumber);
-	const prev =
-		pageNumber > 1 ? categorySlugPathToUrl(slugPath, pageNumber - 1) : undefined;
-	const next =
-		pageNumber < totalPages
-			? categorySlugPathToUrl(slugPath, pageNumber + 1)
-			: undefined;
-	const first = categorySlugPathToUrl(slugPath, 1);
-	const last = categorySlugPathToUrl(slugPath, totalPages);
-
-	return {
-		data,
-		start,
-		end,
-		total: posts.length,
-		size: PAGE_SIZE,
-		currentPage: pageNumber,
-		lastPage: totalPages,
-		url: {
-			current,
-			prev,
-			next,
-			first,
-			last,
-		},
-	};
-};
-
-const buildStaticPaths = (
-	categorizedPosts: CategorizedPost[],
-): Awaited<ReturnType<GetStaticPaths>> => {
-	const slugPaths = flattenSlugPathsWithPrefixes(taxonomy);
-	const hasUncategorized = categorizedPosts.some(
-		({ slugPath }) => slugPath?.[0] === UNCATEGORIZED_SLUG,
-	);
-	if (hasUncategorized) slugPaths.push([UNCATEGORIZED_SLUG]);
-	const allPaths: string[][] = [[]];
-	allPaths.push(...slugPaths);
-
-	const paths = allPaths.flatMap((slugPath) => {
-		const matchingPosts = categorizedPosts
-			.filter(
-				({ slugPath: postSlugPath }) =>
-					// Include descendant categories by matching prefix paths.
-					postSlugPath && isSlugPathPrefix(slugPath, postSlugPath),
-			)
-			.map(({ post }) => post);
-
-		const totalPages = Math.max(
-			1,
-			Math.ceil(matchingPosts.length / PAGE_SIZE),
-		);
-
-		const currentNode =
-			slugPath.length > 0 ? findNodeBySlugPath(slugPath, taxonomy) : null;
-		const customLabel =
-			slugPath[0] === UNCATEGORIZED_SLUG
-				? i18n(I18nKey.uncategorized)
-				: null;
-		const childCategories =
-			slugPath.length === 0 ? taxonomy : currentNode?.children ?? [];
-
-		return Array.from({ length: totalPages }, (_, index) => {
-			const pageNumber = index + 1;
-			const paramsPath =
-				pageNumber === 1 ? slugPath : [...slugPath, String(pageNumber)];
-			return {
-				params: { path: paramsPath.join("/") },
-				props: {
-					page: buildPage(matchingPosts, slugPath, pageNumber, totalPages),
-					slugPath,
-					childCategories,
-					categoryLabel: currentNode?.label ?? customLabel,
-				},
-			};
-		});
-	});
-
-	return paths;
-};
-
 export const getStaticPaths = (async () => {
+	const taxonomy = categories as CategoryNode[];
+	const missingCategoryWarnings = new Set<string>();
+
+	const warnMissingCategory = (labelPath: string[]) => {
+		const label = labelPath.join(" / ");
+		if (missingCategoryWarnings.has(label)) return;
+		missingCategoryWarnings.add(label);
+		console.warn(
+			`[categories] Category "${label}" is not defined in categories.json`,
+		);
+	};
+
+	const toCategorySlugPath = (category: string | null | undefined) => {
+		const labelPath = parseCategoryLabelPath(category);
+		if (labelPath.length === 0) return [UNCATEGORIZED_SLUG];
+		const slugPath = labelPathToSlugPath(labelPath, taxonomy);
+		if (!slugPath) warnMissingCategory(labelPath);
+		return slugPath;
+	};
+
+	const buildPage = (
+		posts: CollectionEntry<"posts">[],
+		slugPath: string[],
+		pageNumber: number,
+		totalPages: number,
+	): Page<CollectionEntry<"posts">> => {
+		const startIndex = (pageNumber - 1) * PAGE_SIZE;
+		const data = posts.slice(startIndex, startIndex + PAGE_SIZE);
+		const start = posts.length === 0 ? 0 : startIndex + 1;
+		const end = posts.length === 0 ? 0 : startIndex + data.length;
+
+		const current = categorySlugPathToUrl(slugPath, pageNumber);
+		const prev =
+			pageNumber > 1
+				? categorySlugPathToUrl(slugPath, pageNumber - 1)
+				: undefined;
+		const next =
+			pageNumber < totalPages
+				? categorySlugPathToUrl(slugPath, pageNumber + 1)
+				: undefined;
+		const first = categorySlugPathToUrl(slugPath, 1);
+		const last = categorySlugPathToUrl(slugPath, totalPages);
+
+		return {
+			data,
+			start,
+			end,
+			total: posts.length,
+			size: PAGE_SIZE,
+			currentPage: pageNumber,
+			lastPage: totalPages,
+			url: {
+				current,
+				prev,
+				next,
+				first,
+				last,
+			},
+		};
+	};
+
+	const buildStaticPaths = (
+		categorizedPosts: CategorizedPost[],
+	): Awaited<ReturnType<GetStaticPaths>> => {
+		const slugPaths = flattenSlugPathsWithPrefixes(taxonomy);
+		const hasUncategorized = categorizedPosts.some(
+			({ slugPath }) => slugPath?.[0] === UNCATEGORIZED_SLUG,
+		);
+		if (hasUncategorized) slugPaths.push([UNCATEGORIZED_SLUG]);
+		const allPaths: string[][] = [[]];
+		allPaths.push(...slugPaths);
+
+		const paths = allPaths.flatMap((slugPath) => {
+			const matchingPosts = categorizedPosts
+				.filter(
+					({ slugPath: postSlugPath }) =>
+						// Include descendant categories by matching prefix paths.
+						postSlugPath && isSlugPathPrefix(slugPath, postSlugPath),
+				)
+				.map(({ post }) => post);
+
+			const totalPages = Math.max(
+				1,
+				Math.ceil(matchingPosts.length / PAGE_SIZE),
+			);
+
+			const currentNode =
+				slugPath.length > 0 ? findNodeBySlugPath(slugPath, taxonomy) : null;
+			const customLabel =
+				slugPath[0] === UNCATEGORIZED_SLUG
+					? i18n(I18nKey.uncategorized)
+					: null;
+			const childCategories =
+				slugPath.length === 0 ? taxonomy : currentNode?.children ?? [];
+
+			return Array.from({ length: totalPages }, (_, index) => {
+				const pageNumber = index + 1;
+				const paramsPath =
+					pageNumber === 1 ? slugPath : [...slugPath, String(pageNumber)];
+				return {
+					params:
+						paramsPath.length === 0
+							? { path: undefined }
+							: { path: paramsPath.join("/") },
+					props: {
+						page: buildPage(matchingPosts, slugPath, pageNumber, totalPages),
+						slugPath,
+						childCategories,
+						categoryLabel: currentNode?.label ?? customLabel,
+					},
+				};
+			});
+		});
+
+		return paths;
+	};
+
 	const allPosts = await getSortedPosts();
 	const categorizedPosts: CategorizedPost[] = allPosts.map((post) => ({
 		post,
@@ -157,6 +162,8 @@ type CategoryPageProps = {
 
 const { page, slugPath, childCategories, categoryLabel } =
 	Astro.props as CategoryPageProps;
+
+const taxonomy = categories as CategoryNode[];
 
 const currentNode = findNodeBySlugPath(slugPath, taxonomy);
 const resolvedLabel = categoryLabel ?? currentNode?.label ?? slugPath.at(-1);

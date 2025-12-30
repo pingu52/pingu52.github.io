@@ -1,0 +1,22 @@
+---
+import CategoryTreeItem from "./CategoryTreeItem.astro";
+import type { CategoryNode } from "../../utils/category-taxonomy";
+
+interface Props {
+	nodes: CategoryNode[];
+	parentSlugPath?: string[];
+	activeSlugPath: string[];
+}
+
+const { nodes, parentSlugPath = [], activeSlugPath } = Astro.props;
+---
+
+<ul class="flex flex-col gap-1">
+	{nodes.map((node) => (
+		<CategoryTreeItem
+			node={node}
+			parentSlugPath={parentSlugPath}
+			activeSlugPath={activeSlugPath}
+		/>
+	))}
+</ul>
