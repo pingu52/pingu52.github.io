@@ -69,7 +69,7 @@ export function collectCategories(posts: PostEntry[]) {
 	let hasUncategorized = false;
 
 	for (const post of posts) {
-		const path = getCategoryPathFromData(post.data);
+		const path = normalizeCategoryPath(getCategoryPathFromData(post.data));
 		if (path.length === 0) {
 			hasUncategorized = true;
 			continue;
@@ -107,14 +107,12 @@ export function collectTags(posts: PostEntry[]) {
 
 type TaxonomyProps = { taxonomyTitle: string; taxonomyKey: string };
 
-type TaxonomyPaginateFunction<Params extends Record<string, string>> = (
+type TaxonomyPaginateFunction = (
 	data: readonly PostEntry[],
-	args?: PaginateOptions<TaxonomyProps, Params>,
+	args?: PaginateOptions<TaxonomyProps, any>,
 ) => ReturnType<PaginateFunction>;
 
-type TaxonomyPaths<Params extends Record<string, string>> = ReturnType<
-	TaxonomyPaginateFunction<Params>
->;
+type TaxonomyPaths = ReturnType<TaxonomyPaginateFunction>;
 
 /**
  * Build paginated static paths for /category/<category>/<page>.
@@ -124,12 +122,12 @@ type TaxonomyPaths<Params extends Record<string, string>> = ReturnType<
  * - we group case-insensitively for consistency.
  */
 export function buildCategoryStaticPaths(
-	paginate: TaxonomyPaginateFunction<{ category: string }>,
+	paginate: TaxonomyPaginateFunction,
 	posts: PostEntry[],
 	pageSize: number,
-): TaxonomyPaths<{ category: string }> {
+): TaxonomyPaths {
 	const { categories, hasUncategorized } = collectCategories(posts);
-	const paths: TaxonomyPaths<{ category: string }> = [];
+	const paths: TaxonomyPaths = [];
 
 	for (const categoryPath of categories) {
 		const filtered = posts.filter((post) => {
@@ -145,7 +143,7 @@ export function buildCategoryStaticPaths(
 		paths.push(
 			...paginate(filtered, {
 				pageSize,
-				params: { category: categoryLabel },
+				params: { category: categoryPath },
 				props: { taxonomyTitle: categoryLabel, taxonomyKey: key },
 			}),
 		);
@@ -161,7 +159,7 @@ export function buildCategoryStaticPaths(
 		paths.push(
 			...paginate(filtered, {
 				pageSize,
-				params: { category: UNCATEGORIZED_SLUG },
+				params: { category: [UNCATEGORIZED_SLUG] },
 				props: { taxonomyTitle: UNCATEGORIZED_SLUG, taxonomyKey: "" },
 			}),
 		);
@@ -174,12 +172,12 @@ export function buildCategoryStaticPaths(
  * Build paginated static paths for /tag/<tag>/<page>.
  */
 export function buildTagStaticPaths(
-	paginate: TaxonomyPaginateFunction<{ tag: string }>,
+	paginate: TaxonomyPaginateFunction,
 	posts: PostEntry[],
 	pageSize: number,
-): TaxonomyPaths<{ tag: string }> {
+): TaxonomyPaths {
 	const tags = collectTags(posts);
-	const paths: TaxonomyPaths<{ tag: string }> = [];
+	const paths: TaxonomyPaths = [];
 
 	for (const tagLabel of tags) {
 		const key = taxonomyKey(tagLabel);

@@ -1,7 +1,7 @@
 ---
 import I18nKey from "../../i18n/i18nKey";
 import { i18n } from "../../i18n/translation";
-import { getCategoryList } from "../../utils/content-utils";
+import { getCategoryList, type CategoryTreeNode } from "../../utils/content-utils";
 import ButtonLink from "../control/ButtonLink.astro";
 import WidgetLayout from "./WidgetLayout.astro";
 
@@ -12,10 +12,47 @@ const COLLAPSE_THRESHOLD = 5;
 
 const isCollapsed = categories.length >= COLLAPSE_THRESHOLD;
 
-interface Props {
-	class?: string;
-	style?: string;
-}
+const renderCategoryNode = (node: CategoryTreeNode, depth = 0) => {
+	const hasChildren = node.children && node.children.length > 0;
+	return (
+		<li class="space-y-1">
+			{hasChildren ? (
+				<details class="group" open={depth === 0}>
+					<summary class="flex items-center gap-2 cursor-pointer select-none text-sm text-neutral-300/90 dark:text-neutral-200/90">
+						<span class="transition-transform group-open:rotate-90 text-neutral-400 dark:text-neutral-500">▶</span>
+						<span class="font-semibold text-neutral-800 dark:text-neutral-200">{node.name}</span>
+						<span class="ml-auto px-2 h-6 min-w-[2rem] rounded-lg text-xs font-bold text-[var(--btn-content)] dark:text-[var(--deep-text)] bg-[var(--btn-regular-bg)] dark:bg-[var(--primary)] flex items-center justify-center">
+							{node.count}
+						</span>
+					</summary>
+					<div class="mt-2 pl-3 border-l border-dashed border-black/10 dark:border-white/15 space-y-2">
+						<ButtonLink
+							url={node.url}
+							badge={String(node.count)}
+							label={`View all posts in the ${node.path.join(" / ") || node.name.trim()} category`}
+						>
+							{node.name.trim()}
+						</ButtonLink>
+						{hasChildren && (
+							<ul class="space-y-1">
+								{node.children.map((child: CategoryTreeNode) => renderCategoryNode(child, depth + 1))}
+							</ul>
+						)}
+					</div>
+				</details>
+			) : (
+				<ButtonLink
+					url={node.url}
+					badge={String(node.count)}
+					label={`View all posts in the ${node.path.join(" / ") || node.name.trim()} category`}
+				>
+					{node.name.trim()}
+				</ButtonLink>
+			)}
+		</li>
+	);
+};
+
 const className = Astro.props.class;
 const style = Astro.props.style;
 ---
@@ -23,15 +60,7 @@ const style = Astro.props.style;
 <WidgetLayout name={i18n(I18nKey.categories)} id="categories" isCollapsed={isCollapsed} collapsedHeight={COLLAPSED_HEIGHT}
                 class={className} style={style}
 >
-    {categories.map((c) =>
-        <div style={`padding-left: ${c.depth * 0.75}rem`}>
-            <ButtonLink
-                url={c.url}
-                badge={String(c.count)}
-                label={`View all posts in the ${(c.path.length ? c.path.join(" / ") : c.name.trim())} category`}
-            >
-                {c.name.trim()}
-            </ButtonLink>
-        </div>
-    )}
+    <ul class="space-y-2">
+        {categories.map((node) => renderCategoryNode(node))}
+    </ul>
 </WidgetLayout>

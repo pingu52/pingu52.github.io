@@ -30,7 +30,9 @@ export function normalizeCategoryPath(
 }
 
 export function categoryPathKey(categoryPath: string[]): string {
-	return categoryPath.map((segment) => normalizeLower(segment)).join("///");
+	return normalizeCategoryPath(categoryPath)
+		.map((segment) => normalizeLower(segment))
+		.join("///");
 }
 
 export function formatCategoryPath(categoryPath: string[]): string {
@@ -87,7 +89,7 @@ export function getCategoryPathFromData(data: {
 	}
 
 	if (data?.category) {
-		return normalizeCategoryPath([data.category]);
+		return parseCategoryLabel(data.category);
 	}
 
 	return [];
@@ -98,6 +100,10 @@ export function isUncategorizedCategory(
 ): boolean {
 	const parts = normalizeCategoryPath(category);
 	if (parts.length === 0) return true;
+
+	if (parts.length === 1 && normalizeLower(parts[0]) === "uncategorized") {
+		return true;
+	}
 
 	const label = formatCategoryPath(parts);
 	return normalizeLower(label) === normalizeLower(getUncategorizedLabel());
@@ -120,6 +126,28 @@ export function categoryPathIsPrefix(
 	prefix: string[],
 	fullPath: string[],
 ): boolean {
-	if (prefix.length > fullPath.length) return false;
-	return prefix.every((segment, index) => fullPath[index] === segment);
+	const normalizedPrefix = normalizeCategoryPath(prefix).map(normalizeLower);
+	const normalizedFull = normalizeCategoryPath(fullPath).map(normalizeLower);
+	if (normalizedPrefix.length > normalizedFull.length) return false;
+	return normalizedPrefix.every(
+		(segment, index) => segment === normalizedFull[index],
+	);
+}
+
+export function decodeCategorySegments(segments: string[]): string[] {
+	return normalizeCategoryPath(
+		segments.map((segment) => {
+			try {
+				return decodeURIComponent(segment);
+			} catch {
+				return segment;
+			}
+		}),
+	);
+}
+
+export function encodeCategorySegments(path: string[]): string[] {
+	return normalizeCategoryPath(path).map((segment) =>
+		encodeURIComponent(segment),
+	);
 }

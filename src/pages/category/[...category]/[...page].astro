@@ -1,0 +1,51 @@
+---
+import TaxonomyFeedPage from "@components/TaxonomyFeedPage.astro";
+import { PAGE_SIZE } from "@constants/constants";
+import I18nKey from "@i18n/i18nKey";
+import { i18n, i18nFormat } from "@i18n/translation";
+import {
+	getCategoryLabelOrDefault,
+	decodeCategorySegments,
+	isUncategorizedCategory,
+} from "@utils/category-utils";
+import { getSortedPosts } from "@utils/content-utils";
+import {
+	buildCategoryStaticPaths,
+	UNCATEGORIZED_SLUG,
+} from "@utils/taxonomy-utils";
+import type { GetStaticPaths, Page } from "astro";
+
+export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
+	const allBlogPosts = await getSortedPosts();
+	return buildCategoryStaticPaths(paginate, allBlogPosts, PAGE_SIZE);
+};
+
+const { page, taxonomyTitle } = Astro.props as {
+	page: Page;
+	taxonomyTitle?: string;
+};
+
+const categoryParam = Astro.params.category ?? [];
+const categorySegments = (Array.isArray(categoryParam)
+	? categoryParam
+	: [categoryParam]
+).map((segment) => String(segment));
+const decodedPath = decodeCategorySegments(categorySegments);
+
+const isUncategorized =
+	isUncategorizedCategory(decodedPath) ||
+	(categorySegments.length === 1 && categorySegments[0] === UNCATEGORIZED_SLUG);
+
+const categoryTitle =
+	isUncategorized
+		? i18n(I18nKey.uncategorized)
+		: typeof taxonomyTitle === "string" && taxonomyTitle !== ""
+			? taxonomyTitle
+			: getCategoryLabelOrDefault(decodedPath);
+---
+
+<TaxonomyFeedPage
+	title={categoryTitle}
+	page={page}
+	description={i18nFormat(I18nKey.taxonomyCategoryDescription, { name: categoryTitle })}
+/>

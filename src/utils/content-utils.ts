@@ -75,8 +75,8 @@ export type CategoryTreeNode = {
 	name: string;
 	count: number;
 	url: string;
-	depth: number;
 	path: string[];
+	children: CategoryTreeNode[];
 };
 
 export async function getCategoryList(): Promise<CategoryTreeNode[]> {
@@ -126,32 +126,25 @@ export async function getCategoryList(): Promise<CategoryTreeNode[]> {
 			a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
 		);
 
-	const flatten = (nodes: Node[], depth: number): CategoryTreeNode[] => {
-		let result: CategoryTreeNode[] = [];
-		nodes.forEach((node) => {
-			result.push({
-				name: node.name,
-				count: node.count,
-				url: getCategoryUrl(node.path),
-				depth,
-				path: node.path,
-			});
-			result = result.concat(flatten(sortNodes(node), depth + 1));
-		});
-		return result;
-	};
+	const toArray = (node: Node): CategoryTreeNode => ({
+		name: node.name,
+		count: node.count,
+		url: getCategoryUrl(node.path),
+		path: node.path,
+		children: sortNodes(node).map(toArray),
+	});
 
-	const flat = flatten(sortNodes(root), 0);
+	const tree = sortNodes(root).map(toArray);
 
 	if (uncategorizedCount > 0) {
-		flat.push({
+		tree.push({
 			name: uncategorizedLabel,
 			count: uncategorizedCount,
 			url: getCategoryUrl(null),
-			depth: 0,
 			path: [],
+			children: [],
 		});
 	}
 
-	return flat;
+	return tree;
 }
