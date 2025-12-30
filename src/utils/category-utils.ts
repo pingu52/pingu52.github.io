@@ -72,9 +72,18 @@ export function normalizeCategoryName(
 export function getCategoryPathFromData(data: {
 	category?: string | null;
 	categoryPath?: string[] | null;
+	// Some authors might use lowercase `categorypath` in frontmatter.
+	categorypath?: string[] | null;
 }): string[] {
-	if (data?.categoryPath && data.categoryPath.length > 0) {
-		return normalizeCategoryPath(data.categoryPath);
+	const explicitPath =
+		data?.categoryPath && data.categoryPath.length > 0
+			? data.categoryPath
+			: data?.categorypath && data.categorypath.length > 0
+				? data.categorypath
+				: null;
+
+	if (explicitPath) {
+		return normalizeCategoryPath(explicitPath);
 	}
 
 	if (data?.category) {
