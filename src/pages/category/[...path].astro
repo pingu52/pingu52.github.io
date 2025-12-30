@@ -8,125 +8,85 @@ import { i18n } from "@i18n/translation";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import type { CategoryNode } from "@utils/category-taxonomy-utils";
 import {
+	aggregateCounts,
 	findNodeBySlugPath,
 	flattenSlugPathsWithPrefixes,
 	getChildrenBySlugPath,
-	parseCategoryLabelPath,
-	resolveSlugPathFromLabelPath,
+	pruneTaxonomyToDepth,
+	resolvePostCategorySlugPath,
 } from "@utils/category-taxonomy-utils";
-import { normalizeCategoryName } from "@utils/category-utils";
 import { getSortedPosts } from "@utils/content-utils";
-import {
-	normalizeTaxonomyLabel,
-	UNCATEGORIZED_SLUG,
-} from "@utils/taxonomy-utils";
+import { UNCATEGORIZED_SLUG } from "@utils/taxonomy-utils";
 import { getCategorySlugPathUrl } from "@utils/url-utils";
 import type { GetStaticPaths } from "astro";
 import taxonomy from "@/data/category-taxonomy.json";
 
-export const getStaticPaths = (async () => {
-	const allPosts = await getSortedPosts();
-	const taxonomyData = taxonomy as CategoryNode[];
+const MAX_DEPTH = 2;
 
-	const resolvePostSlugPathForBuild = (rawCategory: string): string[] => {
-		const labelPath = parseCategoryLabelPath(rawCategory);
-		if (labelPath.length === 0) return [UNCATEGORIZED_SLUG];
-		if (labelPath.length === 1) {
-			return (
-				resolveSlugPathFromLabelPath(labelPath, taxonomyData) ?? [
-					normalizeTaxonomyLabel(rawCategory),
-				]
-			);
-		}
-		const resolved = resolveSlugPathFromLabelPath(labelPath, taxonomyData);
-		if (!resolved) {
-			throw new Error(
-				`Category label path not found in taxonomy: ${labelPath.join(" / ")}`,
-			);
-		}
-		return resolved;
-	};
+const resolveSlugPathFromParams = (path: string | undefined) => {
+	const segments = (path ?? "")
+		.split("/")
+		.map((seg) => seg.trim())
+		.filter((seg) => seg !== "");
+	const lastSegment = segments.at(-1);
+	const pageNumber =
+		lastSegment && /^\d+$/.test(lastSegment) ? Number(segments.pop()) : 1;
+	if (segments.length > MAX_DEPTH) {
+		throw new Error(
+			`Category path exceeds maximum depth of ${MAX_DEPTH}: ${segments.join(" / ")}`,
+		);
+	}
+	return { slugPath: segments, pageNumber };
+};
+
+export const getStaticPaths = (async () => {
+	const taxonomyData = pruneTaxonomyToDepth(taxonomy as CategoryNode[]);
+	const allPosts = await getSortedPosts();
+
+	const leafCounts = new Map<string, number>();
+	allPosts.forEach((post) => {
+		const slugPath = resolvePostCategorySlugPath(post.data, taxonomyData);
+		const key = slugPath.join("/");
+		leafCounts.set(key, (leafCounts.get(key) ?? 0) + 1);
+	});
 
 	const slugPathSet = new Set<string>();
 	for (const path of flattenSlugPathsWithPrefixes(taxonomyData)) {
 		slugPathSet.add(path.join("/"));
 	}
-
 	allPosts.forEach((post) => {
-		const rawCategory = normalizeCategoryName(post.data.category);
-		const resolved = resolvePostSlugPathForBuild(rawCategory);
-		slugPathSet.add(resolved.join("/"));
+		const slugPath = resolvePostCategorySlugPath(post.data, taxonomyData);
+		slugPathSet.add(slugPath.join("/"));
 	});
 
-	if (
-		allPosts.some((post) => normalizeCategoryName(post.data.category) === "")
-	) {
-		slugPathSet.add(UNCATEGORIZED_SLUG);
-	}
+	const leafCountsObj = Object.fromEntries(leafCounts);
 
-	const slugPaths = Array.from(slugPathSet).map((path) => path.split("/"));
+	const pathEntries = Array.from(slugPathSet)
+		.map((pathStr) => pathStr.split("/"))
+		.flatMap((slugPath) => {
+			const node = findNodeBySlugPath(slugPath, taxonomyData)?.node;
+			const isLeaf = !node || !node.children?.length;
+			const countKey = slugPath.join("/");
+			const totalForLeaf = leafCountsObj[countKey] ?? 0;
+			const totalPages = isLeaf
+				? Math.max(1, Math.ceil(totalForLeaf / PAGE_SIZE))
+				: 1;
 
-	const pathEntries = slugPaths.flatMap((slugPath) => {
-		const postsForCategory = allPosts.filter((post) => {
-			const rawCategory = normalizeCategoryName(post.data.category);
-			const resolvedSlugPath = resolvePostSlugPathForBuild(rawCategory);
-			if (resolvedSlugPath.length < slugPath.length) return false;
-
-			return slugPath.every(
-				(segment, idx) => resolvedSlugPath[idx] === segment,
-			);
+			return Array.from({ length: totalPages }, (_, index) => {
+				const pageNumber = index + 1;
+				const pageSuffix = pageNumber > 1 ? `/${pageNumber}` : "";
+				return { params: { path: `${slugPath.join("/")}${pageSuffix}` } };
+			});
 		});
-
-		const totalPages = Math.max(
-			1,
-			Math.ceil(postsForCategory.length / PAGE_SIZE),
-		);
-
-		return Array.from({ length: totalPages }, (_, index) => {
-			const pageNumber = index + 1;
-			const pageSuffix = pageNumber > 1 ? `/${pageNumber}` : "";
-			return { params: { path: `${slugPath.join("/")}${pageSuffix}` } };
-		});
-	});
 
 	return pathEntries;
 }) satisfies GetStaticPaths;
 
-const segments = (Astro.params.path ?? "")
-	.split("/")
-	.map((seg) => seg.trim())
-	.filter((seg) => seg !== "");
-
-const lastSegment = segments.at(-1);
-const pageNumber =
-	lastSegment && /^\d+$/.test(lastSegment) ? Number(segments.pop()) : 1;
-
-const slugPath = segments;
-const taxonomyData = taxonomy as CategoryNode[];
-
-const resolvePostSlugPath = (
-	rawCategory: string,
-	taxonomyTree: CategoryNode[],
-): string[] => {
-	const labelPath = parseCategoryLabelPath(rawCategory);
-	if (labelPath.length === 0) return [UNCATEGORIZED_SLUG];
-	if (labelPath.length === 1) {
-		return (
-			resolveSlugPathFromLabelPath(labelPath, taxonomyTree) ?? [
-				normalizeTaxonomyLabel(rawCategory),
-			]
-		);
-	}
-	const resolved = resolveSlugPathFromLabelPath(labelPath, taxonomyTree);
-	if (!resolved) {
-		throw new Error(
-			`Category label path not found in taxonomy: ${labelPath.join(" / ")}`,
-		);
-	}
-	return resolved;
-};
-
+const { slugPath, pageNumber } = resolveSlugPathFromParams(Astro.params.path);
+const taxonomyData = pruneTaxonomyToDepth(taxonomy as CategoryNode[]);
 const nodeMatch = findNodeBySlugPath(slugPath, taxonomyData);
+const children = getChildrenBySlugPath(slugPath, taxonomyData);
+const isLeaf = !nodeMatch?.node || !nodeMatch.node.children?.length;
 const labelPath =
 	nodeMatch?.labelPath ??
 	(slugPath[0] === UNCATEGORIZED_SLUG && slugPath.length === 1
@@ -134,15 +94,26 @@ const labelPath =
 		: slugPath);
 const title = labelPath.at(-1) ?? i18n(I18nKey.uncategorized);
 
-const children = getChildrenBySlugPath(slugPath, taxonomyData);
-
 const allPosts = await getSortedPosts();
-const postsForCurrent = allPosts.filter((post) => {
-	const rawCategory = normalizeCategoryName(post.data.category);
-	const resolvedSlugPath = resolvePostSlugPath(rawCategory, taxonomyData);
-	if (resolvedSlugPath.length < slugPath.length) return false;
-	return slugPath.every((segment, idx) => resolvedSlugPath[idx] === segment);
+const leafCounts = new Map<string, number>();
+allPosts.forEach((post) => {
+	const resolved = resolvePostCategorySlugPath(post.data, taxonomyData);
+	const key = resolved.join("/");
+	leafCounts.set(key, (leafCounts.get(key) ?? 0) + 1);
 });
+const aggregateCountMap = aggregateCounts(leafCounts, taxonomyData);
+const currentKey = slugPath.join("/");
+const totalForLeaf = leafCounts.get(currentKey) ?? 0;
+const displayCount = isLeaf
+	? totalForLeaf
+	: (aggregateCountMap.get(currentKey) ?? 0);
+
+const postsForCurrent = isLeaf
+	? allPosts.filter((post) => {
+			const resolved = resolvePostCategorySlugPath(post.data, taxonomyData);
+			return resolved.join("/") === currentKey;
+		})
+	: [];
 
 const total = postsForCurrent.length;
 const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -151,40 +122,42 @@ const start = (currentPage - 1) * PAGE_SIZE;
 const end = start + PAGE_SIZE;
 const pageData = postsForCurrent.slice(start, end);
 
-const page = {
-	data: pageData,
-	start,
-	end: Math.min(end, total),
-	size: PAGE_SIZE,
-	total,
-	currentPage,
-	lastPage: totalPages,
-	url: {
-		current: getCategorySlugPathUrl(slugPath, currentPage),
-		first: getCategorySlugPathUrl(slugPath, 1),
-		last: getCategorySlugPathUrl(slugPath, totalPages),
-		prev:
-			currentPage > 1
-				? getCategorySlugPathUrl(slugPath, currentPage - 1)
-				: undefined,
-		next:
-			currentPage < totalPages
-				? getCategorySlugPathUrl(slugPath, currentPage + 1)
-				: undefined,
-	},
-};
+const page = isLeaf
+	? {
+			data: pageData,
+			start,
+			end: Math.min(end, total),
+			size: PAGE_SIZE,
+			total,
+			currentPage,
+			lastPage: totalPages,
+			url: {
+				current: getCategorySlugPathUrl(slugPath, currentPage),
+				first: getCategorySlugPathUrl(slugPath, 1),
+				last: getCategorySlugPathUrl(slugPath, totalPages),
+				prev:
+					currentPage > 1
+						? getCategorySlugPathUrl(slugPath, currentPage - 1)
+						: undefined,
+				next:
+					currentPage < totalPages
+						? getCategorySlugPathUrl(slugPath, currentPage + 1)
+						: undefined,
+			},
+		}
+	: null;
 ---
 
 <MainGridLayout title={title}>
 	<TaxonomyHeader
 		title={title}
-		count={page.total}
-		currentPage={page.currentPage}
-		lastPage={page.lastPage}
+		count={displayCount}
+		currentPage={page?.currentPage}
+		lastPage={page?.lastPage}
 		breadcrumb={labelPath.join(" / ")}
 	/>
 
-	{children.length > 0 && (
+	{children.length > 0 && nodeMatch?.node && (
 		<nav class="flex flex-wrap gap-2 mb-6">
 			{children.map((child) => (
 				<a
@@ -197,10 +170,14 @@ const page = {
 		</nav>
 	)}
 
-	<PostPage page={page} />
-	<Pagination
-		class="mx-auto onload-animation"
-		page={page}
-		style={`animation-delay: calc(var(--content-delay) + ${page.data.length * 50}ms)`}
-	/>
+	{page && (
+		<>
+			<PostPage page={page} />
+			<Pagination
+				class="mx-auto onload-animation"
+				page={page}
+				style={`animation-delay: calc(var(--content-delay) + ${page.data.length * 50}ms)`}
+			/>
+		</>
+	)}
 </MainGridLayout>

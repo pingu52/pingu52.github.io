@@ -1,4 +1,6 @@
 import {
+	buildLeafLabelMap,
+	MAX_CATEGORY_DEPTH,
 	parseCategoryLabelPath,
 	resolveSlugPathFromLabelPath,
 } from "@utils/category-taxonomy-utils";
@@ -58,12 +60,23 @@ export function getCategoryUrl(category: string | null): string {
 		return getCategorySlugPathUrl([UNCATEGORIZED_SLUG]);
 
 	if (labelPath.length === 1) {
-		const resolved = resolveSlugPathFromLabelPath(labelPath, taxonomy);
+		const leafMap = buildLeafLabelMap(taxonomy, MAX_CATEGORY_DEPTH);
+		const resolved = leafMap.get(labelPath[0]);
 		const slugPath = resolved ?? [normalizeTaxonomyLabel(normalized)];
 		return getCategorySlugPathUrl(slugPath);
 	}
 
-	const resolved = resolveSlugPathFromLabelPath(labelPath, taxonomy);
+	if (labelPath.length > MAX_CATEGORY_DEPTH) {
+		throw new Error(
+			`Category label path exceeds maximum depth of ${MAX_CATEGORY_DEPTH}: ${labelPath.join(" / ")}`,
+		);
+	}
+
+	const resolved = resolveSlugPathFromLabelPath(
+		labelPath,
+		taxonomy,
+		true /* requireLeaf */,
+	);
 	if (!resolved) {
 		throw new Error(
 			`Category label path not found in taxonomy: ${labelPath.join(" / ")}`,

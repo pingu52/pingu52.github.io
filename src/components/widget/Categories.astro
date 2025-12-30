@@ -2,48 +2,29 @@
 import taxonomy from "@/data/category-taxonomy.json";
 import type { CategoryNode } from "@/utils/category-taxonomy-utils";
 import {
+	aggregateCounts,
 	flattenSlugPathsWithPrefixes,
-	getChildrenBySlugPath,
-	parseCategoryLabelPath,
-	resolveSlugPathFromLabelPath,
+	MAX_CATEGORY_DEPTH,
+	pruneTaxonomyToDepth,
+	resolvePostCategorySlugPath,
 } from "@/utils/category-taxonomy-utils";
-import { normalizeCategoryName } from "@/utils/category-utils";
-import {
-	normalizeTaxonomyLabel,
-	UNCATEGORIZED_SLUG,
-} from "@/utils/taxonomy-utils";
 import I18nKey from "../../i18n/i18nKey";
 import { i18n } from "../../i18n/translation";
+import { getAllPosts } from "../../utils/post-utils";
 import CategoryTreeItem from "./CategoryTreeItem.astro";
 import WidgetLayout from "./WidgetLayout.astro";
 
-const taxonomyData = taxonomy as CategoryNode[];
-const postsGlob = import.meta.glob("../../content/posts/*.md", {
-	eager: true,
-});
-const allPosts = Object.values(postsGlob) as {
-	frontmatter: { category?: string };
-}[];
+const taxonomyData = pruneTaxonomyToDepth(taxonomy as CategoryNode[]);
 
-const countMap: Record<string, number> = {};
-allPosts.forEach((post) => {
-	const rawCategory = normalizeCategoryName(post.frontmatter.category);
-	const labelPath = parseCategoryLabelPath(rawCategory);
-
-	const slugPath =
-		labelPath.length === 0
-			? [UNCATEGORIZED_SLUG]
-			: labelPath.length === 1
-				? (resolveSlugPathFromLabelPath(labelPath, taxonomyData) ?? [
-						normalizeTaxonomyLabel(rawCategory),
-					])
-				: resolveSlugPathFromLabelPath(labelPath, taxonomyData);
-
-	if (!slugPath) return;
+const allPosts = await getAllPosts();
+const leafCounts = new Map<string, number>();
+for (const post of allPosts) {
+	const slugPath = resolvePostCategorySlugPath(post.data, taxonomyData);
 	const key = slugPath.join("/");
-	countMap[key] = (countMap[key] ?? 0) + 1;
-});
+	leafCounts.set(key, (leafCounts.get(key) ?? 0) + 1);
+}
 
+const aggregateCountMap = aggregateCounts(leafCounts, taxonomyData);
 const activeSlugPath = (() => {
 	const path = Astro.url.pathname;
 	const match = path.match(/^\/category\/(.*)$/);
@@ -51,10 +32,10 @@ const activeSlugPath = (() => {
 	const parts = match[1].split("/").filter(Boolean);
 	const last = parts.at(-1);
 	if (last && /^\d+$/.test(last)) parts.pop();
-	return parts;
+	return parts.slice(0, MAX_CATEGORY_DEPTH);
 })();
 
-const topLevel = getChildrenBySlugPath([], taxonomyData);
+const topLevel = taxonomyData;
 
 const allPaths = flattenSlugPathsWithPrefixes(taxonomyData);
 const totalNodes = allPaths.length;
@@ -68,6 +49,9 @@ interface Props {
 }
 const className = Astro.props.class;
 const style = Astro.props.style;
+
+const isActivePrefix = (slugPath: string[]) =>
+	slugPath.every((seg, idx) => activeSlugPath[idx] === seg);
 ---
 
 <WidgetLayout
@@ -79,14 +63,55 @@ const style = Astro.props.style;
 	style={style}
 >
 	<ul class="flex flex-col gap-2">
-		{topLevel.map((node) => (
-			<CategoryTreeItem
-				node={node}
-				parentSlugPath={[]}
-				activeSlugPath={activeSlugPath}
-				level={0}
-				countMap={countMap}
-			/>
-		))}
+		{topLevel.map((node) => {
+			const slugPath = [node.slug];
+			const count = aggregateCountMap.get(slugPath.join("/")) ?? 0;
+			if (node.children && node.children.length > 0) {
+				return (
+					<li class="flex flex-col gap-1">
+						<details class="group" open={isActivePrefix(slugPath)}>
+							<summary
+								class="flex items-center justify-between rounded-lg px-2 py-1 cursor-pointer hover:bg-[var(--card-bg)]"
+								style="list-style: none;"
+							>
+								<span class="font-semibold">{node.label}</span>
+								<span class="text-xs text-neutral-500 dark:text-neutral-400">
+									{count}
+								</span>
+							</summary>
+							<ul class="flex flex-col gap-1 mt-1 pl-3 border-l border-neutral-200 dark:border-neutral-800">
+								{node.children.map((child) => {
+									const childSlugPath = [...slugPath, child.slug];
+									const key = childSlugPath.join("/");
+									const childCount = leafCounts.get(key) ?? 0;
+									return (
+										<CategoryTreeItem
+											label={child.label}
+											slugPath={childSlugPath}
+											count={childCount}
+											activeSlugPath={activeSlugPath}
+											level={1}
+										/>
+									);
+								})}
+							</ul>
+						</details>
+					</li>
+				);
+			}
+
+			// leaf depth1
+			const key = slugPath.join("/");
+			const leafCount =
+				leafCounts.get(key) ?? aggregateCountMap.get(key) ?? 0;
+			return (
+				<CategoryTreeItem
+					label={node.label}
+					slugPath={slugPath}
+					count={leafCount}
+					activeSlugPath={activeSlugPath}
+				/>
+			);
+		})}
 	</ul>
 </WidgetLayout>
