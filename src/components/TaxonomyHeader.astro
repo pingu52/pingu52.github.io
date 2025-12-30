@@ -7,8 +7,10 @@ interface Props {
 	count?: number;
 	currentPage?: number;
 	lastPage?: number;
+	breadcrumb?: string;
 }
-const { title, count, currentPage, lastPage } = Astro.props as Props;
+const { title, count, currentPage, lastPage, breadcrumb } =
+	Astro.props as Props;
 
 const hasPagingInfo =
 	typeof currentPage === "number" &&
@@ -33,6 +35,9 @@ const subtitle = subtitleParts.join(" · ");
 <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-20 mb-4">
 	<div class="card-base z-10 px-9 py-6 relative w-full">
 		<h1 class="text-xl md:text-2xl font-bold text-[var(--primary)]">{title}</h1>
+		{breadcrumb && (
+			<p class="text-xs text-black/50 dark:text-white/50 mt-1">{breadcrumb}</p>
+		)}
 		{subtitle && (
 			<p class="mt-1 text-sm text-black/40 dark:text-white/40" aria-label={subtitle}>
 				{subtitle}

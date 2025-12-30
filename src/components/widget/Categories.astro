@@ -1,16 +1,66 @@
 ---
+import taxonomy from "@/data/category-taxonomy.json";
+import type { CategoryNode } from "@/utils/category-taxonomy-utils";
+import {
+	flattenSlugPathsWithPrefixes,
+	getChildrenBySlugPath,
+	parseCategoryLabelPath,
+	resolveSlugPathFromLabelPath,
+} from "@/utils/category-taxonomy-utils";
+import { normalizeCategoryName } from "@/utils/category-utils";
+import {
+	normalizeTaxonomyLabel,
+	UNCATEGORIZED_SLUG,
+} from "@/utils/taxonomy-utils";
 import I18nKey from "../../i18n/i18nKey";
 import { i18n } from "../../i18n/translation";
-import { getCategoryList } from "../../utils/content-utils";
-import ButtonLink from "../control/ButtonLink.astro";
+import CategoryTreeItem from "./CategoryTreeItem.astro";
 import WidgetLayout from "./WidgetLayout.astro";
 
-const categories = await getCategoryList();
+const taxonomyData = taxonomy as CategoryNode[];
+const postsGlob = import.meta.glob("../../content/posts/*.md", {
+	eager: true,
+});
+const allPosts = Object.values(postsGlob) as {
+	frontmatter: { category?: string };
+}[];
 
+const countMap: Record<string, number> = {};
+allPosts.forEach((post) => {
+	const rawCategory = normalizeCategoryName(post.frontmatter.category);
+	const labelPath = parseCategoryLabelPath(rawCategory);
+
+	const slugPath =
+		labelPath.length === 0
+			? [UNCATEGORIZED_SLUG]
+			: labelPath.length === 1
+				? (resolveSlugPathFromLabelPath(labelPath, taxonomyData) ?? [
+						normalizeTaxonomyLabel(rawCategory),
+					])
+				: resolveSlugPathFromLabelPath(labelPath, taxonomyData);
+
+	if (!slugPath) return;
+	const key = slugPath.join("/");
+	countMap[key] = (countMap[key] ?? 0) + 1;
+});
+
+const activeSlugPath = (() => {
+	const path = Astro.url.pathname;
+	const match = path.match(/^\/category\/(.*)$/);
+	if (!match) return [];
+	const parts = match[1].split("/").filter(Boolean);
+	const last = parts.at(-1);
+	if (last && /^\d+$/.test(last)) parts.pop();
+	return parts;
+})();
+
+const topLevel = getChildrenBySlugPath([], taxonomyData);
+
+const allPaths = flattenSlugPathsWithPrefixes(taxonomyData);
+const totalNodes = allPaths.length;
 const COLLAPSED_HEIGHT = "7.5rem";
 const COLLAPSE_THRESHOLD = 5;
-
-const isCollapsed = categories.length >= COLLAPSE_THRESHOLD;
+const isCollapsed = totalNodes >= COLLAPSE_THRESHOLD;
 
 interface Props {
 	class?: string;
@@ -20,16 +70,23 @@ const className = Astro.props.class;
 const style = Astro.props.style;
 ---
 
-<WidgetLayout name={i18n(I18nKey.categories)} id="categories" isCollapsed={isCollapsed} collapsedHeight={COLLAPSED_HEIGHT}
-                class={className} style={style}
+<WidgetLayout
+	name={i18n(I18nKey.categories)}
+	id="categories"
+	isCollapsed={isCollapsed}
+	collapsedHeight={COLLAPSED_HEIGHT}
+	class={className}
+	style={style}
 >
-    {categories.map((c) =>
-        <ButtonLink
-            url={c.url}
-            badge={String(c.count)}
-            label={`View all posts in the ${c.name.trim()} category`}
-        >
-            {c.name.trim()}
-        </ButtonLink>
-    )}
+	<ul class="flex flex-col gap-2">
+		{topLevel.map((node) => (
+			<CategoryTreeItem
+				node={node}
+				parentSlugPath={[]}
+				activeSlugPath={activeSlugPath}
+				level={0}
+				countMap={countMap}
+			/>
+		))}
+	</ul>
 </WidgetLayout>

@@ -1,0 +1,53 @@
+---
+import type { CategoryNode } from "@utils/category-taxonomy-utils";
+import { getCategorySlugPathUrl } from "@utils/url-utils";
+import CategoryTreeItemSelf from "./CategoryTreeItem.astro";
+
+interface Props {
+	node: CategoryNode;
+	parentSlugPath: string[];
+	activeSlugPath: string[];
+	level: number;
+	countMap: Record<string, number>;
+}
+
+const { node, parentSlugPath, activeSlugPath, level, countMap } = Astro.props;
+const slugPath = [...parentSlugPath, node.slug];
+const isActiveLeaf =
+	activeSlugPath.length === slugPath.length &&
+	activeSlugPath.every((seg, idx) => slugPath[idx] === seg);
+const isActiveBranch =
+	slugPath.length <= activeSlugPath.length &&
+	slugPath.every((seg, idx) => activeSlugPath[idx] === seg);
+const showChildren = isActiveBranch || activeSlugPath.length === 0;
+const countKey = slugPath.join("/");
+const count = countMap[countKey] ?? 0;
+---
+<li class:list={["flex flex-col gap-1", level > 0 ? "pl-3 border-l border-neutral-200 dark:border-neutral-800" : ""]}>
+	<a
+		href={getCategorySlugPathUrl(slugPath)}
+		class:list={[
+			"flex items-center justify-between rounded-lg px-2 py-1 hover:bg-[var(--card-bg)] transition",
+			isActiveLeaf
+				? "font-semibold text-[var(--primary)]"
+				: "text-neutral-700 dark:text-neutral-300",
+		]}
+	>
+		<span>{node.label}</span>
+		<span class="text-xs text-neutral-500 dark:text-neutral-400">{count}</span>
+	</a>
+
+		{node.children && node.children.length > 0 && showChildren && (
+			<ul class="flex flex-col gap-1">
+				{node.children.map((child) => (
+					<CategoryTreeItemSelf
+						node={child}
+						parentSlugPath={slugPath}
+						activeSlugPath={activeSlugPath}
+						level={level + 1}
+						countMap={countMap}
+				/>
+			))}
+		</ul>
+	)}
+</li>

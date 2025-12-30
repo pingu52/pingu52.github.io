@@ -1,0 +1,206 @@
+---
+import Pagination from "@components/control/Pagination.astro";
+import PostPage from "@components/PostPage.astro";
+import TaxonomyHeader from "@components/TaxonomyHeader.astro";
+import { PAGE_SIZE } from "@constants/constants";
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import type { CategoryNode } from "@utils/category-taxonomy-utils";
+import {
+	findNodeBySlugPath,
+	flattenSlugPathsWithPrefixes,
+	getChildrenBySlugPath,
+	parseCategoryLabelPath,
+	resolveSlugPathFromLabelPath,
+} from "@utils/category-taxonomy-utils";
+import { normalizeCategoryName } from "@utils/category-utils";
+import { getSortedPosts } from "@utils/content-utils";
+import {
+	normalizeTaxonomyLabel,
+	UNCATEGORIZED_SLUG,
+} from "@utils/taxonomy-utils";
+import { getCategorySlugPathUrl } from "@utils/url-utils";
+import type { GetStaticPaths } from "astro";
+import taxonomy from "@/data/category-taxonomy.json";
+
+export const getStaticPaths = (async () => {
+	const allPosts = await getSortedPosts();
+	const taxonomyData = taxonomy as CategoryNode[];
+
+	const resolvePostSlugPathForBuild = (rawCategory: string): string[] => {
+		const labelPath = parseCategoryLabelPath(rawCategory);
+		if (labelPath.length === 0) return [UNCATEGORIZED_SLUG];
+		if (labelPath.length === 1) {
+			return (
+				resolveSlugPathFromLabelPath(labelPath, taxonomyData) ?? [
+					normalizeTaxonomyLabel(rawCategory),
+				]
+			);
+		}
+		const resolved = resolveSlugPathFromLabelPath(labelPath, taxonomyData);
+		if (!resolved) {
+			throw new Error(
+				`Category label path not found in taxonomy: ${labelPath.join(" / ")}`,
+			);
+		}
+		return resolved;
+	};
+
+	const slugPathSet = new Set<string>();
+	for (const path of flattenSlugPathsWithPrefixes(taxonomyData)) {
+		slugPathSet.add(path.join("/"));
+	}
+
+	allPosts.forEach((post) => {
+		const rawCategory = normalizeCategoryName(post.data.category);
+		const resolved = resolvePostSlugPathForBuild(rawCategory);
+		slugPathSet.add(resolved.join("/"));
+	});
+
+	if (
+		allPosts.some((post) => normalizeCategoryName(post.data.category) === "")
+	) {
+		slugPathSet.add(UNCATEGORIZED_SLUG);
+	}
+
+	const slugPaths = Array.from(slugPathSet).map((path) => path.split("/"));
+
+	const pathEntries = slugPaths.flatMap((slugPath) => {
+		const postsForCategory = allPosts.filter((post) => {
+			const rawCategory = normalizeCategoryName(post.data.category);
+			const resolvedSlugPath = resolvePostSlugPathForBuild(rawCategory);
+			if (resolvedSlugPath.length < slugPath.length) return false;
+
+			return slugPath.every(
+				(segment, idx) => resolvedSlugPath[idx] === segment,
+			);
+		});
+
+		const totalPages = Math.max(
+			1,
+			Math.ceil(postsForCategory.length / PAGE_SIZE),
+		);
+
+		return Array.from({ length: totalPages }, (_, index) => {
+			const pageNumber = index + 1;
+			const pageSuffix = pageNumber > 1 ? `/${pageNumber}` : "";
+			return { params: { path: `${slugPath.join("/")}${pageSuffix}` } };
+		});
+	});
+
+	return pathEntries;
+}) satisfies GetStaticPaths;
+
+const segments = (Astro.params.path ?? "")
+	.split("/")
+	.map((seg) => seg.trim())
+	.filter((seg) => seg !== "");
+
+const lastSegment = segments.at(-1);
+const pageNumber =
+	lastSegment && /^\d+$/.test(lastSegment) ? Number(segments.pop()) : 1;
+
+const slugPath = segments;
+const taxonomyData = taxonomy as CategoryNode[];
+
+const resolvePostSlugPath = (
+	rawCategory: string,
+	taxonomyTree: CategoryNode[],
+): string[] => {
+	const labelPath = parseCategoryLabelPath(rawCategory);
+	if (labelPath.length === 0) return [UNCATEGORIZED_SLUG];
+	if (labelPath.length === 1) {
+		return (
+			resolveSlugPathFromLabelPath(labelPath, taxonomyTree) ?? [
+				normalizeTaxonomyLabel(rawCategory),
+			]
+		);
+	}
+	const resolved = resolveSlugPathFromLabelPath(labelPath, taxonomyTree);
+	if (!resolved) {
+		throw new Error(
+			`Category label path not found in taxonomy: ${labelPath.join(" / ")}`,
+		);
+	}
+	return resolved;
+};
+
+const nodeMatch = findNodeBySlugPath(slugPath, taxonomyData);
+const labelPath =
+	nodeMatch?.labelPath ??
+	(slugPath[0] === UNCATEGORIZED_SLUG && slugPath.length === 1
+		? [i18n(I18nKey.uncategorized)]
+		: slugPath);
+const title = labelPath.at(-1) ?? i18n(I18nKey.uncategorized);
+
+const children = getChildrenBySlugPath(slugPath, taxonomyData);
+
+const allPosts = await getSortedPosts();
+const postsForCurrent = allPosts.filter((post) => {
+	const rawCategory = normalizeCategoryName(post.data.category);
+	const resolvedSlugPath = resolvePostSlugPath(rawCategory, taxonomyData);
+	if (resolvedSlugPath.length < slugPath.length) return false;
+	return slugPath.every((segment, idx) => resolvedSlugPath[idx] === segment);
+});
+
+const total = postsForCurrent.length;
+const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+const currentPage = Math.min(Math.max(pageNumber, 1), totalPages);
+const start = (currentPage - 1) * PAGE_SIZE;
+const end = start + PAGE_SIZE;
+const pageData = postsForCurrent.slice(start, end);
+
+const page = {
+	data: pageData,
+	start,
+	end: Math.min(end, total),
+	size: PAGE_SIZE,
+	total,
+	currentPage,
+	lastPage: totalPages,
+	url: {
+		current: getCategorySlugPathUrl(slugPath, currentPage),
+		first: getCategorySlugPathUrl(slugPath, 1),
+		last: getCategorySlugPathUrl(slugPath, totalPages),
+		prev:
+			currentPage > 1
+				? getCategorySlugPathUrl(slugPath, currentPage - 1)
+				: undefined,
+		next:
+			currentPage < totalPages
+				? getCategorySlugPathUrl(slugPath, currentPage + 1)
+				: undefined,
+	},
+};
+---
+
+<MainGridLayout title={title}>
+	<TaxonomyHeader
+		title={title}
+		count={page.total}
+		currentPage={page.currentPage}
+		lastPage={page.lastPage}
+		breadcrumb={labelPath.join(" / ")}
+	/>
+
+	{children.length > 0 && (
+		<nav class="flex flex-wrap gap-2 mb-6">
+			{children.map((child) => (
+				<a
+					href={getCategorySlugPathUrl([...slugPath, child.slug])}
+					class="btn-card px-3 py-2 text-sm"
+				>
+					{child.label}
+				</a>
+			))}
+		</nav>
+	)}
+
+	<PostPage page={page} />
+	<Pagination
+		class="mx-auto onload-animation"
+		page={page}
+		style={`animation-delay: calc(var(--content-delay) + ${page.data.length * 50}ms)`}
+	/>
+</MainGridLayout>
