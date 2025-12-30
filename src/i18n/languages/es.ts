@@ -17,7 +17,6 @@ export const es: Translation = {
 	[Key.visitorCounterRange]: "Visitas en los últimos {days} días",
 	[Key.visitorCounterTotal]: "Visitas totales",
 	[Key.visitorCounterRecent]: "Últimos {days} días",
-	[Key.visitorCounterToday]: "Hoy",
 	[Key.visitorCounterLoading]: "Cargando el conteo de visitas…",
 	[Key.visitorCounterUnavailable]: "No se pudo cargar el conteo de visitas",
 

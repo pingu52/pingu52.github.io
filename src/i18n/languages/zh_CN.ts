@@ -17,7 +17,6 @@ export const zh_CN: Translation = {
 	[Key.visitorCounterRange]: "最近 {days} 天的访问量",
 	[Key.visitorCounterTotal]: "累计访问量",
 	[Key.visitorCounterRecent]: "最近 {days} 天",
-	[Key.visitorCounterToday]: "今日",
 	[Key.visitorCounterLoading]: "正在加载访问量…",
 	[Key.visitorCounterUnavailable]: "无法加载访问量",
 
