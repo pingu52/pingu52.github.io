@@ -1,0 +1,21 @@
+[
+	{
+		"label": "Linux",
+		"slug": "Linux",
+		"children": [
+			{
+				"label": "WSL2",
+				"slug": "WSL2",
+				"children": [
+					{
+						"label": "USBIPD",
+						"slug": "usbipd"
+					}
+				]
+			}
+		]
+	},
+	{ "label": "Guides", "slug": "Guides" },
+	{ "label": "Examples", "slug": "Examples" },
+	{ "label": "C++", "slug": "c-plus-plus" }
+]

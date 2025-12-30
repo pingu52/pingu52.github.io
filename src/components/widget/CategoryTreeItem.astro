@@ -1,0 +1,36 @@
+---
+import { getCategorySlugPathUrl } from "@utils/url-utils";
+
+interface Props {
+	label: string;
+	slugPath: string[];
+	count: number;
+	activeSlugPath: string[];
+	level?: number;
+}
+
+const { label, slugPath, count, activeSlugPath } = Astro.props;
+const level = Astro.props.level ?? 0;
+const isActiveLeaf =
+	activeSlugPath.length === slugPath.length &&
+	activeSlugPath.every((seg, idx) => slugPath[idx] === seg);
+---
+<li
+	class:list={[
+		"flex flex-col gap-1",
+		level > 0 ? "pl-2" : "",
+	]}
+>
+	<a
+		href={getCategorySlugPathUrl(slugPath)}
+		class:list={[
+			"flex items-center justify-between rounded-lg px-2 py-1 transition",
+			isActiveLeaf
+				? "font-semibold text-[var(--primary)]"
+				: "text-neutral-700 dark:text-neutral-300",
+		]}
+	>
+		<span>{label}</span>
+		<span class="text-xs text-neutral-500 dark:text-neutral-400">{count}</span>
+	</a>
+</li>

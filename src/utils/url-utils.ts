@@ -1,9 +1,20 @@
 import {
+	buildLeafLabelMap,
+	MAX_CATEGORY_DEPTH,
+	parseCategoryLabelPath,
+	resolveSlugPathFromLabelPath,
+} from "@utils/category-taxonomy-utils";
+import {
 	isUncategorizedCategory,
 	normalizeCategoryName,
 } from "@utils/category-utils";
 import { isBlank } from "@utils/string-utils";
-import { encodeTaxonomySegment } from "@utils/taxonomy-utils";
+import {
+	encodeTaxonomySegment,
+	normalizeTaxonomyLabel,
+	UNCATEGORIZED_SLUG,
+} from "@utils/taxonomy-utils";
+import taxonomy from "@/data/category-taxonomy.json";
 
 export function pathsEqual(path1: string, path2: string) {
 	const normalizedPath1 = path1.replace(/^\/|\/$/g, "").toLowerCase();
@@ -25,12 +36,54 @@ export function getTagUrl(tag: string): string {
 	return url(`/tag/${encodeTaxonomySegment(tag)}/`);
 }
 
+export function getCategorySlugPathUrl(
+	slugPath: string[],
+	page?: number,
+): string {
+	const encoded = slugPath.map((segment) => encodeURIComponent(segment));
+	const basePath = encoded.join("/");
+	const pageSuffix = page && page >= 2 ? `${page}/` : "";
+	const categoryPath =
+		basePath === "" ? "/category/" : `/category/${basePath}/`;
+	return url(`${categoryPath}${pageSuffix}`);
+}
+
 export function getCategoryUrl(category: string | null): string {
-	// Category pages are rendered as main-feed style pages under /category/:category/...
-	if (isUncategorizedCategory(category)) return url("/category/uncategorized/");
-	return url(
-		`/category/${encodeTaxonomySegment(normalizeCategoryName(category))}/`,
+	if (isUncategorizedCategory(category)) {
+		return getCategorySlugPathUrl([UNCATEGORIZED_SLUG]);
+	}
+
+	const normalized = normalizeCategoryName(category);
+	const labelPath = parseCategoryLabelPath(normalized);
+
+	if (labelPath.length === 0)
+		return getCategorySlugPathUrl([UNCATEGORIZED_SLUG]);
+
+	if (labelPath.length === 1) {
+		const leafMap = buildLeafLabelMap(taxonomy, MAX_CATEGORY_DEPTH);
+		const resolved = leafMap.get(labelPath[0]);
+		const slugPath = resolved ?? [normalizeTaxonomyLabel(normalized)];
+		return getCategorySlugPathUrl(slugPath);
+	}
+
+	if (labelPath.length > MAX_CATEGORY_DEPTH) {
+		throw new Error(
+			`Category label path exceeds maximum depth of ${MAX_CATEGORY_DEPTH}: ${labelPath.join(" / ")}`,
+		);
+	}
+
+	const resolved = resolveSlugPathFromLabelPath(
+		labelPath,
+		taxonomy,
+		true /* requireLeaf */,
 	);
+	if (!resolved) {
+		throw new Error(
+			`Category label path not found in taxonomy: ${labelPath.join(" / ")}`,
+		);
+	}
+
+	return getCategorySlugPathUrl(resolved);
 }
 
 export function getDir(path: string): string {
