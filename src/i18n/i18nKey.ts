@@ -14,6 +14,7 @@ enum I18nKey {
 	visitorCounterRange = "visitorCounterRange",
 	visitorCounterTotal = "visitorCounterTotal",
 	visitorCounterRecent = "visitorCounterRecent",
+	visitorCounterToday = "visitorCounterToday",
 	visitorCounterLoading = "visitorCounterLoading",
 	visitorCounterUnavailable = "visitorCounterUnavailable",
 

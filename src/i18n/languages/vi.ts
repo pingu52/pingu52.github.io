@@ -17,6 +17,7 @@ export const vi: Translation = {
 	[Key.visitorCounterRange]: "Lượt truy cập trong {days} ngày qua",
 	[Key.visitorCounterTotal]: "Tổng lượt truy cập",
 	[Key.visitorCounterRecent]: "{days} ngày gần đây",
+	[Key.visitorCounterToday]: "Hôm nay",
 	[Key.visitorCounterLoading]: "Đang tải lượt truy cập…",
 	[Key.visitorCounterUnavailable]: "Không thể tải lượt truy cập",
 

@@ -38,7 +38,9 @@ if (!isUmami && !isGoatcounter) {
 
 const activeProvider = isUmami ? "umami" : "goatcounter";
 const providerLabel = isUmami ? "Umami" : "GoatCounter";
-const recentLabel = i18nFormat(I18nKey.visitorCounterRecent, { days: rangeDays });
+const recentLabel = isUmami
+	? i18nFormat(I18nKey.visitorCounterRecent, { days: rangeDays })
+	: i18n(I18nKey.visitorCounterToday);
 const totalLabel = i18n(I18nKey.visitorCounterTotal);
 ---
 
