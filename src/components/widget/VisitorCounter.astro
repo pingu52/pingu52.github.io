@@ -114,10 +114,40 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 		const goatcounterBase = root.dataset.goatcounterBase;
 		const goatcounterPath = root.dataset.goatcounterPath || "/";
 
+		const formatDate = (date: Date) => {
+			const tzAdjusted = new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
+			return tzAdjusted.toISOString().slice(0, 10);
+		};
+
+		const buildGoatcounterUrl = (
+			path: string,
+			base: string,
+			range?: { start?: string; end?: string },
+		) => {
+			const url = new URL(
+				`/counter/${encodeURIComponent(path)}.json`,
+				base,
+			);
+			if (range?.start) url.searchParams.set("start", range.start);
+			if (range?.end) url.searchParams.set("end", range.end);
+			return url;
+		};
+
 		const formatter = new Intl.NumberFormat(
 			document.documentElement.lang || "en",
 			{ maximumFractionDigits: 0 },
 		);
+
+		const normalizeNumber = (value: unknown): number | null => {
+			if (typeof value === "number" && Number.isFinite(value)) return value;
+			if (typeof value === "string") {
+				const trimmed = value.trim();
+				if (!trimmed) return null;
+				const parsed = Number(trimmed);
+				return Number.isFinite(parsed) ? parsed : null;
+			}
+			return null;
+		};
 
 		const setStatus = (text: string) => {
 			if (statusEl) {
@@ -140,9 +170,8 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 
 		const extractNumber = (values: unknown[]): number | null => {
 			for (const value of values) {
-				if (typeof value === "number" && Number.isFinite(value)) {
-					return value;
-				}
+				const parsed = normalizeNumber(value);
+				if (parsed != null) return parsed;
 			}
 			return null;
 		};
@@ -201,22 +230,39 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 			if (!goatcounterBase) {
 				throw new Error("Missing GoatCounter configuration.");
 			}
-			const url = new URL(
-				`/counter/${encodeURIComponent(goatcounterPath)}.json`,
-				goatcounterBase,
-			);
-			const response = await fetch(url.toString());
-			if (!response.ok) {
-				throw new Error(`GoatCounter responded with ${response.status}`);
-			}
-			const data = await response.json();
-			const total = extractNumber([
-				data?.count,
-				data?.hits,
-				data?.views,
-				data?.total,
+			const today = formatDate(new Date());
+			const [dailyResponse, totalResponse] = await Promise.all([
+				fetch(
+					buildGoatcounterUrl(goatcounterPath, goatcounterBase, {
+						start: today,
+						end: today,
+					}).toString(),
+				),
+				fetch(buildGoatcounterUrl(goatcounterPath, goatcounterBase).toString()),
 			]);
-			return { recent: total, total };
+
+			if (!dailyResponse.ok) {
+				throw new Error(`GoatCounter daily responded with ${dailyResponse.status}`);
+			}
+			if (!totalResponse.ok) {
+				throw new Error(`GoatCounter total responded with ${totalResponse.status}`);
+			}
+
+			const dailyData = await dailyResponse.json();
+			const totalData = await totalResponse.json();
+			const recent = extractNumber([
+				dailyData?.count,
+				dailyData?.hits,
+				dailyData?.views,
+				dailyData?.total,
+			]);
+			const total = extractNumber([
+				totalData?.count,
+				totalData?.hits,
+				totalData?.views,
+				totalData?.total,
+			]);
+			return { recent, total };
 		};
 
 		const load = async () => {
