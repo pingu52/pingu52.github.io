@@ -1,0 +1,253 @@
+---
+import Pagination from "@components/control/Pagination.astro";
+import PostPage from "@components/PostPage.astro";
+import TaxonomyHeader from "@components/TaxonomyHeader.astro";
+import { PAGE_SIZE } from "@constants/constants";
+import I18nKey from "@i18n/i18nKey";
+import { i18n, i18nFormat } from "@i18n/translation";
+import categories from "@data/categories.json";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import {
+	flattenSlugPathsWithPrefixes,
+	findNodeBySlugPath,
+	isSlugPathPrefix,
+	labelPathToSlugPath,
+	parseCategoryLabelPath,
+	type CategoryNode,
+	UNCATEGORIZED_SLUG,
+} from "@utils/category-taxonomy";
+import { getSortedPosts } from "@utils/content-utils";
+import { categorySlugPathToUrl } from "@utils/url-utils";
+import type { GetStaticPaths, Page } from "astro";
+import type { CollectionEntry } from "astro:content";
+
+type CategorizedPost = {
+	post: CollectionEntry<"posts">;
+	slugPath: string[] | null;
+};
+
+const taxonomy = categories as CategoryNode[];
+const missingCategoryWarnings = new Set<string>();
+
+const warnMissingCategory = (labelPath: string[]) => {
+	const label = labelPath.join(" / ");
+	if (missingCategoryWarnings.has(label)) return;
+	missingCategoryWarnings.add(label);
+	console.warn(
+		`[categories] Category "${label}" is not defined in categories.json`,
+	);
+};
+
+const toCategorySlugPath = (category: string | null | undefined) => {
+	const labelPath = parseCategoryLabelPath(category);
+	if (labelPath.length === 0) return [UNCATEGORIZED_SLUG];
+	const slugPath = labelPathToSlugPath(labelPath, taxonomy);
+	if (!slugPath) warnMissingCategory(labelPath);
+	return slugPath;
+};
+
+const buildPage = (
+	posts: CollectionEntry<"posts">[],
+	slugPath: string[],
+	pageNumber: number,
+	totalPages: number,
+): Page<CollectionEntry<"posts">> => {
+	const startIndex = (pageNumber - 1) * PAGE_SIZE;
+	const data = posts.slice(startIndex, startIndex + PAGE_SIZE);
+	const start = posts.length === 0 ? 0 : startIndex + 1;
+	const end = posts.length === 0 ? 0 : startIndex + data.length;
+
+	const current = categorySlugPathToUrl(slugPath, pageNumber);
+	const prev =
+		pageNumber > 1 ? categorySlugPathToUrl(slugPath, pageNumber - 1) : undefined;
+	const next =
+		pageNumber < totalPages
+			? categorySlugPathToUrl(slugPath, pageNumber + 1)
+			: undefined;
+	const first = categorySlugPathToUrl(slugPath, 1);
+	const last = categorySlugPathToUrl(slugPath, totalPages);
+
+	return {
+		data,
+		start,
+		end,
+		total: posts.length,
+		size: PAGE_SIZE,
+		currentPage: pageNumber,
+		lastPage: totalPages,
+		url: {
+			current,
+			prev,
+			next,
+			first,
+			last,
+		},
+	};
+};
+
+const buildStaticPaths = (
+	categorizedPosts: CategorizedPost[],
+): Awaited<ReturnType<GetStaticPaths>> => {
+	const slugPaths = flattenSlugPathsWithPrefixes(taxonomy);
+	const hasUncategorized = categorizedPosts.some(
+		({ slugPath }) => slugPath?.[0] === UNCATEGORIZED_SLUG,
+	);
+	if (hasUncategorized) slugPaths.push([UNCATEGORIZED_SLUG]);
+	const allPaths: string[][] = [[]];
+	allPaths.push(...slugPaths);
+
+	const paths = allPaths.flatMap((slugPath) => {
+		const matchingPosts = categorizedPosts
+			.filter(
+				({ slugPath: postSlugPath }) =>
+					// Include descendant categories by matching prefix paths.
+					postSlugPath && isSlugPathPrefix(slugPath, postSlugPath),
+			)
+			.map(({ post }) => post);
+
+		const totalPages = Math.max(
+			1,
+			Math.ceil(matchingPosts.length / PAGE_SIZE),
+		);
+
+		const currentNode =
+			slugPath.length > 0 ? findNodeBySlugPath(slugPath, taxonomy) : null;
+		const customLabel =
+			slugPath[0] === UNCATEGORIZED_SLUG
+				? i18n(I18nKey.uncategorized)
+				: null;
+		const childCategories =
+			slugPath.length === 0 ? taxonomy : currentNode?.children ?? [];
+
+		return Array.from({ length: totalPages }, (_, index) => {
+			const pageNumber = index + 1;
+			const paramsPath =
+				pageNumber === 1 ? slugPath : [...slugPath, String(pageNumber)];
+			return {
+				params: { path: paramsPath.join("/") },
+				props: {
+					page: buildPage(matchingPosts, slugPath, pageNumber, totalPages),
+					slugPath,
+					childCategories,
+					categoryLabel: currentNode?.label ?? customLabel,
+				},
+			};
+		});
+	});
+
+	return paths;
+};
+
+export const getStaticPaths = (async () => {
+	const allPosts = await getSortedPosts();
+	const categorizedPosts: CategorizedPost[] = allPosts.map((post) => ({
+		post,
+		slugPath: toCategorySlugPath(post.data.category),
+	}));
+
+	return buildStaticPaths(categorizedPosts);
+}) satisfies GetStaticPaths;
+
+type CategoryPageProps = {
+	page: Page<CollectionEntry<"posts">>;
+	slugPath: string[];
+	childCategories: CategoryNode[];
+	categoryLabel: string | null;
+};
+
+const { page, slugPath, childCategories, categoryLabel } =
+	Astro.props as CategoryPageProps;
+
+const currentNode = findNodeBySlugPath(slugPath, taxonomy);
+const resolvedLabel = categoryLabel ?? currentNode?.label ?? slugPath.at(-1);
+const isRoot = slugPath.length === 0;
+const title = isRoot ? i18n(I18nKey.categories) : resolvedLabel ?? "Category";
+const description = i18nFormat(I18nKey.taxonomyCategoryDescription, {
+	name: title,
+});
+
+const breadcrumb = (() => {
+	const items: { label: string; slugPath: string[] }[] = [
+		{ label: i18n(I18nKey.categories), slugPath: [] },
+	];
+	let nodes = taxonomy;
+	const path: string[] = [];
+
+	for (const slug of slugPath) {
+		const match = nodes.find((node) => node.slug === slug);
+		if (!match) break;
+		path.push(match.slug);
+		items.push({ label: match.label, slugPath: [...path] });
+		nodes = match.children ?? [];
+	}
+
+	if (
+		categoryLabel &&
+		(items.at(-1)?.slugPath.length ?? 0) !== slugPath.length
+	) {
+		items.push({ label: categoryLabel, slugPath });
+	}
+
+	return items;
+})();
+
+const showPagination = page.lastPage > 1;
+const showChildren = childCategories.length > 0;
+---
+
+<MainGridLayout title={title} description={description}>
+	<section class="card-base onload-animation">
+		<nav class="text-sm text-50 mb-3 flex flex-wrap gap-2 items-center">
+			{breadcrumb.map((item, index) => (
+				<>
+					<a href={categorySlugPathToUrl(item.slugPath)} class="btn-plain px-2 py-1 rounded-md">
+						{item.label}
+					</a>
+					{index < breadcrumb.length - 1 && <span class="text-30">/</span>}
+				</>
+			))}
+		</nav>
+
+		<div class="flex flex-col gap-6">
+			{showChildren && (
+				<section class="flex flex-col gap-3">
+					<h2 class="text-lg font-semibold text-75">
+						{i18n(I18nKey.categories)}
+					</h2>
+					<ul class="flex flex-wrap gap-2">
+						{childCategories.map((category: CategoryNode) => {
+							const childPath = [...slugPath, category.slug];
+							return (
+								<li>
+									<a
+										href={categorySlugPathToUrl(childPath)}
+										class="btn-plain inline-flex items-center gap-2 rounded-lg px-3 py-2"
+									>
+										<span class="font-semibold">{category.label}</span>
+									</a>
+								</li>
+							);
+						})}
+					</ul>
+				</section>
+			)}
+
+			<section class="flex flex-col gap-3">
+				<TaxonomyHeader
+					title={title}
+					count={page.total}
+					currentPage={page.currentPage}
+					lastPage={page.lastPage}
+				/>
+				<PostPage page={page} />
+				{showPagination && (
+					<Pagination
+						class="mx-auto onload-animation"
+						page={page}
+						style={`animation-delay: calc(var(--content-delay) + ${page.data.length * 50}ms)`}
+					/>
+				)}
+			</section>
+		</div>
+	</section>
+</MainGridLayout>

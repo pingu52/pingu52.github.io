@@ -2,12 +2,6 @@ import type { CollectionEntry } from "astro:content";
 import { normalizeLower, trimOrEmpty } from "@utils/string-utils";
 import type { PaginateFunction, PaginateOptions } from "astro";
 
-/**
- * Slug used for posts that do not have a category.
- * The user-facing label is localized via i18n.
- */
-export const UNCATEGORIZED_SLUG = "uncategorized" as const;
-
 type PostEntry = CollectionEntry<"posts">;
 
 const sortCi = (a: string, b: string) =>
@@ -54,29 +48,6 @@ const normalizeTags = (tags?: string[]) =>
 	(tags ?? []).map(normalizeTaxonomyLabel).filter((t) => t !== "");
 
 /**
- * Collect categories with a stable label for each group (case-insensitive).
- * Returns the chosen display labels in case-insensitive sorted order.
- */
-export function collectCategories(posts: PostEntry[]) {
-	const map = new Map<string, string>(); // key -> label
-	let hasUncategorized = false;
-
-	for (const post of posts) {
-		const raw = normalizeTaxonomyLabel(post.data.category ?? "");
-		if (raw === "") {
-			hasUncategorized = true;
-			continue;
-		}
-		const key = taxonomyKey(raw);
-		if (!map.has(key)) map.set(key, raw);
-	}
-
-	const categories = Array.from(map.values()).sort(sortCi);
-
-	return { categories, hasUncategorized };
-}
-
-/**
  * Collect tags with a stable label for each group (case-insensitive).
  */
 export function collectTags(posts: PostEntry[]) {
@@ -102,52 +73,6 @@ type TaxonomyPaginateFunction<Params extends Record<string, string>> = (
 type TaxonomyPaths<Params extends Record<string, string>> = ReturnType<
 	TaxonomyPaginateFunction<Params>
 >;
-
-/**
- * Build paginated static paths for /category/<category>/<page>.
- *
- * IMPORTANT:
- * - params must use unencoded labels (Astro will encode the URL for you).
- * - we group case-insensitively for consistency.
- */
-export function buildCategoryStaticPaths(
-	paginate: TaxonomyPaginateFunction<{ category: string }>,
-	posts: PostEntry[],
-	pageSize: number,
-): TaxonomyPaths<{ category: string }> {
-	const { categories, hasUncategorized } = collectCategories(posts);
-	const paths: TaxonomyPaths<{ category: string }> = [];
-
-	for (const categoryLabel of categories) {
-		const key = taxonomyKey(categoryLabel);
-		const filtered = posts.filter(
-			(p) => taxonomyKey(p.data.category ?? "") === key,
-		);
-
-		paths.push(
-			...paginate(filtered, {
-				pageSize,
-				params: { category: categoryLabel },
-				props: { taxonomyTitle: categoryLabel, taxonomyKey: key },
-			}),
-		);
-	}
-
-	if (hasUncategorized) {
-		const filtered = posts.filter(
-			(p) => normalizeTaxonomyLabel(p.data.category ?? "") === "",
-		);
-		paths.push(
-			...paginate(filtered, {
-				pageSize,
-				params: { category: UNCATEGORIZED_SLUG },
-				props: { taxonomyTitle: UNCATEGORIZED_SLUG, taxonomyKey: "" },
-			}),
-		);
-	}
-
-	return paths;
-}
 
 /**
  * Build paginated static paths for /tag/<tag>/<page>.

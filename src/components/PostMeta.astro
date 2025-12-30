@@ -1,9 +1,35 @@
 ---
 import { Icon } from "astro-icon/components";
+import categories from "@data/categories.json";
 import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
+import {
+	labelPathToSlugPath,
+	parseCategoryLabelPath,
+	type CategoryNode,
+} from "../utils/category-taxonomy";
 import { formatDateToYYYYMMDD } from "../utils/date-utils";
-import { getCategoryUrl, getTagUrl } from "../utils/url-utils";
+import { categorySlugPathToUrl, getTagUrl } from "../utils/url-utils";
+
+const taxonomy = categories as CategoryNode[];
+const missingCategoryWarnings = new Set<string>();
+
+const toCategoryHref = (value: string | null | undefined) => {
+	const labelPath = parseCategoryLabelPath(value);
+	if (labelPath.length === 0) return null;
+	const slugPath = labelPathToSlugPath(labelPath, taxonomy);
+	if (!slugPath) {
+		const label = labelPath.join(" / ");
+		if (!missingCategoryWarnings.has(label)) {
+			console.warn(
+				`[categories] Category "${label}" is not defined in categories.json`,
+			);
+			missingCategoryWarnings.add(label);
+		}
+		return null;
+	}
+	return categorySlugPathToUrl(slugPath);
+};
 
 interface Props {
 	class: string;
@@ -53,11 +79,33 @@ const className = Astro.props.class;
             <Icon name="material-symbols:book-2-outline-rounded" class="text-xl"></Icon>
         </div>
         <div class="flex flex-row flex-nowrap items-center">
-            <a href={getCategoryUrl(category)} aria-label={`View all posts in the ${category} category`}
-               class="link-lg transition text-50 text-sm font-medium
-                            hover:text-[var(--primary)] dark:hover:text-[var(--primary)] whitespace-nowrap">
-                {category || i18n(I18nKey.uncategorized)}
-            </a>
+			{
+				category
+					? (() => {
+							const href = toCategoryHref(category);
+							if (!href)
+								return (
+									<span class="transition text-50 text-sm font-medium whitespace-nowrap">
+										{category}
+									</span>
+								);
+							return (
+								<a
+									href={href}
+									aria-label={`View all posts in the ${category} category`}
+									class="link-lg transition text-50 text-sm font-medium
+                            hover:text-[var(--primary)] dark:hover:text-[var(--primary)] whitespace-nowrap"
+								>
+									{category}
+								</a>
+							);
+						})()
+					: (
+						<span class="transition text-50 text-sm font-medium whitespace-nowrap">
+							{i18n(I18nKey.uncategorized)}
+						</span>
+					)
+			}
         </div>
     </div>
 

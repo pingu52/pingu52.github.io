@@ -1,14 +1,41 @@
 <script lang="ts">
 import { onMount } from "svelte";
 
+import categoryTaxonomy from "@data/categories.json";
 import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
 import type { PostForList } from "../utils/content-utils";
 import {
-	getCategoryUrl,
+	categorySlugPathToUrl,
 	getPostUrlBySlug,
 	getTagUrl,
 } from "../utils/url-utils";
+import {
+	labelPathToSlugPath,
+	parseCategoryLabelPath,
+	type CategoryNode,
+	UNCATEGORIZED_SLUG,
+} from "../utils/category-taxonomy";
+
+const taxonomy = categoryTaxonomy as CategoryNode[];
+const missingCategoryWarnings = new Set<string>();
+
+const toCategoryHref = (value: string | null | undefined) => {
+	const labelPath = parseCategoryLabelPath(value);
+	if (labelPath.length === 0) return null;
+	const slugPath = labelPathToSlugPath(labelPath, taxonomy);
+	if (!slugPath) {
+		const label = labelPath.join(" / ");
+		if (!missingCategoryWarnings.has(label)) {
+			console.warn(
+				`[categories] Category "${label}" is not defined in categories.json`,
+			);
+			missingCategoryWarnings.add(label);
+		}
+		return null;
+	}
+	return categorySlugPathToUrl(slugPath);
+};
 
 export let tags: string[];
 export let categories: string[];
@@ -49,11 +76,12 @@ onMount(async () => {
 		return;
 	}
 	if (qCategories.length === 1 && qTags.length === 0 && !qUncategorized) {
-		window.location.replace(getCategoryUrl(qCategories[0]));
+		const href = toCategoryHref(qCategories[0]);
+		if (href) window.location.replace(href);
 		return;
 	}
 	if (qUncategorized && qTags.length === 0 && qCategories.length === 0) {
-		window.location.replace(getCategoryUrl(null));
+		window.location.replace(categorySlugPathToUrl([UNCATEGORIZED_SLUG]));
 		return;
 	}
 

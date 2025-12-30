@@ -70,7 +70,7 @@ published: 2025-12-21
 description: ""
 image: ""
 tags: []
-category: ""
+category: "Guides / Front-end"
 draft: false
 lang: ""
 ---
@@ -83,9 +83,16 @@ lang: ""
 - 홈 피드: `src/pages/[...page].astro`
 - 포스트 상세: `src/pages/posts/[...slug].astro`
 - 아카이브: `src/pages/archive.astro`
-- 카테고리 피드(홈과 동일한 카드형): `src/pages/category/[category]/[...page].astro`
+- 카테고리 피드(홈과 동일한 카드형): `src/pages/category/[...path].astro`
 - 태그 피드(홈과 동일한 카드형): `src/pages/tag/[tag]/[...page].astro`
 - About: `src/pages/about.astro`
+
+### 🗂️ 카테고리 택소노미
+
+- 카테고리 정의는 `src/data/categories.json`에서 label/slug 트리로 관리합니다. label은 화면 표시명, slug는 URL 세그먼트(예: `"label": "C++"`, `"slug": "c-plus-plus"`).
+- 포스트 frontmatter `category` 값은 표시명 경로를 `/`로 구분해 작성합니다. 예) `Guides / Front-end` → `/category/guides/front-end/`.
+- categories.json에 없는 경로를 적으면 빌드 시 경고가 출력되고 해당 포스트는 카테고리 목록에서 제외됩니다.
+- 카테고리 페이지는 현재 노드 하위의 모든 포스트를 함께 보여주는(prefix 포함) 정책을 따릅니다.
 
 ---
 

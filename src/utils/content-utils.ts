@@ -1,6 +1,4 @@
 import type { CollectionEntry } from "astro:content";
-import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
 import {
 	attachPrevNext,
 	getAllPosts,
@@ -8,7 +6,6 @@ import {
 	sortPostsByPublishedDesc,
 } from "@utils/post-utils";
 import { trimOrEmpty } from "@utils/string-utils";
-import { getCategoryUrl } from "@utils/url-utils.ts";
 
 // Retrieve posts and sort them by publication date (DESC)
 async function getRawSortedPosts(): Promise<PostEntry[]> {
@@ -54,33 +51,4 @@ export async function getTagList(): Promise<Tag[]> {
 	});
 
 	return keys.map((key) => ({ name: key, count: countMap[key] }));
-}
-
-export type Category = {
-	name: string;
-	count: number;
-	url: string;
-};
-
-export async function getCategoryList(): Promise<Category[]> {
-	const allBlogPosts = await getAllPosts();
-	const count: Record<string, number> = {};
-
-	const uncategorizedLabel = i18n(I18nKey.uncategorized);
-
-	allBlogPosts.forEach((post) => {
-		const category = trimOrEmpty(post.data.category);
-		const key = category === "" ? uncategorizedLabel : category;
-		count[key] = (count[key] ?? 0) + 1;
-	});
-
-	const lst = Object.keys(count).sort((a, b) => {
-		return a.toLowerCase().localeCompare(b.toLowerCase());
-	});
-
-	return lst.map((c) => ({
-		name: c,
-		count: count[c],
-		url: getCategoryUrl(c),
-	}));
 }

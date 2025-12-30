@@ -1,0 +1,30 @@
+[
+	{
+		"label": "Examples",
+		"slug": "examples"
+	},
+	{
+		"label": "Linux",
+		"slug": "linux",
+		"children": [
+			{
+				"label": "C++",
+				"slug": "c-plus-plus"
+			},
+			{
+				"label": "C#",
+				"slug": "c-sharp"
+			}
+		]
+	},
+	{
+		"label": "Guides",
+		"slug": "guides",
+		"children": [
+			{
+				"label": "Front-end",
+				"slug": "front-end"
+			}
+		]
+	}
+]
