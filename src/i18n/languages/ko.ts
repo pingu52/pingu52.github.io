@@ -17,6 +17,7 @@ export const ko: Translation = {
 	[Key.visitorCounterRange]: "최근 {days}일 방문자",
 	[Key.visitorCounterTotal]: "누적 방문자",
 	[Key.visitorCounterRecent]: "최근 {days}일",
+	[Key.visitorCounterToday]: "오늘",
 	[Key.visitorCounterLoading]: "방문자 수 불러오는 중…",
 	[Key.visitorCounterUnavailable]: "방문자 수를 불러오지 못했습니다",
 

@@ -92,7 +92,7 @@ lang: ""
 ## 🔢 방문자 카운터 (Umami/GoatCounter)
 
 사이드바 태그 위젯 아래에 방문자 수를 표기할 수 있도록 Umami 혹은 GoatCounter 기반 카운터를 추가했습니다.
-최근 N일 방문자와 누적 방문자를 함께 보여줍니다.
+오늘/최근 N일/누적 방문자를 모두 보여주며, GoatCounter 조회 시에는 `yyyy-mm-dd` 형식으로 날짜를 전달해 정확도를 높였습니다.
 
 1. `.env` (또는 배포 환경 변수)에 `PUBLIC_ANALYTICS_PROVIDER`를 설정합니다.  
    - `umami` 또는 `goatcounter` 값을 사용합니다.
@@ -104,6 +104,8 @@ lang: ""
    - `PUBLIC_GOATCOUNTER_HOST` 또는 `PUBLIC_GOATCOUNTER_CODE` 중 하나를 지정  
      (예: `PUBLIC_GOATCOUNTER_HOST=https://example.goatcounter.com` 또는 `PUBLIC_GOATCOUNTER_CODE=example`)
    - `PUBLIC_GOATCOUNTER_PATH`(선택): 카운트할 경로. 기본 `/`
+   - 페이지에 페이지뷰 카운트를 표시하려면 원하는 위치에 `<div data-goatcounter-visit-count></div>`를 추가하면 됩니다.  
+     레이아웃 스크립트가 `count.js` 로드를 감지한 뒤 `goatcounter.visit_count`를 호출해 해당 요소(없을 경우 `<body>`)에 값을 삽입합니다.
 
 환경 변수가 올바르게 지정되면 사이드바에 방문자 수 카드가 나타납니다.
 
