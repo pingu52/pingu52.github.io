@@ -33,7 +33,17 @@ export type PostForList = {
 
 export async function getSortedPostsList(): Promise<PostForList[]> {
 	const sortedFullPosts = await getSortedPosts();
-	return sortedFullPosts.map((post) => ({ slug: post.slug, data: post.data }));
+	return sortedFullPosts.map((post) => ({
+		slug: post.slug,
+		data: {
+			...post.data,
+			// Preserve hierarchical category information even if the author used lowercase `categorypath`.
+			categoryPath:
+				post.data.categoryPath ??
+				(post.data as Record<string, unknown>)["categorypath"] ??
+				[],
+		},
+	}));
 }
 
 export type Tag = {

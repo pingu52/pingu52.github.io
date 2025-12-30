@@ -153,7 +153,10 @@ export function buildCategoryStaticPaths(
 
 	if (hasUncategorized) {
 		const filtered = posts.filter(
-			(p) => normalizeTaxonomyLabel(formatCategoryPath(getCategoryPathFromData(p.data))) === "",
+			(p) =>
+				normalizeTaxonomyLabel(
+					formatCategoryPath(getCategoryPathFromData(p.data)),
+				) === "",
 		);
 		paths.push(
 			...paginate(filtered, {

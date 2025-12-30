@@ -11,6 +11,8 @@ const postsCollection = defineCollection({
 		tags: z.array(z.string()).optional().default([]),
 		category: z.string().optional().nullable().default(""),
 		categoryPath: z.array(z.string()).max(3).optional().default([]),
+		// Accept lowercase alias to avoid validation failures; normalization happens downstream.
+		categorypath: z.array(z.string()).optional().default([]),
 		lang: z.string().optional().default(""),
 
 		/* For internal use */
