@@ -3,9 +3,15 @@ import categoriesData from "@data/categories.json";
 import I18nKey from "../../i18n/i18nKey";
 import { i18n } from "../../i18n/translation";
 import CategoryTreeList from "./CategoryTreeList.astro";
-import { type CategoryNode } from "../../utils/category-taxonomy";
+import {
+	labelPathToSlugPath,
+	parseCategoryLabelPath,
+	type CategoryNode,
+	UNCATEGORIZED_SLUG,
+} from "../../utils/category-taxonomy";
 import { categorySlugPathToUrl } from "../../utils/url-utils";
 import WidgetLayout from "./WidgetLayout.astro";
+import { getSortedPosts } from "../../utils/content-utils";
 
 const taxonomy = categoriesData as CategoryNode[];
 
@@ -31,10 +37,43 @@ const rawSegments = currentPath.startsWith(categoryRoot)
 
 if (rawSegments.at(-1)?.match(/^\d+$/)) rawSegments.pop();
 const activeSlugPath = rawSegments;
+
+const warnMissing = new Set<string>();
+const addWarning = (labelPath: string[]) => {
+	const label = labelPath.join(" / ");
+	if (warnMissing.has(label)) return;
+	warnMissing.add(label);
+	console.warn(
+		`[categories] Category "${label}" is not defined in categories.json`,
+	);
+};
+
+const counts = await (async () => {
+	const map = new Map<string, number>();
+	const posts = await getSortedPosts();
+
+	for (const post of posts) {
+		const labels = parseCategoryLabelPath(post.data.category);
+		const slugPath =
+			labels.length === 0
+				? [UNCATEGORIZED_SLUG]
+				: labelPathToSlugPath(labels, taxonomy);
+		if (!slugPath) {
+			addWarning(labels);
+			continue;
+		}
+		for (let i = 1; i <= slugPath.length; i++) {
+			const key = slugPath.slice(0, i).join("/");
+			map.set(key, (map.get(key) ?? 0) + 1);
+		}
+	}
+
+	return Object.fromEntries(map.entries());
+})();
 ---
 
 <WidgetLayout name={i18n(I18nKey.categories)} id="categories" isCollapsed={isCollapsed} collapsedHeight={COLLAPSED_HEIGHT}
                 class={className} style={style}
 >
-	<CategoryTreeList nodes={taxonomy} activeSlugPath={activeSlugPath} />
+	<CategoryTreeList nodes={taxonomy} activeSlugPath={activeSlugPath} counts={counts} />
 </WidgetLayout>

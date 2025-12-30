@@ -119,27 +119,23 @@ export const getStaticPaths = (async () => {
 				slugPath[0] === UNCATEGORIZED_SLUG
 					? i18n(I18nKey.uncategorized)
 					: null;
-			const childCategories =
-				slugPath.length === 0 ? taxonomy : currentNode?.children ?? [];
-
-			return Array.from({ length: totalPages }, (_, index) => {
-				const pageNumber = index + 1;
-				const paramsPath =
-					pageNumber === 1 ? slugPath : [...slugPath, String(pageNumber)];
-				return {
+				return Array.from({ length: totalPages }, (_, index) => {
+					const pageNumber = index + 1;
+					const paramsPath =
+						pageNumber === 1 ? slugPath : [...slugPath, String(pageNumber)];
+					return {
 					params:
 						paramsPath.length === 0
 							? { path: undefined }
 							: { path: paramsPath.join("/") },
-					props: {
-						page: buildPage(matchingPosts, slugPath, pageNumber, totalPages),
-						slugPath,
-						childCategories,
-						categoryLabel: currentNode?.label ?? customLabel,
-					},
-				};
+						props: {
+							page: buildPage(matchingPosts, slugPath, pageNumber, totalPages),
+							slugPath,
+							categoryLabel: currentNode?.label ?? customLabel,
+						},
+					};
+				});
 			});
-		});
 
 		return paths;
 	};
@@ -156,12 +152,10 @@ export const getStaticPaths = (async () => {
 type CategoryPageProps = {
 	page: Page<CollectionEntry<"posts">>;
 	slugPath: string[];
-	childCategories: CategoryNode[];
 	categoryLabel: string | null;
 };
 
-const { page, slugPath, childCategories, categoryLabel } =
-	Astro.props as CategoryPageProps;
+const { page, slugPath, categoryLabel } = Astro.props as CategoryPageProps;
 
 const taxonomy = categories as CategoryNode[];
 
@@ -199,7 +193,6 @@ const breadcrumb = (() => {
 })();
 
 const showPagination = page.lastPage > 1;
-const showChildren = childCategories.length > 0;
 ---
 
 <MainGridLayout title={title} description={description}>
@@ -213,35 +206,12 @@ const showChildren = childCategories.length > 0;
 					{index < breadcrumb.length - 1 && <span class="text-30">/</span>}
 				</>
 			))}
-		</nav>
+			</nav>
 
-		<div class="flex flex-col gap-6">
-			{showChildren && (
+			<div class="flex flex-col gap-6">
 				<section class="flex flex-col gap-3">
-					<h2 class="text-lg font-semibold text-75">
-						{i18n(I18nKey.categories)}
-					</h2>
-					<ul class="flex flex-wrap gap-2">
-						{childCategories.map((category: CategoryNode) => {
-							const childPath = [...slugPath, category.slug];
-							return (
-								<li>
-									<a
-										href={categorySlugPathToUrl(childPath)}
-										class="btn-plain inline-flex items-center gap-2 rounded-lg px-3 py-2"
-									>
-										<span class="font-semibold">{category.label}</span>
-									</a>
-								</li>
-							);
-						})}
-					</ul>
-				</section>
-			)}
-
-			<section class="flex flex-col gap-3">
-				<TaxonomyHeader
-					title={title}
+					<TaxonomyHeader
+						title={title}
 					count={page.total}
 					currentPage={page.currentPage}
 					lastPage={page.lastPage}

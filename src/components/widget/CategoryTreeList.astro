@@ -6,9 +6,10 @@ interface Props {
 	nodes: CategoryNode[];
 	parentSlugPath?: string[];
 	activeSlugPath: string[];
+	counts: Record<string, number>;
 }
 
-const { nodes, parentSlugPath = [], activeSlugPath } = Astro.props;
+const { nodes, parentSlugPath = [], activeSlugPath, counts } = Astro.props;
 ---
 
 <ul class="flex flex-col gap-1">
@@ -17,6 +18,7 @@ const { nodes, parentSlugPath = [], activeSlugPath } = Astro.props;
 			node={node}
 			parentSlugPath={parentSlugPath}
 			activeSlugPath={activeSlugPath}
+			counts={counts}
 		/>
 	))}
 </ul>
