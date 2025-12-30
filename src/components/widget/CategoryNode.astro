@@ -1,6 +1,8 @@
 ---
 import type { CategoryTreeNode } from "@utils/content-utils";
 import ButtonLink from "../control/ButtonLink.astro";
+// Self import needed for recursion in Astro components
+import CategoryNode from "./CategoryNode.astro";
 
 interface Props {
 	node: CategoryTreeNode;
