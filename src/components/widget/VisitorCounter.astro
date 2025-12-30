@@ -38,7 +38,9 @@ if (!isUmami && !isGoatcounter) {
 
 const activeProvider = isUmami ? "umami" : "goatcounter";
 const providerLabel = isUmami ? "Umami" : "GoatCounter";
-const recentLabel = i18nFormat(I18nKey.visitorCounterRecent, { days: rangeDays });
+const recentLabel = isUmami
+	? i18nFormat(I18nKey.visitorCounterRecent, { days: rangeDays })
+	: i18n(I18nKey.visitorCounterToday);
 const totalLabel = i18n(I18nKey.visitorCounterTotal);
 ---
 
@@ -57,10 +59,6 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 		data-goatcounter-base={goatcounterBaseUrl}
 		data-goatcounter-path={goatcounterPath}
 		data-range-days={String(rangeDays)}
-		data-recent-label={recentLabel}
-		data-total-label={totalLabel}
-		data-loading-text={i18n(I18nKey.visitorCounterLoading)}
-		data-error-text={i18n(I18nKey.visitorCounterUnavailable)}
 	>
 		<div class="flex items-start justify-between gap-3">
 			<div class="flex flex-col gap-1">
@@ -70,13 +68,6 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 						class="text-xl text-[var(--primary)]"
 					/>
 					<span>{i18nFormat(I18nKey.visitorCounterProvider, { provider: providerLabel })}</span>
-				</div>
-				<div
-					class="text-xs text-neutral-500 dark:text-neutral-400"
-					data-status
-					aria-live="polite"
-				>
-					{i18n(I18nKey.visitorCounterLoading)}
 				</div>
 			</div>
 		</div>
@@ -101,31 +92,53 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 
 		const countRecentEl = root.querySelector("[data-count-recent]");
 		const countTotalEl = root.querySelector("[data-count-total]");
-		const statusEl = root.querySelector("[data-status]");
 		const provider = root.dataset.provider;
 		const parsedRange = Number(root.dataset.rangeDays || "30");
 		const rangeDays = Number.isFinite(parsedRange) && parsedRange > 0 ? parsedRange : 30;
-		const recentLabel = root.dataset.recentLabel || "";
-		const totalLabel = root.dataset.totalLabel || "";
-		const loadingText = root.dataset.loadingText || "";
-		const errorText = root.dataset.errorText || "";
 		const umamiShareId = root.dataset.umamiShareId;
 		const umamiBase = root.dataset.umamiBase;
 		const goatcounterBase = root.dataset.goatcounterBase;
 		const goatcounterPath = root.dataset.goatcounterPath || "/";
+
+		const formatKstDate = (date: Date) => {
+			const kstDate = new Date(
+				date.toLocaleString("en-US", { timeZone: "Asia/Seoul" }),
+			);
+			const year = kstDate.getFullYear();
+			const month = String(kstDate.getMonth() + 1).padStart(2, "0");
+			const day = String(kstDate.getDate()).padStart(2, "0");
+			return `${year}-${month}-${day}`;
+		};
+
+		const buildGoatcounterUrl = (
+			path: string,
+			base: string,
+			range?: { start?: string; end?: string },
+		) => {
+			const url = new URL(
+				`/counter/${encodeURIComponent(path)}.json`,
+				base,
+			);
+			if (range?.start) url.searchParams.set("start", range.start);
+			if (range?.end) url.searchParams.set("end", range.end);
+			return url;
+		};
 
 		const formatter = new Intl.NumberFormat(
 			document.documentElement.lang || "en",
 			{ maximumFractionDigits: 0 },
 		);
 
-		const setStatus = (text: string) => {
-			if (statusEl) {
-				statusEl.textContent = text;
+		const normalizeNumber = (value: unknown): number | null => {
+			if (typeof value === "number" && Number.isFinite(value)) return value;
+			if (typeof value === "string") {
+				const trimmed = value.trim();
+				if (!trimmed) return null;
+				const parsed = Number(trimmed);
+				return Number.isFinite(parsed) ? parsed : null;
 			}
+			return null;
 		};
-
-		setStatus(loadingText);
 
 		const setCounts = (recent: number | null, total: number | null) => {
 			if (countRecentEl) {
@@ -140,9 +153,8 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 
 		const extractNumber = (values: unknown[]): number | null => {
 			for (const value of values) {
-				if (typeof value === "number" && Number.isFinite(value)) {
-					return value;
-				}
+				const parsed = normalizeNumber(value);
+				if (parsed != null) return parsed;
 			}
 			return null;
 		};
@@ -201,22 +213,38 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 			if (!goatcounterBase) {
 				throw new Error("Missing GoatCounter configuration.");
 			}
-			const url = new URL(
-				`/counter/${encodeURIComponent(goatcounterPath)}.json`,
-				goatcounterBase,
-			);
-			const response = await fetch(url.toString());
-			if (!response.ok) {
-				throw new Error(`GoatCounter responded with ${response.status}`);
-			}
-			const data = await response.json();
-			const total = extractNumber([
-				data?.count,
-				data?.hits,
-				data?.views,
-				data?.total,
+			const today = formatKstDate(new Date());
+			const [dailyResponse, totalResponse] = await Promise.all([
+				fetch(
+					buildGoatcounterUrl(goatcounterPath, goatcounterBase, {
+						start: today,
+					}).toString(),
+				),
+				fetch(buildGoatcounterUrl(goatcounterPath, goatcounterBase).toString()),
 			]);
-			return { recent: total, total };
+
+			if (!dailyResponse.ok) {
+				throw new Error(`GoatCounter daily responded with ${dailyResponse.status}`);
+			}
+			if (!totalResponse.ok) {
+				throw new Error(`GoatCounter total responded with ${totalResponse.status}`);
+			}
+
+			const dailyData = await dailyResponse.json();
+			const totalData = await totalResponse.json();
+			const recent = extractNumber([
+				dailyData?.count,
+				dailyData?.hits,
+				dailyData?.views,
+				dailyData?.total,
+			]);
+			const total = extractNumber([
+				totalData?.count,
+				totalData?.hits,
+				totalData?.views,
+				totalData?.total,
+			]);
+			return { recent, total };
 		};
 
 		const load = async () => {
@@ -232,11 +260,9 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 					throw new Error("Visitor count not available.");
 				}
 				setCounts(result.recent, result.total);
-				setStatus(`${recentLabel} • ${totalLabel}`);
 			} catch (error) {
 				console.error("[VisitorCounter]", error);
 				setCounts(null, null);
-				setStatus(errorText);
 			}
 		};
 
