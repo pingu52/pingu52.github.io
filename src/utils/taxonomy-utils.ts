@@ -1,4 +1,11 @@
 import type { CollectionEntry } from "astro:content";
+import {
+	categoryPathIsPrefix,
+	categoryPathKey,
+	formatCategoryPath,
+	getCategoryPathFromData,
+	normalizeCategoryPath,
+} from "@utils/category-utils";
 import { normalizeLower, trimOrEmpty } from "@utils/string-utils";
 import type { PaginateFunction, PaginateOptions } from "astro";
 
@@ -58,20 +65,26 @@ const normalizeTags = (tags?: string[]) =>
  * Returns the chosen display labels in case-insensitive sorted order.
  */
 export function collectCategories(posts: PostEntry[]) {
-	const map = new Map<string, string>(); // key -> label
+	const map = new Map<string, string[]>(); // key -> path segments
 	let hasUncategorized = false;
 
 	for (const post of posts) {
-		const raw = normalizeTaxonomyLabel(post.data.category ?? "");
-		if (raw === "") {
+		const path = getCategoryPathFromData(post.data);
+		if (path.length === 0) {
 			hasUncategorized = true;
 			continue;
 		}
-		const key = taxonomyKey(raw);
-		if (!map.has(key)) map.set(key, raw);
+
+		for (let i = 1; i <= path.length; i++) {
+			const prefix = path.slice(0, i);
+			const key = categoryPathKey(prefix);
+			if (!map.has(key)) map.set(key, prefix);
+		}
 	}
 
-	const categories = Array.from(map.values()).sort(sortCi);
+	const categories = Array.from(map.values()).sort((a, b) =>
+		sortCi(formatCategoryPath(a), formatCategoryPath(b)),
+	);
 
 	return { categories, hasUncategorized };
 }
@@ -118,11 +131,16 @@ export function buildCategoryStaticPaths(
 	const { categories, hasUncategorized } = collectCategories(posts);
 	const paths: TaxonomyPaths<{ category: string }> = [];
 
-	for (const categoryLabel of categories) {
-		const key = taxonomyKey(categoryLabel);
-		const filtered = posts.filter(
-			(p) => taxonomyKey(p.data.category ?? "") === key,
-		);
+	for (const categoryPath of categories) {
+		const filtered = posts.filter((post) => {
+			const postPath = normalizeCategoryPath(
+				getCategoryPathFromData(post.data),
+			);
+			return categoryPathIsPrefix(categoryPath, postPath);
+		});
+
+		const categoryLabel = formatCategoryPath(categoryPath);
+		const key = categoryPathKey(categoryPath);
 
 		paths.push(
 			...paginate(filtered, {
@@ -135,7 +153,7 @@ export function buildCategoryStaticPaths(
 
 	if (hasUncategorized) {
 		const filtered = posts.filter(
-			(p) => normalizeTaxonomyLabel(p.data.category ?? "") === "",
+			(p) => normalizeTaxonomyLabel(formatCategoryPath(getCategoryPathFromData(p.data))) === "",
 		);
 		paths.push(
 			...paginate(filtered, {

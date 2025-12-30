@@ -8,6 +8,11 @@ import {
 	sortPostsByPublishedDesc,
 } from "@utils/post-utils";
 import { trimOrEmpty } from "@utils/string-utils";
+import {
+	categoryPathKey,
+	getCategoryPathFromData,
+	normalizeCategoryPath,
+} from "@utils/category-utils";
 import { getCategoryUrl } from "@utils/url-utils.ts";
 
 // Retrieve posts and sort them by publication date (DESC)
@@ -56,31 +61,87 @@ export async function getTagList(): Promise<Tag[]> {
 	return keys.map((key) => ({ name: key, count: countMap[key] }));
 }
 
-export type Category = {
+export type CategoryTreeNode = {
 	name: string;
 	count: number;
 	url: string;
+	depth: number;
+	path: string[];
 };
 
-export async function getCategoryList(): Promise<Category[]> {
+export async function getCategoryList(): Promise<CategoryTreeNode[]> {
 	const allBlogPosts = await getAllPosts();
-	const count: Record<string, number> = {};
-
 	const uncategorizedLabel = i18n(I18nKey.uncategorized);
 
+	type Node = {
+		name: string;
+		path: string[];
+		count: number;
+		children: Map<string, Node>;
+	};
+
+	const root: Node = { name: "", path: [], count: 0, children: new Map() };
+	let uncategorizedCount = 0;
+
+	const insertPath = (path: string[]) => {
+		let current = root;
+		for (const segment of path) {
+			const key = categoryPathKey([...current.path, segment]);
+			if (!current.children.has(key)) {
+				current.children.set(key, {
+					name: segment,
+					path: [...current.path, segment],
+					count: 0,
+					children: new Map(),
+				});
+			}
+			const node = current.children.get(key)!;
+			node.count += 1;
+			current = node;
+		}
+	};
+
 	allBlogPosts.forEach((post) => {
-		const category = trimOrEmpty(post.data.category);
-		const key = category === "" ? uncategorizedLabel : category;
-		count[key] = (count[key] ?? 0) + 1;
+		const path = getCategoryPathFromData(post.data);
+		if (path.length === 0) {
+			uncategorizedCount += 1;
+			return;
+		}
+
+		insertPath(normalizeCategoryPath(path));
 	});
 
-	const lst = Object.keys(count).sort((a, b) => {
-		return a.toLowerCase().localeCompare(b.toLowerCase());
-	});
+	const sortNodes = (node: Node) =>
+		Array.from(node.children.values()).sort((a, b) =>
+			a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+		);
 
-	return lst.map((c) => ({
-		name: c,
-		count: count[c],
-		url: getCategoryUrl(c),
-	}));
+	const flatten = (nodes: Node[], depth: number): CategoryTreeNode[] => {
+		let result: CategoryTreeNode[] = [];
+		nodes.forEach((node) => {
+			result.push({
+				name: node.name,
+				count: node.count,
+				url: getCategoryUrl(node.path),
+				depth,
+				path: node.path,
+			});
+			result = result.concat(flatten(sortNodes(node), depth + 1));
+		});
+		return result;
+	};
+
+	const flat = flatten(sortNodes(root), 0);
+
+	if (uncategorizedCount > 0) {
+		flat.push({
+			name: uncategorizedLabel,
+			count: uncategorizedCount,
+			url: getCategoryUrl(null),
+			depth: 0,
+			path: [],
+		});
+	}
+
+	return flat;
 }

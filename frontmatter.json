@@ -52,6 +52,11 @@
           "type": "string"
         },
         {
+          "title": "categoryPath",
+          "name": "categoryPath",
+          "type": "list"
+        },
+        {
           "title": "draft",
           "name": "draft",
           "type": "boolean"

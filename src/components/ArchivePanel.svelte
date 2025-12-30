@@ -5,6 +5,11 @@ import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
 import type { PostForList } from "../utils/content-utils";
 import {
+	categoryPathKey,
+	getCategoryPathFromData,
+	parseCategoryLabel,
+} from "../utils/category-utils";
+import {
 	getCategoryUrl,
 	getPostUrlBySlug,
 	getTagUrl,
@@ -16,7 +21,13 @@ export let sortedPosts: PostForList[] = [];
 
 const params = new URLSearchParams(window.location.search);
 tags = params.has("tag") ? params.getAll("tag") : [];
-categories = params.has("category") ? params.getAll("category") : [];
+const categoryParamValues = params.has("category")
+	? params.getAll("category")
+	: [];
+const categoryKeys = categoryParamValues
+	.map((c) => parseCategoryLabel(c))
+	.map((path) => categoryPathKey(path));
+categories = categoryParamValues;
 const uncategorized = params.get("uncategorized");
 
 interface Group {
@@ -49,7 +60,7 @@ onMount(async () => {
 		return;
 	}
 	if (qCategories.length === 1 && qTags.length === 0 && !qUncategorized) {
-		window.location.replace(getCategoryUrl(qCategories[0]));
+		window.location.replace(getCategoryUrl(parseCategoryLabel(qCategories[0])));
 		return;
 	}
 	if (qUncategorized && qTags.length === 0 && qCategories.length === 0) {
@@ -69,12 +80,17 @@ onMount(async () => {
 
 	if (categories.length > 0) {
 		filteredPosts = filteredPosts.filter(
-			(post) => post.data.category && categories.includes(post.data.category),
+			(post) =>
+				categoryKeys.includes(
+					categoryPathKey(getCategoryPathFromData(post.data)),
+				),
 		);
 	}
 
 	if (uncategorized) {
-		filteredPosts = filteredPosts.filter((post) => !post.data.category);
+		filteredPosts = filteredPosts.filter(
+			(post) => getCategoryPathFromData(post.data).length === 0,
+		);
 	}
 
 	const grouped = filteredPosts.reduce(

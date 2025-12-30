@@ -2,6 +2,10 @@
 import { Icon } from "astro-icon/components";
 import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
+import {
+	getCategoryLabelOrDefault,
+	getCategoryPathFromData,
+} from "../utils/category-utils";
 import { formatDateToYYYYMMDD } from "../utils/date-utils";
 import { getCategoryUrl, getTagUrl } from "../utils/url-utils";
 
@@ -11,6 +15,7 @@ interface Props {
 	updated?: Date;
 	tags: string[];
 	category: string | null;
+	categoryPath?: string[];
 	hideTagsForMobile?: boolean;
 	hideUpdateDate?: boolean;
 }
@@ -19,10 +24,15 @@ const {
 	updated,
 	tags,
 	category,
+	categoryPath = [],
 	hideTagsForMobile = false,
 	hideUpdateDate = false,
 } = Astro.props;
 const className = Astro.props.class;
+
+const normalizedPath =
+	getCategoryPathFromData({ categoryPath, category }) ?? [];
+const categoryLabel = getCategoryLabelOrDefault(normalizedPath);
 ---
 
 <div class:list={["flex flex-wrap text-neutral-500 dark:text-neutral-400 items-center gap-4 gap-x-4 gap-y-2", className]}>
@@ -53,10 +63,10 @@ const className = Astro.props.class;
             <Icon name="material-symbols:book-2-outline-rounded" class="text-xl"></Icon>
         </div>
         <div class="flex flex-row flex-nowrap items-center">
-            <a href={getCategoryUrl(category)} aria-label={`View all posts in the ${category} category`}
+            <a href={getCategoryUrl(normalizedPath)} aria-label={`View all posts in the ${categoryLabel} category`}
                class="link-lg transition text-50 text-sm font-medium
                             hover:text-[var(--primary)] dark:hover:text-[var(--primary)] whitespace-nowrap">
-                {category || i18n(I18nKey.uncategorized)}
+                {categoryLabel || i18n(I18nKey.uncategorized)}
             </a>
         </div>
     </div>

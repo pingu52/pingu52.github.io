@@ -1,6 +1,7 @@
 import {
+	formatCategoryPath,
 	isUncategorizedCategory,
-	normalizeCategoryName,
+	normalizeCategoryPath,
 } from "@utils/category-utils";
 import { isBlank } from "@utils/string-utils";
 import { encodeTaxonomySegment } from "@utils/taxonomy-utils";
@@ -25,12 +26,20 @@ export function getTagUrl(tag: string): string {
 	return url(`/tag/${encodeTaxonomySegment(tag)}/`);
 }
 
-export function getCategoryUrl(category: string | null): string {
+export function getCategoryUrl(category: string | string[] | null): string {
 	// Category pages are rendered as main-feed style pages under /category/:category/...
-	if (isUncategorizedCategory(category)) return url("/category/uncategorized/");
-	return url(
-		`/category/${encodeTaxonomySegment(normalizeCategoryName(category))}/`,
-	);
+	const path =
+		category && Array.isArray(category)
+			? normalizeCategoryPath(category)
+			: normalizeCategoryPath(category ?? undefined);
+
+	if (path.length === 0 || isUncategorizedCategory(category)) {
+		return url("/category/uncategorized/");
+	}
+
+	const label = formatCategoryPath(path);
+	const encoded = encodeTaxonomySegment(label);
+	return url(`/category/${encoded}/`);
 }
 
 export function getDir(path: string): string {
