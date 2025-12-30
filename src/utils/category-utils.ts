@@ -41,17 +41,25 @@ export function parseCategoryLabel(label: string): string[] {
 	const trimmed = trimOrEmpty(label);
 	if (trimmed === "") return [];
 
-	if (trimmed.includes(CATEGORY_SEPARATOR)) {
-		return normalizeCategoryPath(trimmed.split(CATEGORY_SEPARATOR));
+	// If the label was URL-encoded (e.g., C%2B%2B), decode it first so we don't double-encode.
+	let decoded = trimmed;
+	try {
+		decoded = decodeURIComponent(trimmed);
+	} catch {
+		// fall back to the original value if decoding fails
 	}
 
-	if (trimmed.includes("/")) {
+	if (decoded.includes(CATEGORY_SEPARATOR)) {
+		return normalizeCategoryPath(decoded.split(CATEGORY_SEPARATOR));
+	}
+
+	if (decoded.includes("/")) {
 		return normalizeCategoryPath(
-			trimmed.split("/").map((segment) => trimOrEmpty(segment)),
+			decoded.split("/").map((segment) => trimOrEmpty(segment)),
 		);
 	}
 
-	return normalizeCategoryPath([trimmed]);
+	return normalizeCategoryPath([decoded]);
 }
 
 export function normalizeCategoryName(
