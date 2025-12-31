@@ -16,10 +16,7 @@ export function isNumericSegment(seg: string): boolean {
 }
 
 export function parseCategoryLabelPath(category: string): string[] {
-	return category
-		.split("/")
-		.map((seg) => seg.trim())
-		.filter((seg) => seg !== "");
+	return cleanCategorySegments(category.split("/"));
 }
 
 export function isLeaf(node: CategoryNode): boolean {
@@ -49,6 +46,10 @@ export function pruneTaxonomyToDepth(
 		});
 
 	return prune(taxonomy, 1);
+}
+
+function cleanCategorySegments(values: readonly string[]): string[] {
+	return values.map((seg) => seg.trim()).filter((seg) => seg !== "");
 }
 
 export function findNodeBySlugPath(
@@ -183,7 +184,7 @@ export function resolveSlugPathFromCategoryPath(
 	categoryPath: string[],
 	taxonomy: CategoryNode[],
 ): string[] | null {
-	const cleaned = categoryPath.map((seg) => seg.trim()).filter(Boolean);
+	const cleaned = cleanCategorySegments(categoryPath);
 	if (cleaned.length === 0) return null;
 	if (cleaned.length > MAX_CATEGORY_DEPTH) {
 		throw new Error(
@@ -217,10 +218,10 @@ export type CategoryLike = {
 export function resolvePostCategorySlugPath(
 	input: CategoryLike,
 	taxonomy: CategoryNode[],
+	options?: { leafLabelMap?: Map<string, string[]> },
 ): string[] {
 	const { categoryPath, category } = input;
-	const trimmedPath =
-		categoryPath?.map((seg) => seg.trim()).filter(Boolean) ?? [];
+	const trimmedPath = cleanCategorySegments(categoryPath ?? []);
 	if (trimmedPath.length > 0) {
 		const resolved = resolveSlugPathFromCategoryPath(trimmedPath, taxonomy);
 		if (!resolved) {
@@ -231,21 +232,22 @@ export function resolvePostCategorySlugPath(
 		return resolved;
 	}
 
-	const single = category?.trim() ?? "";
-	if (single === "") return [UNCATEGORIZED_SLUG];
+	const rawLabel = category?.trim() ?? "";
+	if (rawLabel === "") return [UNCATEGORIZED_SLUG];
 
-	const leafMap = buildLeafLabelMap(taxonomy);
-	const match = leafMap.get(single);
+	const leafLabelMap =
+		options?.leafLabelMap ?? buildLeafLabelMap(taxonomy, MAX_CATEGORY_DEPTH);
+	const match = leafLabelMap.get(rawLabel);
 	if (match) return match;
 
-	const labelMatch = findNodeByLabel(taxonomy, single);
+	const labelMatch = findNodeByLabel(taxonomy, rawLabel);
 	if (labelMatch?.node.children?.length) {
 		throw new Error(
 			`Category label refers to a parent category. Use categoryPath instead: ${labelMatch.slugPath.join(" / ")}`,
 		);
 	}
 
-	return [normalizeTaxonomyLabel(single)];
+	return [normalizeTaxonomyLabel(rawLabel)];
 }
 
 export function aggregateCounts(

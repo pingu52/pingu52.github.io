@@ -3,6 +3,7 @@ import {
 	MAX_CATEGORY_DEPTH,
 	parseCategoryLabelPath,
 	resolveSlugPathFromLabelPath,
+	type CategoryNode,
 } from "@utils/category-taxonomy-utils";
 import {
 	isUncategorizedCategory,
@@ -15,6 +16,9 @@ import {
 	UNCATEGORIZED_SLUG,
 } from "@utils/taxonomy-utils";
 import taxonomy from "@/data/category-taxonomy.json";
+
+const taxonomyData = taxonomy as CategoryNode[];
+const taxonomyLeafLabelMap = buildLeafLabelMap(taxonomyData, MAX_CATEGORY_DEPTH);
 
 export function pathsEqual(path1: string, path2: string) {
 	const normalizedPath1 = path1.replace(/^\/|\/$/g, "").toLowerCase();
@@ -48,6 +52,32 @@ export function getCategorySlugPathUrl(
 	return url(`${categoryPath}${pageSuffix}`);
 }
 
+function resolveCategoryLabelPath(labelPath: string[]): string[] {
+	if (labelPath.length > MAX_CATEGORY_DEPTH) {
+		throw new Error(
+			`Category label path exceeds maximum depth of ${MAX_CATEGORY_DEPTH}: ${labelPath.join(" / ")}`,
+		);
+	}
+
+	if (labelPath.length === 1) {
+		const resolved = taxonomyLeafLabelMap.get(labelPath[0]);
+		return resolved ?? [normalizeTaxonomyLabel(labelPath[0])];
+	}
+
+	const resolved = resolveSlugPathFromLabelPath(
+		labelPath,
+		taxonomyData,
+		true /* requireLeaf */,
+	);
+	if (!resolved) {
+		throw new Error(
+			`Category label path not found in taxonomy: ${labelPath.join(" / ")}`,
+		);
+	}
+
+	return resolved;
+}
+
 export function getCategoryUrl(category: string | null): string {
 	if (isUncategorizedCategory(category)) {
 		return getCategorySlugPathUrl([UNCATEGORIZED_SLUG]);
@@ -59,31 +89,8 @@ export function getCategoryUrl(category: string | null): string {
 	if (labelPath.length === 0)
 		return getCategorySlugPathUrl([UNCATEGORIZED_SLUG]);
 
-	if (labelPath.length === 1) {
-		const leafMap = buildLeafLabelMap(taxonomy, MAX_CATEGORY_DEPTH);
-		const resolved = leafMap.get(labelPath[0]);
-		const slugPath = resolved ?? [normalizeTaxonomyLabel(normalized)];
-		return getCategorySlugPathUrl(slugPath);
-	}
-
-	if (labelPath.length > MAX_CATEGORY_DEPTH) {
-		throw new Error(
-			`Category label path exceeds maximum depth of ${MAX_CATEGORY_DEPTH}: ${labelPath.join(" / ")}`,
-		);
-	}
-
-	const resolved = resolveSlugPathFromLabelPath(
-		labelPath,
-		taxonomy,
-		true /* requireLeaf */,
-	);
-	if (!resolved) {
-		throw new Error(
-			`Category label path not found in taxonomy: ${labelPath.join(" / ")}`,
-		);
-	}
-
-	return getCategorySlugPathUrl(resolved);
+	const slugPath = resolveCategoryLabelPath(labelPath);
+	return getCategorySlugPathUrl(slugPath);
 }
 
 export function getDir(path: string): string {
@@ -95,5 +102,6 @@ export function getDir(path: string): string {
 }
 
 export function url(path: string) {
-	return joinUrl("", import.meta.env.BASE_URL, path);
+	const base = import.meta.env?.BASE_URL ?? "/";
+	return joinUrl("", base, path);
 }

@@ -3,6 +3,7 @@ import taxonomy from "@/data/category-taxonomy.json";
 import type { CategoryNode } from "@/utils/category-taxonomy-utils";
 import {
 	aggregateCounts,
+	buildLeafLabelMap,
 	flattenSlugPathsWithPrefixes,
 	MAX_CATEGORY_DEPTH,
 	pruneTaxonomyToDepth,
@@ -15,12 +16,15 @@ import CategoryTreeItem from "./CategoryTreeItem.astro";
 import WidgetLayout from "./WidgetLayout.astro";
 
 const taxonomyData = pruneTaxonomyToDepth(taxonomy as CategoryNode[]);
+const leafLabelMap = buildLeafLabelMap(taxonomyData);
 
 const allPosts = await getAllPosts();
 const leafCounts = new Map<string, number>();
 
 for (const post of allPosts) {
-	const slugPath = resolvePostCategorySlugPath(post.data, taxonomyData);
+	const slugPath = resolvePostCategorySlugPath(post.data, taxonomyData, {
+		leafLabelMap,
+	});
 	const key = slugPath.join("/");
 	leafCounts.set(key, (leafCounts.get(key) ?? 0) + 1);
 }
