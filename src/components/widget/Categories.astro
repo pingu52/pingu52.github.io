@@ -2,18 +2,19 @@
 import taxonomy from "@/data/category-taxonomy.json";
 import type { CategoryNode } from "@/utils/category-taxonomy-utils";
 import {
-	aggregateCounts,
-	buildLeafLabelMap,
-	flattenSlugPathsWithPrefixes,
-	MAX_CATEGORY_DEPTH,
-	pruneTaxonomyToDepth,
-	resolvePostCategorySlugPath,
+  aggregateCounts,
+  buildLeafLabelMap,
+  flattenSlugPathsWithPrefixes,
+  MAX_CATEGORY_DEPTH,
+  pruneTaxonomyToDepth,
+  resolvePostCategorySlugPath,
 } from "@/utils/category-taxonomy-utils";
 import I18nKey from "../../i18n/i18nKey";
 import { i18n } from "../../i18n/translation";
 import { getAllPosts } from "../../utils/post-utils";
 import CategoryTreeItem from "./CategoryTreeItem.astro";
 import WidgetLayout from "./WidgetLayout.astro";
+import { Icon } from "astro-icon/components";
 
 const taxonomyData = pruneTaxonomyToDepth(taxonomy as CategoryNode[]);
 const leafLabelMap = buildLeafLabelMap(taxonomyData);
@@ -22,23 +23,23 @@ const allPosts = await getAllPosts();
 const leafCounts = new Map<string, number>();
 
 for (const post of allPosts) {
-	const slugPath = resolvePostCategorySlugPath(post.data, taxonomyData, {
-		leafLabelMap,
-	});
-	const key = slugPath.join("/");
-	leafCounts.set(key, (leafCounts.get(key) ?? 0) + 1);
+  const slugPath = resolvePostCategorySlugPath(post.data, taxonomyData, {
+    leafLabelMap,
+  });
+  const key = slugPath.join("/");
+  leafCounts.set(key, (leafCounts.get(key) ?? 0) + 1);
 }
 
 const aggregateCountMap = aggregateCounts(leafCounts, taxonomyData);
 
 const activeSlugPath = (() => {
-	const path = Astro.url.pathname;
-	const match = path.match(/^\/category\/(.*)$/);
-	if (!match) return [];
-	const parts = match[1].split("/").filter(Boolean);
-	const last = parts.at(-1);
-	if (last && /^\d+$/.test(last)) parts.pop();
-	return parts.slice(0, MAX_CATEGORY_DEPTH);
+  const path = Astro.url.pathname;
+  const match = path.match(/^\/category\/(.*)$/);
+  if (!match) return [];
+  const parts = match[1].split("/").filter(Boolean);
+  const last = parts.at(-1);
+  if (last && /^\d+$/.test(last)) parts.pop();
+  return parts.slice(0, MAX_CATEGORY_DEPTH);
 })();
 
 const topLevel = taxonomyData;
@@ -50,14 +51,14 @@ const COLLAPSE_THRESHOLD = 5;
 const isCollapsed = totalNodes >= COLLAPSE_THRESHOLD;
 
 interface Props {
-	class?: string;
-	style?: string;
+  class?: string;
+  style?: string;
 }
 const className = Astro.props.class;
 const style = Astro.props.style;
 
 const isActivePrefix = (slugPath: string[]) =>
-	slugPath.every((seg, idx) => activeSlugPath[idx] === seg);
+  slugPath.every((seg, idx) => activeSlugPath[idx] === seg);
 ---
 
 <WidgetLayout
@@ -69,79 +70,101 @@ const isActivePrefix = (slugPath: string[]) =>
   style={style}
 >
   <ul class="flex flex-col gap-2">
-    {topLevel.map((node) => {
-      const slugPath = [node.slug];
-      const count = aggregateCountMap.get(slugPath.join("/")) ?? 0;
+    {
+      topLevel.map((node) => {
+        const slugPath = [node.slug];
+        const count = aggregateCountMap.get(slugPath.join("/")) ?? 0;
+        const isParentActive = isActivePrefix(slugPath);
 
-      if (node.children && node.children.length > 0) {
-        return (
-          <li class="flex flex-col gap-1">
-            <details class="group" open={isActivePrefix(slugPath)}>
-              <summary
-                class:list={[
-                  `
-                    flex items-center rounded-lg px-2 py-1 cursor-pointer
-                    w-full h-10 bg-none transition-all pl-2 hover:pl-3 gap-2
-                    text-neutral-700 dark:text-neutral-300
-                    hover:text-[var(--primary)] dark:hover:text-[var(--primary)]
-                    hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)]
-                  `,
-                  isActivePrefix(slugPath) ? "text-[var(--primary)]" : "",
-                ]}
-                style="list-style: none;"
-              >
-                <span class="mr-2 text-base shrink-0 transition-transform group-open:rotate-90">
-                  ▸
-                </span>
+        if (node.children && node.children.length > 0) {
+          return (
+            <li class="flex flex-col gap-1">
+              <details class="group" open={isParentActive}>
+                <summary
+                  class:list={[
+                    `
+                      flex items-center rounded-lg px-2 py-1 cursor-pointer
+                      w-full h-10 bg-none transition-all gap-2
+                      text-neutral-700 dark:text-neutral-300
+                      hover:text-[var(--primary)] dark:hover:text-[var(--primary)]
+                      hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)]
+                    `,
+                    isParentActive ? "text-[var(--primary)]" : "",
+                  ]}
+                  style="list-style: none;"
+                >
+                  {/* 화살표 아이콘 (토글용) */}
+                  <div class="transition-transform group-open:rotate-90 shrink-0">
+                    <Icon
+                      name="material-symbols:chevron-right-rounded"
+                      class="w-5 h-5 text-neutral-500 dark:text-neutral-400"
+                    />
+                  </div>
 
-                <span class="flex-1 min-w-0 overflow-hidden text-left whitespace-nowrap overflow-ellipsis">
-                  {node.label}
-                </span>
+                  {/* 부모 카테고리 라벨 (링크 제거됨, 클릭 시 토글) */}
+                  <span
+                    class="flex-1 min-w-0 overflow-hidden text-left whitespace-nowrap overflow-ellipsis"
+                  >
+                    {node.label}
+                  </span>
 
-                <span
-                  class="ml-auto shrink-0 transition px-2 h-7 min-w-[2rem] rounded-lg text-sm font-bold
+                  {/* 숫자 카운트 */}
+                  <span
+                    class="ml-auto shrink-0 transition px-2 h-7 min-w-[2rem] rounded-lg text-sm font-bold
                     text-[var(--btn-content)] dark:text-[var(--deep-text)]
                     bg-[var(--btn-regular-bg)] dark:bg-[var(--primary)]
                     flex items-center justify-center"
-                >
-                  {count}
-                </span>
-              </summary>
+                  >
+                    {count}
+                  </span>
+                </summary>
 
-              <ul class="flex flex-col gap-1 mt-1 pl-2">
-                {node.children.map((child) => {
-                  const childSlugPath = [...slugPath, child.slug];
-                  const key = childSlugPath.join("/");
-                  const childCount = leafCounts.get(key) ?? 0;
+                {/* 하위 목록 (왼쪽 줄 추가) */}
+                <ul class="flex flex-col gap-1 mt-1 pl-3 border-l-2 border-neutral-200 dark:border-neutral-700 ml-5">
+                  {node.children.map((child) => {
+                    const childSlugPath = [...slugPath, child.slug];
+                    const key = childSlugPath.join("/");
+                    const childCount = leafCounts.get(key) ?? 0;
 
-                  return (
-                    <CategoryTreeItem
-                      prefix="•"
-                      label={child.label}
-                      slugPath={childSlugPath}
-                      count={childCount}
-                      activeSlugPath={activeSlugPath}
-                    />
-                  );
-                })}
-              </ul>
-            </details>
-          </li>
+                    return (
+                      <CategoryTreeItem
+                        label={child.label}
+                        slugPath={childSlugPath}
+                        count={childCount}
+                        activeSlugPath={activeSlugPath}
+                      />
+                    );
+                  })}
+                </ul>
+              </details>
+            </li>
+          );
+        }
+
+        // leaf depth1
+        const key = slugPath.join("/");
+        const leafCount =
+          leafCounts.get(key) ?? aggregateCountMap.get(key) ?? 0;
+
+        return (
+          <CategoryTreeItem
+            label={node.label}
+            slugPath={slugPath}
+            count={leafCount}
+            activeSlugPath={activeSlugPath}
+          />
         );
-      }
-
-      // leaf depth1
-      const key = slugPath.join("/");
-      const leafCount = leafCounts.get(key) ?? aggregateCountMap.get(key) ?? 0;
-
-      return (
-        <CategoryTreeItem
-          label={node.label}
-          slugPath={slugPath}
-          count={leafCount}
-          activeSlugPath={activeSlugPath}
-        />
-      );
-    })}
+      })
+    }
   </ul>
 </WidgetLayout>
+
+<style>
+  /* 기본 details 마커 숨김 */
+  details > summary {
+    list-style: none;
+  }
+  details > summary::-webkit-details-marker {
+    display: none;
+  }
+</style>
