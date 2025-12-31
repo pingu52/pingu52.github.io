@@ -5,13 +5,11 @@
 		"children": [
 			{
 				"label": "WSL2",
-				"slug": "WSL2",
-				"children": [
-					{
-						"label": "USBIPD",
-						"slug": "usbipd"
-					}
-				]
+				"slug": "WSL2"
+			},
+			{
+				"label": "Ubuntu",
+				"slug": "Ubuntu"
 			}
 		]
 	},

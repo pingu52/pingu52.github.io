@@ -18,6 +18,7 @@ const taxonomyData = pruneTaxonomyToDepth(taxonomy as CategoryNode[]);
 
 const allPosts = await getAllPosts();
 const leafCounts = new Map<string, number>();
+
 for (const post of allPosts) {
 	const slugPath = resolvePostCategorySlugPath(post.data, taxonomyData);
 	const key = slugPath.join("/");
@@ -25,6 +26,7 @@ for (const post of allPosts) {
 }
 
 const aggregateCountMap = aggregateCounts(leafCounts, taxonomyData);
+
 const activeSlugPath = (() => {
 	const path = Astro.url.pathname;
 	const match = path.match(/^\/category\/(.*)$/);
@@ -55,81 +57,87 @@ const isActivePrefix = (slugPath: string[]) =>
 ---
 
 <WidgetLayout
-	name={i18n(I18nKey.categories)}
-	id="categories"
-	isCollapsed={isCollapsed}
-	collapsedHeight={COLLAPSED_HEIGHT}
-	class={className}
-	style={style}
+  name={i18n(I18nKey.categories)}
+  id="categories"
+  isCollapsed={isCollapsed}
+  collapsedHeight={COLLAPSED_HEIGHT}
+  class={className}
+  style={style}
 >
-	<ul class="flex flex-col gap-2">
-			{topLevel.map((node) => {
-				const slugPath = [node.slug];
-				const count = aggregateCountMap.get(slugPath.join("/")) ?? 0;
-				if (node.children && node.children.length > 0) {
-					return (
-						<li class="flex flex-col gap-1">
-							<details class="group" open={isActivePrefix(slugPath)}>
-								<summary
-									class:list={[
-										`
-									flex items-center justify-between rounded-lg px-2 py-1 cursor-pointer
-									w-full h-10 bg-none transition-all pl-2 hover:pl-3
-									text-neutral-700 dark:text-neutral-300
-									hover:text-[var(--primary)] dark:hover:text-[var(--primary)]
-									hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)]
-								`,
-										isActivePrefix(slugPath) ? "text-[var(--primary)]" : "",
-									]}
-									style="list-style: none;"
-								>
-									<span class="mr-2 text-base transition-transform group-open:rotate-90">
-										▸
-									</span>
-									<span class="overflow-hidden text-left whitespace-nowrap overflow-ellipsis">
-										{node.label}
-									</span>
-									<span
-										class="transition px-2 h-7 ml-4 min-w-[2rem] rounded-lg text-sm font-bold
+  <ul class="flex flex-col gap-2">
+    {topLevel.map((node) => {
+      const slugPath = [node.slug];
+      const count = aggregateCountMap.get(slugPath.join("/")) ?? 0;
+
+      if (node.children && node.children.length > 0) {
+        return (
+          <li class="flex flex-col gap-1">
+            <details class="group" open={isActivePrefix(slugPath)}>
+              <summary
+                class:list={[
+                  `
+                    flex items-center rounded-lg px-2 py-1 cursor-pointer
+                    w-full h-10 bg-none transition-all pl-2 hover:pl-3 gap-2
+                    text-neutral-700 dark:text-neutral-300
+                    hover:text-[var(--primary)] dark:hover:text-[var(--primary)]
+                    hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)]
+                  `,
+                  isActivePrefix(slugPath) ? "text-[var(--primary)]" : "",
+                ]}
+                style="list-style: none;"
+              >
+                <span class="mr-2 text-base shrink-0 transition-transform group-open:rotate-90">
+                  ▸
+                </span>
+
+                <span class="flex-1 min-w-0 overflow-hidden text-left whitespace-nowrap overflow-ellipsis">
+                  {node.label}
+                </span>
+
+                <span
+                  class="ml-auto shrink-0 transition px-2 h-7 min-w-[2rem] rounded-lg text-sm font-bold
                     text-[var(--btn-content)] dark:text-[var(--deep-text)]
                     bg-[var(--btn-regular-bg)] dark:bg-[var(--primary)]
                     flex items-center justify-center"
-									>
-										{count}
-									</span>
-								</summary>
-								<ul class="flex flex-col gap-1 mt-1 pl-2">
-								{node.children.map((child) => {
-									const childSlugPath = [...slugPath, child.slug];
-									const key = childSlugPath.join("/");
-									const childCount = leafCounts.get(key) ?? 0;
-									return (
-										<CategoryTreeItem
-											label={`• ${child.label}`}
-											slugPath={childSlugPath}
-											count={childCount}
-											activeSlugPath={activeSlugPath}
-										/>
-									);
-								})}
-							</ul>
-						</details>
-					</li>
-				);
-			}
+                >
+                  {count}
+                </span>
+              </summary>
 
-			// leaf depth1
-			const key = slugPath.join("/");
-			const leafCount =
-				leafCounts.get(key) ?? aggregateCountMap.get(key) ?? 0;
-			return (
-				<CategoryTreeItem
-					label={node.label}
-					slugPath={slugPath}
-					count={leafCount}
-					activeSlugPath={activeSlugPath}
-				/>
-			);
-		})}
-	</ul>
+              <ul class="flex flex-col gap-1 mt-1 pl-2">
+                {node.children.map((child) => {
+                  const childSlugPath = [...slugPath, child.slug];
+                  const key = childSlugPath.join("/");
+                  const childCount = leafCounts.get(key) ?? 0;
+
+                  return (
+                    <CategoryTreeItem
+                      prefix="•"
+                      label={child.label}
+                      slugPath={childSlugPath}
+                      count={childCount}
+                      activeSlugPath={activeSlugPath}
+                    />
+                  );
+                })}
+              </ul>
+            </details>
+          </li>
+        );
+      }
+
+      // leaf depth1
+      const key = slugPath.join("/");
+      const leafCount = leafCounts.get(key) ?? aggregateCountMap.get(key) ?? 0;
+
+      return (
+        <CategoryTreeItem
+          label={node.label}
+          slugPath={slugPath}
+          count={leafCount}
+          activeSlugPath={activeSlugPath}
+        />
+      );
+    })}
+  </ul>
 </WidgetLayout>
