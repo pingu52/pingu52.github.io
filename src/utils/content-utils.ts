@@ -1,14 +1,14 @@
 import type { CollectionEntry } from "astro:content";
 import {
+	getUncategorizedLabel,
+	normalizeCategoryName,
+} from "@utils/category-utils";
+import {
 	attachPrevNext,
 	getAllPosts,
 	type PostEntry,
 	sortPostsByPublishedDesc,
 } from "@utils/post-utils";
-import {
-	getUncategorizedLabel,
-	normalizeCategoryName,
-} from "@utils/category-utils";
 import { trimOrEmpty } from "@utils/string-utils";
 import { getCategoryUrl } from "@utils/url-utils.ts";
 

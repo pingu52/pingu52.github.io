@@ -1,20 +1,20 @@
 ---
-import { getCategorySlugPathUrl } from "@/utils/url-utils";
 import { Icon } from "astro-icon/components";
+import { getCategorySlugPathUrl } from "@/utils/url-utils";
 
 interface Props {
-  label: string;
-  slugPath: string[];
-  count: number;
-  activeSlugPath: string[];
-  prefix?: "dot"; // child에만 주기 위한 플래그
+	label: string;
+	slugPath: string[];
+	count: number;
+	activeSlugPath: string[];
+	prefix?: "dot"; // child에만 주기 위한 플래그
 }
 
 const { label, slugPath, count, activeSlugPath, prefix } = Astro.props;
 
 const isActiveLeaf =
-  activeSlugPath.length === slugPath.length &&
-  activeSlugPath.every((seg, idx) => slugPath[idx] === seg);
+	activeSlugPath.length === slugPath.length &&
+	activeSlugPath.every((seg, idx) => slugPath[idx] === seg);
 ---
 
 <li class="flex">

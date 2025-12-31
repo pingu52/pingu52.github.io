@@ -1,9 +1,9 @@
 import {
 	buildLeafLabelMap,
+	type CategoryNode,
 	MAX_CATEGORY_DEPTH,
 	parseCategoryLabelPath,
 	resolveSlugPathFromLabelPath,
-	type CategoryNode,
 } from "@utils/category-taxonomy-utils";
 import {
 	isUncategorizedCategory,
@@ -18,7 +18,10 @@ import {
 import taxonomy from "@/data/category-taxonomy.json";
 
 const taxonomyData = taxonomy as CategoryNode[];
-const taxonomyLeafLabelMap = buildLeafLabelMap(taxonomyData, MAX_CATEGORY_DEPTH);
+const taxonomyLeafLabelMap = buildLeafLabelMap(
+	taxonomyData,
+	MAX_CATEGORY_DEPTH,
+);
 
 export function pathsEqual(path1: string, path2: string) {
 	const normalizedPath1 = path1.replace(/^\/|\/$/g, "").toLowerCase();
