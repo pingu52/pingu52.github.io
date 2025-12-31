@@ -89,7 +89,10 @@ const isActivePrefix = (slugPath: string[]) =>
 										{node.label}
 									</span>
 									<span
-										class="inline-flex min-w-[1.5rem] items-center justify-center rounded-md bg-blue-500 px-2 py-1 text-[0.75rem] font-semibold text-white dark:text-black/80"
+										class="transition px-2 h-7 ml-4 min-w-[2rem] rounded-lg text-sm font-bold
+                    text-[var(--btn-content)] dark:text-[var(--deep-text)]
+                    bg-[var(--btn-regular-bg)] dark:bg-[var(--primary)]
+                    flex items-center justify-center"
 									>
 										{count}
 									</span>
