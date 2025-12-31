@@ -4,7 +4,10 @@ published: 2025-12-29
 description: "WSL2에서 USB 장치가 안 보일 때, usbipd-win(USB/IP)으로 USB-UART/디버그 프로브(ST-Link 등)를 WSL2(Ubuntu)로 연결하는 방법을 정리합니다."
 image: 'usbipd-win.png'
 tags: [WSL2, Windows11, USB, Ubuntu, usbipd-win]
-category: 'Linux'
+category: "WSL2"
+categoryPath:
+  - Linux
+  - WSL2
 draft: false
 ---
 

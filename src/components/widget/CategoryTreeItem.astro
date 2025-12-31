@@ -1,0 +1,65 @@
+---
+import { getCategorySlugPathUrl } from "@utils/url-utils";
+
+interface Props {
+	label: string;
+	slugPath: string[];
+	count: number;
+	activeSlugPath: string[];
+	prefix?: string; // ex) "•"
+}
+
+const { label, slugPath, count, activeSlugPath, prefix } = Astro.props;
+
+const isActiveLeaf =
+	activeSlugPath.length === slugPath.length &&
+	activeSlugPath.every((seg, idx) => slugPath[idx] === seg);
+---
+
+<li class="flex">
+  <a
+    href={getCategorySlugPathUrl(slugPath)}
+    aria-label={`View all posts in the ${label} category`}
+    class:list={[
+      `
+        w-full
+        h-10
+        rounded-lg
+        bg-none
+        hover:bg-[var(--btn-plain-bg-hover)]
+        active:bg-[var(--btn-plain-bg-active)]
+        transition-all
+        pl-2
+        hover:pl-3
+        flex items-center
+
+        text-neutral-700
+        hover:text-[var(--primary)]
+        dark:text-neutral-300
+        dark:hover:text-[var(--primary)]
+      `,
+      isActiveLeaf ? "text-[var(--primary)]" : "",
+    ]}
+  >
+    <div class="flex items-center w-full relative mr-2 gap-2">
+      {prefix ? (
+        <span class="shrink-0 opacity-70" aria-hidden="true">
+          {prefix}
+        </span>
+      ) : null}
+
+      <div class="flex-1 min-w-0 overflow-hidden text-left whitespace-nowrap overflow-ellipsis">
+        {label}
+      </div>
+
+      <div
+        class="ml-auto shrink-0 transition px-2 h-7 min-w-[2rem] rounded-lg text-sm font-bold
+          text-[var(--btn-content)] dark:text-[var(--deep-text)]
+          bg-[var(--btn-regular-bg)] dark:bg-[var(--primary)]
+          flex items-center justify-center"
+      >
+        {count}
+      </div>
+    </div>
+  </a>
+</li>

@@ -1,0 +1,19 @@
+[
+	{
+		"label": "Linux",
+		"slug": "Linux",
+		"children": [
+			{
+				"label": "WSL2",
+				"slug": "WSL2"
+			},
+			{
+				"label": "Ubuntu",
+				"slug": "Ubuntu"
+			}
+		]
+	},
+	{ "label": "Guides", "slug": "Guides" },
+	{ "label": "Examples", "slug": "Examples" },
+	{ "label": "C++", "slug": "c-plus-plus" }
+]
