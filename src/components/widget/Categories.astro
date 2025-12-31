@@ -63,22 +63,37 @@ const isActivePrefix = (slugPath: string[]) =>
 	style={style}
 >
 	<ul class="flex flex-col gap-2">
-		{topLevel.map((node) => {
-			const slugPath = [node.slug];
-			const count = aggregateCountMap.get(slugPath.join("/")) ?? 0;
-			if (node.children && node.children.length > 0) {
-				return (
-					<li class="flex flex-col gap-1">
-						<details class="group" open={isActivePrefix(slugPath)}>
-							<summary
-								class="flex items-center justify-between rounded-lg px-2 py-1 cursor-pointer hover:bg-[var(--card-bg)]"
-								style="list-style: none;"
-							>
-								<span class="font-semibold">{node.label}</span>
-								<span class="text-xs text-neutral-500 dark:text-neutral-400">
-									{count}
-								</span>
-							</summary>
+			{topLevel.map((node) => {
+				const slugPath = [node.slug];
+				const count = aggregateCountMap.get(slugPath.join("/")) ?? 0;
+				if (node.children && node.children.length > 0) {
+					return (
+						<li class="flex flex-col gap-1">
+							<details class="group" open={isActivePrefix(slugPath)}>
+								<summary
+									class:list={[
+										`
+									flex items-center justify-between rounded-lg px-2 py-1 cursor-pointer
+									w-full h-10 bg-none transition-all pl-2 hover:pl-3
+									text-neutral-700 dark:text-neutral-300
+									hover:text-[var(--primary)] dark:hover:text-[var(--primary)]
+									hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)]
+								`,
+										isActivePrefix(slugPath)
+											? "font-semibold text-[var(--primary)]"
+											: "",
+									]}
+									style="list-style: none;"
+								>
+									<span class="overflow-hidden text-left whitespace-nowrap overflow-ellipsis">
+										{node.label}
+									</span>
+									<span
+										class="inline-flex min-w-[1.5rem] items-center justify-center rounded-md bg-blue-500 px-2 py-1 text-[0.75rem] font-semibold text-white dark:text-black/80"
+									>
+										{count}
+									</span>
+								</summary>
 								<ul class="flex flex-col gap-1 mt-1 pl-2">
 								{node.children.map((child) => {
 									const childSlugPath = [...slugPath, child.slug];
