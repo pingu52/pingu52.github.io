@@ -95,5 +95,7 @@ export function getDir(path: string): string {
 }
 
 export function url(path: string) {
-	return joinUrl("", import.meta.env.BASE_URL, path);
+	const baseUrl =
+		(import.meta as { env?: { BASE_URL?: string } }).env?.BASE_URL ?? "";
+	return joinUrl("", baseUrl, path);
 }

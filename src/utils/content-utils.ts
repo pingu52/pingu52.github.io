@@ -8,6 +8,11 @@ import {
 	sortPostsByPublishedDesc,
 } from "@utils/post-utils";
 import { trimOrEmpty } from "@utils/string-utils";
+import {
+	normalizeTaxonomyLabel,
+	taxonomyKey,
+	UNCATEGORIZED_SLUG,
+} from "@utils/taxonomy-utils";
 import { getCategoryUrl } from "@utils/url-utils.ts";
 
 // Retrieve posts and sort them by publication date (DESC)
@@ -62,25 +67,48 @@ export type Category = {
 	url: string;
 };
 
-export async function getCategoryList(): Promise<Category[]> {
-	const allBlogPosts = await getAllPosts();
-	const count: Record<string, number> = {};
+type CategoryAccumulator = {
+	label: string;
+	count: number;
+};
 
+export function buildCategoryList(posts: PostEntry[]): Category[] {
+	const count = new Map<string, CategoryAccumulator>();
 	const uncategorizedLabel = i18n(I18nKey.uncategorized);
 
-	allBlogPosts.forEach((post) => {
-		const category = trimOrEmpty(post.data.category);
-		const key = category === "" ? uncategorizedLabel : category;
-		count[key] = (count[key] ?? 0) + 1;
+	posts.forEach((post) => {
+		const normalized = normalizeTaxonomyLabel(post.data.category ?? "");
+		const key =
+			normalized === "" ? UNCATEGORIZED_SLUG : taxonomyKey(normalized);
+		const label = normalized === "" ? UNCATEGORIZED_SLUG : normalized;
+
+		const current = count.get(key);
+		if (current) {
+			current.count += 1;
+		} else {
+			count.set(key, { label, count: 1 });
+		}
 	});
 
-	const lst = Object.keys(count).sort((a, b) => {
-		return a.toLowerCase().localeCompare(b.toLowerCase());
+	const sortedEntries = Array.from(count.entries()).sort((a, b) => {
+		const [aKey, aData] = a;
+		const [bKey, bData] = b;
+		const aLabel = aKey === UNCATEGORIZED_SLUG ? uncategorizedLabel : aData.label;
+		const bLabel = bKey === UNCATEGORIZED_SLUG ? uncategorizedLabel : bData.label;
+		return aLabel.toLowerCase().localeCompare(bLabel.toLowerCase());
 	});
 
-	return lst.map((c) => ({
-		name: c,
-		count: count[c],
-		url: getCategoryUrl(c),
-	}));
+	return sortedEntries.map(([key, data]) => {
+		const labelForUrl = key === UNCATEGORIZED_SLUG ? UNCATEGORIZED_SLUG : data.label;
+		return {
+			name: key === UNCATEGORIZED_SLUG ? uncategorizedLabel : data.label,
+			count: data.count,
+			url: getCategoryUrl(labelForUrl),
+		};
+	});
+}
+
+export async function getCategoryList(): Promise<Category[]> {
+	const allBlogPosts = await getAllPosts();
+	return buildCategoryList(allBlogPosts);
 }
