@@ -71,8 +71,8 @@ const isActivePrefix = (slugPath: string[]) =>
 						<li class="flex flex-col gap-1">
 							<details class="group" open={isActivePrefix(slugPath)}>
 								<summary
-								class:list={[
-									`
+									class:list={[
+										`
 									flex items-center justify-between rounded-lg px-2 py-1 cursor-pointer
 									w-full h-10 bg-none transition-all pl-2 hover:pl-3
 									text-neutral-700 dark:text-neutral-300
@@ -83,9 +83,6 @@ const isActivePrefix = (slugPath: string[]) =>
 									]}
 									style="list-style: none;"
 								>
-									<span class="mr-2 text-sm transition-transform group-open:rotate-90">
-										▸
-									</span>
 									<span class="overflow-hidden text-left whitespace-nowrap overflow-ellipsis">
 										{node.label}
 									</span>
