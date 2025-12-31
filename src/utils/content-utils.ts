@@ -1,12 +1,14 @@
 import type { CollectionEntry } from "astro:content";
-import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
 import {
 	attachPrevNext,
 	getAllPosts,
 	type PostEntry,
 	sortPostsByPublishedDesc,
 } from "@utils/post-utils";
+import {
+	getUncategorizedLabel,
+	normalizeCategoryName,
+} from "@utils/category-utils";
 import { trimOrEmpty } from "@utils/string-utils";
 import { getCategoryUrl } from "@utils/url-utils.ts";
 
@@ -64,23 +66,22 @@ export type Category = {
 
 export async function getCategoryList(): Promise<Category[]> {
 	const allBlogPosts = await getAllPosts();
-	const count: Record<string, number> = {};
-
-	const uncategorizedLabel = i18n(I18nKey.uncategorized);
+	const uncategorizedLabel = getUncategorizedLabel();
+	const counts = new Map<string, number>();
 
 	allBlogPosts.forEach((post) => {
-		const category = trimOrEmpty(post.data.category);
+		const category = normalizeCategoryName(post.data.category);
 		const key = category === "" ? uncategorizedLabel : category;
-		count[key] = (count[key] ?? 0) + 1;
+		counts.set(key, (counts.get(key) ?? 0) + 1);
 	});
 
-	const lst = Object.keys(count).sort((a, b) => {
-		return a.toLowerCase().localeCompare(b.toLowerCase());
-	});
+	const sortedNames = Array.from(counts.keys()).sort((a, b) =>
+		a.toLowerCase().localeCompare(b.toLowerCase()),
+	);
 
-	return lst.map((c) => ({
-		name: c,
-		count: count[c],
-		url: getCategoryUrl(c),
+	return sortedNames.map((name) => ({
+		name,
+		count: counts.get(name) ?? 0,
+		url: getCategoryUrl(name),
 	}));
 }

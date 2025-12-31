@@ -9,6 +9,7 @@ import MainGridLayout from "@layouts/MainGridLayout.astro";
 import type { CategoryNode } from "@utils/category-taxonomy-utils";
 import {
 	aggregateCounts,
+	buildLeafLabelMap,
 	findNodeBySlugPath,
 	flattenSlugPathsWithPrefixes,
 	getChildrenBySlugPath,
@@ -41,11 +42,14 @@ const resolveSlugPathFromParams = (path: string | undefined) => {
 
 export const getStaticPaths = (async () => {
 	const taxonomyData = pruneTaxonomyToDepth(taxonomy as CategoryNode[]);
+	const leafLabelMap = buildLeafLabelMap(taxonomyData);
 	const allPosts = await getSortedPosts();
 
 	const leafCounts = new Map<string, number>();
 	allPosts.forEach((post) => {
-		const slugPath = resolvePostCategorySlugPath(post.data, taxonomyData);
+		const slugPath = resolvePostCategorySlugPath(post.data, taxonomyData, {
+			leafLabelMap,
+		});
 		const key = slugPath.join("/");
 		leafCounts.set(key, (leafCounts.get(key) ?? 0) + 1);
 	});
@@ -55,7 +59,9 @@ export const getStaticPaths = (async () => {
 		slugPathSet.add(path.join("/"));
 	}
 	allPosts.forEach((post) => {
-		const slugPath = resolvePostCategorySlugPath(post.data, taxonomyData);
+		const slugPath = resolvePostCategorySlugPath(post.data, taxonomyData, {
+			leafLabelMap,
+		});
 		slugPathSet.add(slugPath.join("/"));
 	});
 
@@ -84,6 +90,7 @@ export const getStaticPaths = (async () => {
 
 const { slugPath, pageNumber } = resolveSlugPathFromParams(Astro.params.path);
 const taxonomyData = pruneTaxonomyToDepth(taxonomy as CategoryNode[]);
+const leafLabelMap = buildLeafLabelMap(taxonomyData);
 const nodeMatch = findNodeBySlugPath(slugPath, taxonomyData);
 const children = getChildrenBySlugPath(slugPath, taxonomyData);
 const isLeaf = !nodeMatch?.node || !nodeMatch.node.children?.length;
@@ -97,7 +104,9 @@ const title = labelPath.at(-1) ?? i18n(I18nKey.uncategorized);
 const allPosts = await getSortedPosts();
 const leafCounts = new Map<string, number>();
 allPosts.forEach((post) => {
-	const resolved = resolvePostCategorySlugPath(post.data, taxonomyData);
+	const resolved = resolvePostCategorySlugPath(post.data, taxonomyData, {
+		leafLabelMap,
+	});
 	const key = resolved.join("/");
 	leafCounts.set(key, (leafCounts.get(key) ?? 0) + 1);
 });
@@ -110,7 +119,9 @@ const displayCount = isLeaf
 
 const postsForCurrent = isLeaf
 	? allPosts.filter((post) => {
-			const resolved = resolvePostCategorySlugPath(post.data, taxonomyData);
+			const resolved = resolvePostCategorySlugPath(post.data, taxonomyData, {
+				leafLabelMap,
+			});
 			return resolved.join("/") === currentKey;
 		})
 	: [];
