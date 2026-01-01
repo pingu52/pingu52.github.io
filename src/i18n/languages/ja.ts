@@ -14,7 +14,7 @@ export const ja: Translation = {
 	[Key.comments]: "コメント",
 	[Key.visitorCounter]: "訪問者数",
 	[Key.visitorCounterProvider]: "情報元: {provider}",
-	[Key.visitorCounterRange]: "直近{days}日間の訪問者",
+	[Key.visitorCounterNotConfigured]: "未設定",
 	[Key.visitorCounterTotal]: "累計訪問者数",
 	[Key.visitorCounterRecent]: "直近{days}日",
 	[Key.visitorCounterToday]: "今日",

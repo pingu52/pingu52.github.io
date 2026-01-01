@@ -6,7 +6,7 @@ import { spawnSync } from "node:child_process";
 
 const ROOT = process.cwd();
 const TAXONOMY_PATH = path.join(ROOT, "src/data/category-taxonomy.json");
-const POSTS_BASE_DIR = path.join(ROOT, "src/contents/posts");
+const POSTS_BASE_DIR = path.join(ROOT, "src/content/posts");
 
 // depth=2 고정(요구사항)
 const MAX_DEPTH = 2;
@@ -99,7 +99,7 @@ function splitPathStr(s) {
 }
 
 function isUrlSafeSlug(slug) {
-  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
+  return /^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/.test(slug);
 }
 
 function ensureSingleLevelDirName(dirNameRaw) {
@@ -435,15 +435,28 @@ async function selectLeafCategory(taxonomy) {
   return leaves[n - 1];
 }
 
-function buildFrontmatter({ title, category, draft, published }) {
+function buildFrontmatter({ title, category, categoryPath, draft, published }) {
   const tags = [];
+  const nl = String.fromCharCode(10);
+
+  const pathSegments = Array.isArray(categoryPath) && categoryPath.length
+    ? categoryPath
+    : [category];
+  const pathLines = pathSegments
+    .map((seg) => `  - ${JSON.stringify(String(seg))}`)
+    .join(nl);
+
   return `---
-title: "${title.replace(/"/g, '\\"')}"
+title: ${JSON.stringify(String(title))}
 published: ${published}
 description: ""
-draft: ${draft ? "true" : "false"}
+image: ""
 tags: ${JSON.stringify(tags)}
-category: "${category.replace(/"/g, '\\"')}"
+category: ${JSON.stringify(String(category))}
+categoryPath:
+${pathLines}
+draft: ${draft ? "true" : "false"}
+lang: ""
 ---
 `;
 }
@@ -498,7 +511,7 @@ async function cmdNewPost(taxonomy, args) {
   const fileBase = slugifyFileName(title);
   const filepath = uniqueFilePath(outDir, fileBase, ".md");
 
-  const fm = buildFrontmatter({ title, category: leafLabel, draft, published });
+  const fm = buildFrontmatter({ title, category: leafLabel, categoryPath: labels, draft, published });
   fs.writeFileSync(filepath, fm + "\n", "utf-8");
 
   console.log(`\n생성 완료: ${path.relative(ROOT, filepath)}`);

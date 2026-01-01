@@ -57,8 +57,16 @@ pnpm preview
 
 ### 스크립트로 생성
 ```bash
+# 기본: 카테고리(leaf) 선택 프롬프트가 뜹니다
 pnpm new-post "my-first-post"
+
+# 옵션 예시
+pnpm new-post "my-first-post" -- --category "Linux" --open
+pnpm new-post "my-first-post" -- --dir "2026-01-01" --draft
+pnpm new-post "my-first-post" -- --date "2026-01-01"
 ```
+
+> 참고: `pnpm blog:post` / `pnpm blog:tax`도 동일한 스크립트를 사용합니다. (예: `pnpm blog:tax list`)
 
 생성된 파일을 열어 frontmatter를 채우면 됩니다.
 
@@ -67,10 +75,12 @@ pnpm new-post "my-first-post"
 ---
 title: My First Post
 published: 2025-12-21
+updated: 2025-12-22 # 선택
 description: ""
 image: ""
 tags: []
-category: ""
+category: "Linux" # leaf label (선택)
+categoryPath: ["OS", "Linux"] # 선택 (권장)
 draft: false
 lang: ""
 ---
@@ -105,7 +115,7 @@ lang: ""
      (예: `PUBLIC_GOATCOUNTER_HOST=https://example.goatcounter.com` 또는 `PUBLIC_GOATCOUNTER_CODE=example`)
    - `PUBLIC_GOATCOUNTER_PATH`(선택): 카운트할 경로. 기본 `/`
 
-환경 변수가 올바르게 지정되면 사이드바에 방문자 수 카드가 나타납니다.
+사이드바 위젯은 항상 표시되며, 환경 변수가 설정되지 않은 경우 "설정되지 않음" 상태로 안내합니다.
 
 ---
 

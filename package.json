@@ -11,10 +11,13 @@
         "preview": "astro preview",
         "astro": "astro",
         "type-check": "tsc --noEmit --isolatedDeclarations",
-        "new-post": "node scripts/new-post.js",
+        "new-post": "node scripts/blog-cli.mjs post",
         "format": "biome format --write ./src",
         "lint": "biome check --write ./src",
-        "preinstall": "npx only-allow pnpm"
+        "preinstall": "npx only-allow pnpm",
+        "blog": "node scripts/blog-cli.mjs",
+        "blog:tax": "node scripts/blog-cli.mjs tax",
+        "blog:post": "node scripts/blog-cli.mjs post"
     },
     "dependencies": {
         "@astrojs/check": "^0.9.6",
@@ -55,7 +58,7 @@
         "sanitize-html": "^2.17.0",
         "sharp": "^0.34.5",
         "stylus": "^0.64.0",
-        "svelte": "^5.46.0",
+        "svelte": "^5.46.1",
         "tailwindcss": "^4.1.18",
         "typescript": "^5.9.3",
         "unist-util-visit": "^5.0.0"

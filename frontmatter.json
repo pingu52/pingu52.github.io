@@ -36,6 +36,11 @@
           "isPublishDate": true
         },
         {
+          "title": "updated",
+          "name": "updated",
+          "type": "datetime"
+        },
+        {
           "title": "preview",
           "name": "image",
           "type": "image",
@@ -52,13 +57,18 @@
           "type": "string"
         },
         {
+          "title": "categoryPath",
+          "name": "categoryPath",
+          "type": "list"
+        },
+        {
           "title": "draft",
           "name": "draft",
           "type": "boolean"
         },
         {
-          "title": "language",
-          "name": "language",
+          "title": "lang",
+          "name": "lang",
           "type": "string"
         }
       ]

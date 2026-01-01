@@ -31,17 +31,27 @@ const goatcounterPath = import.meta.env.PUBLIC_GOATCOUNTER_PATH || "/";
 
 const isUmami = provider === "umami" && umamiShareId;
 const isGoatcounter = provider === "goatcounter" && goatcounterBaseUrl;
+const isConfigured = Boolean(isUmami || isGoatcounter);
 
-if (!isUmami && !isGoatcounter) {
-	return;
-}
-
-const activeProvider = isUmami ? "umami" : "goatcounter";
-const providerLabel = isUmami ? "Umami" : "GoatCounter";
+const activeProvider = isUmami
+	? "umami"
+	: isGoatcounter
+		? "goatcounter"
+		: "none";
+const providerLabel = isUmami
+	? "Umami"
+	: isGoatcounter
+		? "GoatCounter"
+		: i18n(I18nKey.visitorCounterNotConfigured);
 const recentLabel = isUmami
 	? i18nFormat(I18nKey.visitorCounterRecent, { days: rangeDays })
-	: i18n(I18nKey.visitorCounterToday);
+	: isGoatcounter
+		? i18n(I18nKey.visitorCounterToday)
+		: i18nFormat(I18nKey.visitorCounterRecent, { days: rangeDays });
 const totalLabel = i18n(I18nKey.visitorCounterTotal);
+const initialStatus = isConfigured
+	? i18n(I18nKey.visitorCounterLoading)
+	: i18n(I18nKey.visitorCounterNotConfigured);
 ---
 
 <WidgetLayout
@@ -59,6 +69,9 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 		data-goatcounter-base={goatcounterBaseUrl}
 		data-goatcounter-path={goatcounterPath}
 		data-range-days={String(rangeDays)}
+		data-status-loading={i18n(I18nKey.visitorCounterLoading)}
+		data-status-unavailable={i18n(I18nKey.visitorCounterUnavailable)}
+		data-status-not-configured={i18n(I18nKey.visitorCounterNotConfigured)}
 	>
 		<div class="flex items-start justify-between gap-3">
 			<div class="flex flex-col gap-1">
@@ -69,6 +82,7 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 					/>
 					<span>{i18nFormat(I18nKey.visitorCounterProvider, { provider: providerLabel })}</span>
 				</div>
+				<div class="text-xs text-neutral-500 dark:text-neutral-400" data-status aria-live="polite">{initialStatus}</div>
 			</div>
 		</div>
 
@@ -92,6 +106,10 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 
 		const countRecentEl = root.querySelector("[data-count-recent]");
 		const countTotalEl = root.querySelector("[data-count-total]");
+		const statusEl = root.querySelector("[data-status]");
+		const statusLoading = root.dataset.statusLoading || "";
+		const statusUnavailable = root.dataset.statusUnavailable || "";
+		const statusNotConfigured = root.dataset.statusNotConfigured || "";
 		const provider = root.dataset.provider;
 		const parsedRange = Number(root.dataset.rangeDays || "30");
 		const rangeDays = Number.isFinite(parsedRange) && parsedRange > 0 ? parsedRange : 30;
@@ -149,6 +167,11 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 				countTotalEl.textContent =
 					typeof total === "number" ? formatter.format(total) : "—";
 			}
+		};
+
+		const setStatus = (text: string) => {
+			if (!statusEl) return;
+			statusEl.textContent = text;
 		};
 
 		const extractNumber = (values: unknown[]): number | null => {
@@ -249,6 +272,13 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 
 		const load = async () => {
 			try {
+				if (provider !== "umami" && provider !== "goatcounter") {
+					setStatus(statusNotConfigured);
+					setCounts(null, null);
+					return;
+				}
+
+				setStatus(statusLoading);
 				let result: { recent: number | null; total: number | null } | null = null;
 				if (provider === "umami") {
 					result = await fetchUmami();
@@ -260,9 +290,11 @@ const totalLabel = i18n(I18nKey.visitorCounterTotal);
 					throw new Error("Visitor count not available.");
 				}
 				setCounts(result.recent, result.total);
+				setStatus("");
 			} catch (error) {
 				console.error("[VisitorCounter]", error);
 				setCounts(null, null);
+				setStatus(statusUnavailable);
 			}
 		};
 

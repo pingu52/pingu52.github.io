@@ -14,7 +14,7 @@ export const en: Translation = {
 	[Key.comments]: "Comments",
 	[Key.visitorCounter]: "Visitor Count",
 	[Key.visitorCounterProvider]: "Source: {provider}",
-	[Key.visitorCounterRange]: "Visitors in the last {days} days",
+	[Key.visitorCounterNotConfigured]: "Not configured",
 	[Key.visitorCounterTotal]: "All-time visitors",
 	[Key.visitorCounterRecent]: "Last {days} days",
 	[Key.visitorCounterToday]: "Today",

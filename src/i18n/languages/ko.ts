@@ -14,7 +14,7 @@ export const ko: Translation = {
 	[Key.comments]: "댓글",
 	[Key.visitorCounter]: "방문자 수",
 	[Key.visitorCounterProvider]: "수집: {provider}",
-	[Key.visitorCounterRange]: "최근 {days}일 방문자",
+	[Key.visitorCounterNotConfigured]: "설정되지 않음",
 	[Key.visitorCounterTotal]: "누적 방문자",
 	[Key.visitorCounterRecent]: "최근 {days}일",
 	[Key.visitorCounterToday]: "오늘",
