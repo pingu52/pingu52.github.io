@@ -4,10 +4,8 @@ published: 2025-12-27
 description: "Windows 11에서 WSL2로 Linux 빌드 환경을 안정적으로 세팅하는 방법을 정리합니다."
 draft: false
 tags: ["WSL", "Windows11", "Linux", "Ubuntu"]
-category: "WSL2"
-categoryPath:
-  - Linux
-  - WSL2
+category: "Virtualization"
+
 ---
 
 안녕하세요, pingu52입니다.

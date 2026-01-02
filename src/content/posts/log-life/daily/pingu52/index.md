@@ -2,9 +2,9 @@
 title: 핑구 == 주인장.
 published: 2025-12-19
 description: '나는 핑구다.'
-image: '../../assets/images/pingu.jpg'
+image: '../../../../../assets/images/pingu.jpg'
 tags: [pingu]
-category: 'Examples'
+category: '일상'
 draft: false 
 lang: ''
 ---

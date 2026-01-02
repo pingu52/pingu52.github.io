@@ -1,19 +1,52 @@
 [
 	{
-		"label": "Linux",
-		"slug": "Linux",
+	  "label": "Computer Science",
+	  "slug": "computer-science",
+	  "children": [
+		{ "label": "OS & Arch", "slug": "os-architecture" },
+		{ "label": "Network & DB", "slug": "network-database" }
+	  ]
+	},
+	{
+	  "label": "Embedded System",
+	  "slug": "embedded-system",
+	  "children": [
+		{ "label": "BSP & Build", "slug": "bsp-build-system" },
+		{ "label": "Kernel & Driver", "slug": "linux-kernel-driver" },
+		{ "label": "Firmware & MCU", "slug": "firmware-mcu" }
+	  ]
+	},
+	{
+	  "label": "System Engineering",
+	  "slug": "system-engineering",
+	  "children": [
+		{ "label": "Virtualization", "slug": "virtualization" },
+		{ "label": "Server & Infra", "slug": "server-infra" } 
+	  ]
+	},
+	{
+	  "label": "Languages",
+	  "slug": "languages-tools",
+	  "children": [
+		{ "label": "C / C++", "slug": "c-cpp" },
+		{ "label": "Python", "slug": "python-script" },
+		{ "label": "Tools", "slug": "dev-tools" }
+	  ]
+	},
+	{
+		"label": "Problem Solving",
+		"slug": "problem-solving",
 		"children": [
-			{
-				"label": "WSL2",
-				"slug": "WSL2"
-			},
-			{
-				"label": "Ubuntu",
-				"slug": "Ubuntu"
-			}
+		  { "label": "BOJ", "slug": "boj" },
+		  { "label": "SWEA", "slug": "swea" }
 		]
 	},
-	{ "label": "Guides", "slug": "Guides" },
-	{ "label": "Examples", "slug": "Examples" },
-	{ "label": "C++", "slug": "c-plus-plus" }
-]
+	{
+	  "label": "잡담",
+	  "slug": "log-life",
+	  "children": [
+		{ "label": "일상", "slug": "daily" },
+		{ "label": "애니", "slug": "anime" }
+	  ]
+	}
+  ]
