@@ -60,6 +60,7 @@ Yocto 빌드에서 “무엇을 만들지”는 크게 세 축으로 잡힙니�
 
 ![OpenSTLinux envsetup + bitbake 실행 예시](./images/bitbake-envsetup.png)
 *환경 설정 스크립트 적용 후 `bitbake`로 이미지 레시피를 빌드하는 전형적인 흐름.*
+
 ## BitBake 태스크 흐름: Fetch → Configure → Compile → Install → Package → Image
 
 BitBake는 레시피에 정의된 태스크를 “그래프(의존 관계)”로 계산한 뒤 실행합니다. 대표적인 흐름은 다음과 같습니다.
