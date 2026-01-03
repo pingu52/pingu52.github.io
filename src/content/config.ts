@@ -1,6 +1,5 @@
 import { defineCollection, z } from "astro:content";
 
-type AnyCollection = ReturnType<typeof defineCollection>;
 type CollectionDef = ReturnType<typeof defineCollection>;
 
 const postsCollection: CollectionDef = defineCollection({

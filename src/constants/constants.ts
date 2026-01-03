@@ -6,7 +6,7 @@ export const AUTO_MODE = "auto" as const;
 
 // With --isolatedDeclarations enabled, exported variables that depend on other
 // exported variables must have explicit type annotations.
-export const DEFAULT_THEME: typeof AUTO_MODE = AUTO_MODE; 
+export const DEFAULT_THEME: typeof AUTO_MODE = AUTO_MODE;
 
 // Banner height unit: vh
 export const BANNER_HEIGHT = 35;

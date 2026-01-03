@@ -126,7 +126,10 @@ export function createUrlUtils(taxonomyData: CategoryNode[]): UrlUtils {
 const defaultTaxonomyData = taxonomy as CategoryNode[];
 const defaults = createUrlUtils(defaultTaxonomyData);
 
-export const getPostUrlBySlug: UrlUtils["getPostUrlBySlug"] = defaults.getPostUrlBySlug;
+export const getPostUrlBySlug: UrlUtils["getPostUrlBySlug"] =
+	defaults.getPostUrlBySlug;
 export const getTagUrl: UrlUtils["getTagUrl"] = defaults.getTagUrl;
-export const getCategorySlugPathUrl: UrlUtils["getCategorySlugPathUrl"] = defaults.getCategorySlugPathUrl;
-export const getCategoryUrl: UrlUtils["getCategoryUrl"] = defaults.getCategoryUrl;
+export const getCategorySlugPathUrl: UrlUtils["getCategorySlugPathUrl"] =
+	defaults.getCategorySlugPathUrl;
+export const getCategoryUrl: UrlUtils["getCategoryUrl"] =
+	defaults.getCategoryUrl;

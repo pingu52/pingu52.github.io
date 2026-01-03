@@ -53,11 +53,10 @@ export function decodeTaxonomySegment(value: string): string {
 const normalizeTags = (tags?: string[]) =>
 	(tags ?? []).map(normalizeTaxonomyLabel).filter((t) => t !== "");
 
-	export type CollectedCategories = {
-		categories: string[];
-		hasUncategorized: boolean;
-	};
-
+export type CollectedCategories = {
+	categories: string[];
+	hasUncategorized: boolean;
+};
 
 /**
  * Collect categories with a stable label for each group (case-insensitive).
