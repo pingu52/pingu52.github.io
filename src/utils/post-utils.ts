@@ -1,15 +1,17 @@
-import type { CollectionEntry } from "astro:content";
+import { type CollectionEntry, getCollection } from "astro:content";
 
 export type PostEntry = CollectionEntry<"posts">;
 
-export type PostNav = {
-	prevSlug: string;
-	prevTitle: string;
-	nextSlug: string;
-	nextTitle: string;
-};
+export function includePostInBuild(data: PostEntry["data"]): boolean {
+	return import.meta.env.PROD ? data.draft !== true : true;
+}
 
-export type PostEntryWithNav = PostEntry & { nav: PostNav };
+export async function getAllPosts(): Promise<PostEntry[]> {
+	// Explicitly type the callback param to avoid implicit-any under isolatedDeclarations
+	return getCollection("posts", (entry: PostEntry) =>
+		includePostInBuild(entry.data),
+	);
+}
 
 export function sortPostsByPublishedDesc(posts: PostEntry[]): PostEntry[] {
 	// Avoid in-place mutation.
@@ -22,24 +24,21 @@ export function sortPostsByPublishedDesc(posts: PostEntry[]): PostEntry[] {
 		);
 }
 
-/**
- * Attach prev/next navigation info without mutating Astro content entries.
- * Returns a view model shape: { ...entry, nav: {...} }
- */
-export function attachPrevNext(posts: PostEntry[]): PostEntryWithNav[] {
+export function attachPrevNext(posts: PostEntry[]): PostEntry[] {
+	// Avoid mutating Astro content entries; return shallow copies with updated `data`.
 	return posts.map((post, idx) => {
 		const next = idx > 0 ? posts[idx - 1] : undefined;
 		const prev = idx < posts.length - 1 ? posts[idx + 1] : undefined;
 
-		const nav: PostNav = {
-			nextSlug: next?.slug ?? "",
-			nextTitle: next?.data.title ?? "",
-			prevSlug: prev?.slug ?? "",
-			prevTitle: prev?.data.title ?? "",
+		return {
+			...post,
+			data: {
+				...post.data,
+				nextSlug: next?.slug ?? "",
+				nextTitle: next?.data.title ?? "",
+				prevSlug: prev?.slug ?? "",
+				prevTitle: prev?.data.title ?? "",
+			},
 		};
-
-		// Important: do NOT spread `post` (Astro ContentEntry has special typing)
-		// Use Object.assign to keep the original type and just add a field.
-		return Object.assign(post, { nav });
 	});
 }
