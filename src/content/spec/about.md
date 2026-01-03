@@ -16,6 +16,6 @@
 - “삽질 로그”를 **재현 가능한 체크리스트**로 정리해두는 중
 
 ## 링크
-- GitHub: https://github.com/pingu52
-- Email: gudrbs9852@gmail.com
-- LinkedIn: https://www.linkedin.com/in/pingu52
+- GitHub: <https://github.com/pingu52>
+- Email: <gudrbs9852@gmail.com>
+- LinkedIn: <https://www.linkedin.com/in/pingu52>

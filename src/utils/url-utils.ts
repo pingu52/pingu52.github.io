@@ -17,7 +17,7 @@ import {
 } from "@utils/taxonomy-utils";
 import taxonomy from "@/data/category-taxonomy.json";
 
-export function pathsEqual(path1: string, path2: string) {
+export function pathsEqual(path1: string, path2: string): boolean {
 	const normalizedPath1 = path1.replace(/^\/|\/$/g, "").toLowerCase();
 	const normalizedPath2 = path2.replace(/^\/|\/$/g, "").toLowerCase();
 	return normalizedPath1 === normalizedPath2;
@@ -28,7 +28,7 @@ function joinUrl(...parts: string[]): string {
 	return joined.replace(/\/+/g, "/");
 }
 
-export function url(path: string) {
+export function url(path: string): string {
 	const base = import.meta.env?.BASE_URL ?? "/";
 	return joinUrl("", base, path);
 }
@@ -126,7 +126,7 @@ export function createUrlUtils(taxonomyData: CategoryNode[]): UrlUtils {
 const defaultTaxonomyData = taxonomy as CategoryNode[];
 const defaults = createUrlUtils(defaultTaxonomyData);
 
-export const getPostUrlBySlug = defaults.getPostUrlBySlug;
-export const getTagUrl = defaults.getTagUrl;
-export const getCategorySlugPathUrl = defaults.getCategorySlugPathUrl;
-export const getCategoryUrl = defaults.getCategoryUrl;
+export const getPostUrlBySlug: UrlUtils["getPostUrlBySlug"] = defaults.getPostUrlBySlug;
+export const getTagUrl: UrlUtils["getTagUrl"] = defaults.getTagUrl;
+export const getCategorySlugPathUrl: UrlUtils["getCategorySlugPathUrl"] = defaults.getCategorySlugPathUrl;
+export const getCategoryUrl: UrlUtils["getCategoryUrl"] = defaults.getCategoryUrl;
