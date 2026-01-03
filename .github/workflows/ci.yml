@@ -26,16 +26,26 @@ jobs:
           node-version: 24
           cache: pnpm
 
-      - name: Enable Corepack
+      - name: Enable Corepack and ac
         run: |
           corepack enable
-          # Install the package manager version pinned in package.json (packageManager)
-          codepack install
+          # fallback if packageManager is missing
+          if ! command -v pnpm >/dev/null 2>&1; then
+            corepack prepare pnpm@10.26.1 --active
+          fi
           pnpm --version
+          echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
 
       - name: Lint (Biome)
         run: pnpm lint:ci
