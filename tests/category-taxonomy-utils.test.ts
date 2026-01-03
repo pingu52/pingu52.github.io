@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import taxonomy from "@/data/category-taxonomy.json";
 import {
+	type CategoryNode,
 	MAX_CATEGORY_DEPTH,
 	aggregateCounts,
 	buildLeafLabelMap,
@@ -18,22 +19,24 @@ const taxonomyNodes = taxonomy;
 
 describe("category-taxonomy-utils", () => {
 	it("parses category label paths by trimming and removing empty segments", () => {
-		assert.deepStrictEqual(parseCategoryLabelPath(" Linux / Ubuntu "), [
-			"Linux",
-			"Ubuntu",
+		assert.deepStrictEqual(
+			parseCategoryLabelPath(" Embedded System / BSP & Build "),
+			["Embedded System", "BSP & Build"],
+		);
+		assert.deepStrictEqual(parseCategoryLabelPath("///System Engineering//"), [
+			"System Engineering",
 		]);
-		assert.deepStrictEqual(parseCategoryLabelPath("///Linux//"), ["Linux"]);
 	});
 
 	it("resolves slug paths from label paths with optional leaf enforcement", () => {
 		const slugPath = resolveSlugPathFromLabelPath(
-			["Linux", "Ubuntu"],
+			["System Engineering", "Virtualization"],
 			taxonomyNodes,
 		);
-		assert.deepStrictEqual(slugPath, ["Linux", "Ubuntu"]);
+		assert.deepStrictEqual(slugPath, ["system-engineering", "virtualization"]);
 
 		const parentOnly = resolveSlugPathFromLabelPath(
-			["Linux"],
+			["System Engineering"],
 			taxonomyNodes,
 			true,
 		);
@@ -42,30 +45,44 @@ describe("category-taxonomy-utils", () => {
 
 	it("resolves category paths, enforcing maximum depth and leaf requirement", () => {
 		assert.deepStrictEqual(
-			resolveSlugPathFromCategoryPath(["Linux", "WSL2"], taxonomyNodes),
-			["Linux", "WSL2"],
+			resolveSlugPathFromCategoryPath(
+				["System Engineering", "Virtualization"],
+				taxonomyNodes,
+			),
+			["system-engineering", "virtualization"],
 		);
 
 		assert.throws(() =>
 			resolveSlugPathFromCategoryPath(
-				["Linux", "Ubuntu", "Desktop"],
+				["Embedded System", "BSP & Build", "Extra"],
 				taxonomyNodes,
 			),
+		);
+
+		// Parent labels must not be used as category paths (must resolve to leaf)
+		assert.throws(() =>
+			resolveSlugPathFromCategoryPath(["Embedded System"], taxonomyNodes),
 		);
 	});
 
 	it("resolves post category slug paths preferring explicit categoryPath", () => {
 		const pathPreferred = resolvePostCategorySlugPath(
-			{ categoryPath: ["Linux", "WSL2"], category: "Ignored" },
+			{
+				categoryPath: ["System Engineering", "Virtualization"],
+				category: "Ignored",
+			},
 			taxonomyNodes,
 		);
-		assert.deepStrictEqual(pathPreferred, ["Linux", "WSL2"]);
+		assert.deepStrictEqual(pathPreferred, ["system-engineering", "virtualization"]);
 
 		const fallbackToCategory = resolvePostCategorySlugPath(
-			{ category: "Ubuntu" },
+			{ category: "BSP & Build" },
 			taxonomyNodes,
 		);
-		assert.deepStrictEqual(fallbackToCategory, ["Linux", "Ubuntu"]);
+		assert.deepStrictEqual(fallbackToCategory, [
+			"embedded-system",
+			"bsp-build-system",
+		]);
 
 		const uncategorized = resolvePostCategorySlugPath(
 			{ category: "" },
@@ -80,34 +97,49 @@ describe("category-taxonomy-utils", () => {
 		assert.deepStrictEqual(normalized, [normalizeTaxonomyLabel("new   label")]);
 
 		assert.throws(() =>
-			resolvePostCategorySlugPath({ category: "Linux" }, taxonomyNodes),
+			resolvePostCategorySlugPath({ category: "System Engineering" }, taxonomyNodes),
 		);
 	});
 
 	it("builds ancestors and aggregates counts for hierarchical categories", () => {
 		const leafCounts = new Map([
-			["Linux/Ubuntu", 2],
-			["Linux/WSL2", 1],
+			["embedded-system/bsp-build-system", 2],
+			["system-engineering/virtualization", 1],
 		]);
 		const totals = aggregateCounts(leafCounts, taxonomyNodes);
 
-		assert.deepStrictEqual(getAncestorsForSlugPath(["Linux", "Ubuntu"]), [
-			["Linux"],
-			["Linux", "Ubuntu"],
-		]);
+		assert.deepStrictEqual(
+			getAncestorsForSlugPath(["embedded-system", "bsp-build-system"]),
+			[["embedded-system"], ["embedded-system", "bsp-build-system"]],
+		);
 
-		assert.equal(totals.get("Linux"), 3);
-		assert.equal(totals.get("Linux/Ubuntu"), 2);
-		assert.equal(totals.get("Linux/WSL2"), 1);
+		assert.equal(totals.get("embedded-system"), 2);
+		assert.equal(totals.get("embedded-system/bsp-build-system"), 2);
+		assert.equal(totals.get("system-engineering"), 1);
+		assert.equal(totals.get("system-engineering/virtualization"), 1);
+
 		// Ensure taxonomy nodes exist even with zero posts.
-		const findExamples = findNodeBySlugPath(["Examples"], taxonomyNodes);
-		assert.ok(findExamples);
-		assert.equal(totals.get("Examples"), 0);
+		const findNetworkDb = findNodeBySlugPath(
+			["computer-science", "network-database"],
+			taxonomyNodes,
+		);
+		assert.ok(findNetworkDb);
+		assert.equal(totals.get("computer-science/network-database"), 0);
 	});
 
 	it("creates a leaf label map that errors on duplicate labels", () => {
 		const map = buildLeafLabelMap(taxonomyNodes, MAX_CATEGORY_DEPTH);
-		assert.deepStrictEqual(map.get("Ubuntu"), ["Linux", "Ubuntu"]);
-		assert.deepStrictEqual(map.get("C++"), ["c-plus-plus"]);
+		assert.deepStrictEqual(map.get("BSP & Build"), [
+			"embedded-system",
+			"bsp-build-system",
+		]);
+		assert.deepStrictEqual(map.get("C / C++"), ["languages-tools", "c-cpp"]);
+
+		// Verify duplicate leaf labels are rejected (buildLeafLabelMap should throw)
+		const dup: CategoryNode[] = [
+			{ label: "A", slug: "a", children: [{ label: "Leaf", slug: "leaf-1" }] },
+			{ label: "B", slug: "b", children: [{ label: "Leaf", slug: "leaf-2" }] },
+		];
+		assert.throws(() => buildLeafLabelMap(dup, MAX_CATEGORY_DEPTH));
 	});
 });
