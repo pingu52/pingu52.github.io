@@ -10,11 +10,8 @@ import {
 	sortPostsByPublishedDesc,
 } from "@utils/post-utils";
 import { trimOrEmpty } from "@utils/string-utils";
+import { normalizeTaxonomyLabel, taxonomyKey } from "@utils/taxonomy-utils";
 import { getCategoryUrl } from "@utils/url-utils.ts";
-import {
-	normalizeTaxonomyLabel,
-	taxonomyKey,
-} from "@utils/taxonomy-utils";
 
 // Retrieve posts and sort them by publication date (DESC)
 async function getRawSortedPosts(): Promise<PostEntry[]> {

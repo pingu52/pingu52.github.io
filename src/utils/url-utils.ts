@@ -115,7 +115,12 @@ export function createUrlUtils(taxonomyData: CategoryNode[]): UrlUtils {
 		return getCategorySlugPathUrl(slugPath);
 	}
 
-	return { getPostUrlBySlug, getTagUrl, getCategorySlugPathUrl, getCategoryUrl };
+	return {
+		getPostUrlBySlug,
+		getTagUrl,
+		getCategorySlugPathUrl,
+		getCategoryUrl,
+	};
 }
 
 const defaultTaxonomyData = taxonomy as CategoryNode[];
