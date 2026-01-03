@@ -15,7 +15,6 @@ permissions:
 jobs:
   ci:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,28 +23,28 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: pnpm
 
-      - name: Enable Corepack and ac
+      - name: Enable Corepack and activate pnpm
+        shell: bash
         run: |
           corepack enable
-          # fallback if packageManager is missing
+          corepack install || true
           if ! command -v pnpm >/dev/null 2>&1; then
-            corepack prepare pnpm@10.26.1 --active
+            corepack prepare pnpm@10.26.1 --activate
           fi
           pnpm --version
-          echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
 
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:
           path: ${{ env.PNPM_STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-pnpm-store-
 
       - name: Lint (Biome)
         run: pnpm lint:ci
