@@ -13,11 +13,13 @@ export type PostEntryWithNav = PostEntry & { nav: PostNav };
 
 export function sortPostsByPublishedDesc(posts: PostEntry[]): PostEntry[] {
 	// Avoid in-place mutation.
-	return posts.slice().sort(
-		(a, b) =>
-			new Date(b.data.published).getTime() -
-			new Date(a.data.published).getTime(),
-	);
+	return posts
+		.slice()
+		.sort(
+			(a, b) =>
+				new Date(b.data.published).getTime() -
+				new Date(a.data.published).getTime(),
+		);
 }
 
 /**
