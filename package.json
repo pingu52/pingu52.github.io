@@ -14,6 +14,7 @@
         "new-post": "node scripts/blog-cli.mjs post",
         "format": "biome format --write ./src",
         "lint": "biome check --write ./src",
+        "lint:ci": "biome check ./src",
         "preinstall": "npx only-allow pnpm",
         "blog": "node scripts/blog-cli.mjs",
         "blog:tax": "node scripts/blog-cli.mjs tax",
