@@ -11,6 +11,10 @@ import {
 } from "@utils/post-utils";
 import { trimOrEmpty } from "@utils/string-utils";
 import { getCategoryUrl } from "@utils/url-utils.ts";
+import {
+	normalizeTaxonomyLabel,
+	taxonomyKey,
+} from "@utils/taxonomy-utils";
 
 // Retrieve posts and sort them by publication date (DESC)
 async function getRawSortedPosts(): Promise<PostEntry[]> {
@@ -41,21 +45,25 @@ export type Tag = {
 export async function getTagList(): Promise<Tag[]> {
 	const allBlogPosts = await getAllPosts();
 
-	const countMap: Record<string, number> = {};
-	allBlogPosts.forEach((post) => {
-		(post.data.tags ?? []).forEach((tag) => {
-			const key = trimOrEmpty(tag);
-			if (!key) return;
-			countMap[key] = (countMap[key] ?? 0) + 1;
-		});
-	});
+	// Group tags case-insensitively and with collapsed whitespace so that
+	// sidebar tags match the same normalization used by static path generation.
+	const grouped = new Map<string, { label: string; count: number }>();
 
-	// sort tags
-	const keys: string[] = Object.keys(countMap).sort((a, b) => {
-		return a.toLowerCase().localeCompare(b.toLowerCase());
-	});
+	for (const post of allBlogPosts) {
+		for (const raw of post.data.tags ?? []) {
+			const trimmed = trimOrEmpty(raw);
+			if (!trimmed) continue;
+			const label = normalizeTaxonomyLabel(trimmed);
+			const key = taxonomyKey(label);
+			const prev = grouped.get(key);
+			if (!prev) grouped.set(key, { label, count: 1 });
+			else prev.count += 1;
+		}
+	}
 
-	return keys.map((key) => ({ name: key, count: countMap[key] }));
+	return Array.from(grouped.values())
+		.sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()))
+		.map((t) => ({ name: t.label, count: t.count }));
 }
 
 export type Category = {

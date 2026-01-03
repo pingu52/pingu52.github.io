@@ -374,7 +374,9 @@ function cmdTaxonomyCheck(taxonomy) {
   }
   checkSiblingDuplicates(taxonomy);
 
-  // leaf label duplicates (warning)
+  // leaf label duplicates (ERROR)
+  // NOTE: runtime/build path resolution treats duplicate leaf labels as fatal
+  // (see buildLeafLabelMap throwing on duplicates). Keep CLI behavior consistent.
   const leafLabelSeen = new Map();
   for (const p of leaves) {
     const { labels, slugs } = nodePathToStrings(p);
@@ -386,7 +388,7 @@ function cmdTaxonomyCheck(taxonomy) {
   }
   for (const [label, arr] of leafLabelSeen.entries()) {
     if (arr.length > 1) {
-      warnings.push(`leaf label 중복(매핑 충돌 가능): "${label}"\n  - ${arr.join("\n  - ")}`);
+      errors.push(`leaf label 중복(매핑 충돌): "${label}"\n  - ${arr.join("\n  - ")}`);
     }
   }
 

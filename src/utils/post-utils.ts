@@ -11,7 +11,8 @@ export async function getAllPosts(): Promise<PostEntry[]> {
 }
 
 export function sortPostsByPublishedDesc(posts: PostEntry[]): PostEntry[] {
-	return posts.sort(
+	// Avoid in-place mutation to keep the function referentially transparent.
+	return posts.slice().sort(
 		(a, b) =>
 			new Date(b.data.published).getTime() -
 			new Date(a.data.published).getTime(),
@@ -19,13 +20,20 @@ export function sortPostsByPublishedDesc(posts: PostEntry[]): PostEntry[] {
 }
 
 export function attachPrevNext(posts: PostEntry[]): PostEntry[] {
-	for (let i = 1; i < posts.length; i++) {
-		posts[i].data.nextSlug = posts[i - 1].slug;
-		posts[i].data.nextTitle = posts[i - 1].data.title;
-	}
-	for (let i = 0; i < posts.length - 1; i++) {
-		posts[i].data.prevSlug = posts[i + 1].slug;
-		posts[i].data.prevTitle = posts[i + 1].data.title;
-	}
-	return posts;
+	// Do NOT mutate content entry data in-place. Instead, return a new array
+	// with shallow-copied entries and an updated data payload.
+	return posts.map((post, idx) => {
+		const next = idx > 0 ? posts[idx - 1] : undefined;
+		const prev = idx < posts.length - 1 ? posts[idx + 1] : undefined;
+		return {
+			...post,
+			data: {
+				...post.data,
+				nextSlug: next?.slug ?? "",
+				nextTitle: next?.data.title ?? "",
+				prevSlug: prev?.slug ?? "",
+				prevTitle: prev?.data.title ?? "",
+			},
+		};
+	});
 }
