@@ -27,7 +27,12 @@ jobs:
           cache: pnpm
 
       - name: Enable Corepack
-        run: corepack enable
+        run: |
+          corepack enable
+          # Install the package manager version pinned in package.json (packageManager)
+          codepack install
+          pnpm --version
+
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
