@@ -1,5 +1,5 @@
 ---
-title: "[Yocto] OpenSTLinux 빌드 실패 해결: meta-myboard 레이어로 패치 관리 (numactl/avahi 등)"
+title: "[Yocto] OpenSTLinux 빌드 실패 해결: custom layer로 관리 (numactl/avahi 등)"
 published: 2026-01-04
 description: "벤더 레이어를 직접 수정하지 않고, 커스텀 레이어(meta-myboard)에서 bbappend로 빌드 실패를 안정적으로 해결하는 패턴을 정리합니다."
 tags: [Yocto, BitBake, OpenEmbedded, OpenSTLinux, STM32MP25]
