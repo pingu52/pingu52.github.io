@@ -30,14 +30,25 @@ describe("url-utils", () => {
 		(import.meta.env as any).BASE_URL = "/";
 		assert.equal(getCategoryUrl(null), "/category/uncategorized/");
 		assert.equal(getCategoryUrl(""), "/category/uncategorized/");
-		assert.equal(getCategoryUrl("Ubuntu"), "/category/Linux/Ubuntu/");
-		assert.equal(getCategoryUrl("Linux/WSL2"), "/category/Linux/WSL2/");
-		assert.equal(getCategorySlugPathUrl(["Linux", "Ubuntu"], 3), "/category/Linux/Ubuntu/3/");
+		// leaf label -> slugPath (from taxonomy)
+		assert.equal(
+			getCategoryUrl("BSP & Build"),
+			"/category/embedded-system/bsp-build-system/",
+		);
+		// labelPath (parent/leaf) -> slugPath (from taxonomy)
+		assert.equal(
+			getCategoryUrl("System Engineering/Virtualization"),
+			"/category/system-engineering/virtualization/",
+		);
+		assert.equal(
+			getCategorySlugPathUrl(["system-engineering", "virtualization"], 3),
+			"/category/system-engineering/virtualization/3/",
+		);
 	});
 
 	it("throws for category label paths exceeding the maximum depth or missing taxonomy nodes", () => {
-		assert.throws(() => getCategoryUrl("Linux/Ubuntu/Extra"));
-		assert.throws(() => getCategoryUrl("Linux/Nonexistent"));
+		assert.throws(() => getCategoryUrl("Embedded System/BSP & Build/Extra"));
+		assert.throws(() => getCategoryUrl("Embedded System/Nonexistent"));
 	});
 
 	it("returns parent directory portions of a path", () => {

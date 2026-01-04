@@ -7,25 +7,38 @@ export function includePostInBuild(data: PostEntry["data"]): boolean {
 }
 
 export async function getAllPosts(): Promise<PostEntry[]> {
-	return getCollection("posts", ({ data }) => includePostInBuild(data));
-}
-
-export function sortPostsByPublishedDesc(posts: PostEntry[]): PostEntry[] {
-	return posts.sort(
-		(a, b) =>
-			new Date(b.data.published).getTime() -
-			new Date(a.data.published).getTime(),
+	// Explicitly type the callback param to avoid implicit-any under isolatedDeclarations
+	return getCollection("posts", (entry: PostEntry) =>
+		includePostInBuild(entry.data),
 	);
 }
 
+export function sortPostsByPublishedDesc(posts: PostEntry[]): PostEntry[] {
+	// Avoid in-place mutation.
+	return posts
+		.slice()
+		.sort(
+			(a, b) =>
+				new Date(b.data.published).getTime() -
+				new Date(a.data.published).getTime(),
+		);
+}
+
 export function attachPrevNext(posts: PostEntry[]): PostEntry[] {
-	for (let i = 1; i < posts.length; i++) {
-		posts[i].data.nextSlug = posts[i - 1].slug;
-		posts[i].data.nextTitle = posts[i - 1].data.title;
-	}
-	for (let i = 0; i < posts.length - 1; i++) {
-		posts[i].data.prevSlug = posts[i + 1].slug;
-		posts[i].data.prevTitle = posts[i + 1].data.title;
-	}
-	return posts;
+	// Avoid mutating Astro content entries; return shallow copies with updated `data`.
+	return posts.map((post, idx) => {
+		const next = idx > 0 ? posts[idx - 1] : undefined;
+		const prev = idx < posts.length - 1 ? posts[idx + 1] : undefined;
+
+		return {
+			...post,
+			data: {
+				...post.data,
+				nextSlug: next?.slug ?? "",
+				nextTitle: next?.data.title ?? "",
+				prevSlug: prev?.slug ?? "",
+				prevTitle: prev?.data.title ?? "",
+			},
+		};
+	});
 }

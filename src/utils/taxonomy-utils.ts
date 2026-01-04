@@ -53,11 +53,16 @@ export function decodeTaxonomySegment(value: string): string {
 const normalizeTags = (tags?: string[]) =>
 	(tags ?? []).map(normalizeTaxonomyLabel).filter((t) => t !== "");
 
+export type CollectedCategories = {
+	categories: string[];
+	hasUncategorized: boolean;
+};
+
 /**
  * Collect categories with a stable label for each group (case-insensitive).
  * Returns the chosen display labels in case-insensitive sorted order.
  */
-export function collectCategories(posts: PostEntry[]) {
+export function collectCategories(posts: PostEntry[]): CollectedCategories {
 	const map = new Map<string, string>(); // key -> label
 	let hasUncategorized = false;
 
@@ -79,7 +84,7 @@ export function collectCategories(posts: PostEntry[]) {
 /**
  * Collect tags with a stable label for each group (case-insensitive).
  */
-export function collectTags(posts: PostEntry[]) {
+export function collectTags(posts: PostEntry[]): string[] {
 	const map = new Map<string, string>(); // key -> label
 
 	for (const post of posts) {
