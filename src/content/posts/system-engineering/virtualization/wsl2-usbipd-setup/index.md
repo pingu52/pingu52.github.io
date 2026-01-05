@@ -46,7 +46,7 @@ Windows에서 USB 디바이스를 **USB/IP 방식으로 공유**하고, WSL2가 
 
 ## 준비
 
-### 1) Windows / WSL 요구사항
+### 0. Windows / WSL 요구사항
 
 :::important
 Microsoft 공식 가이드 기준으로 **Windows 11 Build 22000 이상**, WSL 커널 버전 조건이 있습니다.  
@@ -82,10 +82,11 @@ wsl uname -r
 
 두 가지 중 편한 방법으로 설치합니다. (1번 권장)
 
-1) `.msi` 설치  
-    - [usbipd-win Github Release Page](https://github.com/dorssel/usbipd-win/releases)에서 최신 버전 다운로드 후 설치
+### 1.1 `.msi` 설치
 
-2) `winget` 설치
+[usbipd-win Github Release Page](https://github.com/dorssel/usbipd-win/releases)에서 최신 버전 다운로드 후 설치
+
+### 1.2 `winget` 설치
 
 ```powershell
 winget install --interactive --exact dorssel.usbipd-win
@@ -178,7 +179,7 @@ usbipd list
 
 WSL로 돌아가서 확인합니다.
 
-### 1) `lsusb` 확인
+### 5.1 `lsusb` 확인
 
 `lsusb`가 없다면 설치:
 
@@ -195,7 +196,7 @@ lsusb
 
 연결한 장치(예: CP210x, ST-Link)가 보이면 1차 성공입니다.
 
-### 2) 시리얼(UART)이라면 `/dev/tty*` 확인
+### 5.2 시리얼(UART)이라면 `/dev/tty*` 확인
 
 ```bash
 ls -l /dev/ttyUSB* /dev/ttyACM* 2>/dev/null
@@ -236,7 +237,7 @@ usbipd unbind --busid 2-2
 
 ## 8. 자주 겪는 문제 (Troubleshooting)
 
-### A) `Device is not shared` / `Not shared` 상태에서 attach 시도
+### 8.1 `Device is not shared` / `Not shared` 상태에서 attach 시도
 
 먼저 `bind`를 해야 합니다.
 
@@ -245,12 +246,12 @@ usbipd unbind --busid 2-2
 usbipd bind --busid <BUSID>
 ```
 
-### B) `The device appears to be used by Windows`
+### 8.2 `The device appears to be used by Windows`
 
 Windows에서 해당 장치를 잡고 있는 프로그램을 종료하세요.  
 (예: 시리얼 모니터, IDE, 드라이버 유틸 등)
 
-### C) 보드 리셋/부트로더 진입으로 BUSID가 바뀌는 경우
+### 8.3 보드 리셋/부트로더 진입으로 BUSID가 바뀌는 경우
 
 펌웨어 업로드/부트로더 진입에서 장치가 재인식되면 BUSID가 바뀌며 attach가 끊길 수 있습니다.  
 이때는 `--auto-attach` + `--hardware-id (VID:PID)` 조합이 도움이 됩니다.
