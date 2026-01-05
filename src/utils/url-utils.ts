@@ -32,20 +32,26 @@ function joinUrl(...parts: string[]): string {
 export function url(path: string): string {
 	const base = import.meta.env?.BASE_URL ?? "/";
 	const joined = joinUrl("", base, path);
-	return stripTrailingSlash(joined);
+	// return stripTrailingSlash(joined);
+	return joined;
 }
 
-function stripTrailingSlash(u: string): string {
-	const match = u.match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
-	if (!match) return u;
+/**
+ * trailing slash 제거 모듈
+ * @param path
+ * @returns
+ */
+// function stripTrailingSlash(u: string): string {
+// 	const match = u.match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
+// 	if (!match) return u;
 
-	let path = match[1] ?? "";
-	const query = match[2] ?? "";
-	const hash = match[3] ?? "";
+// 	let path = match[1] ?? "";
+// 	const query = match[2] ?? "";
+// 	const hash = match[3] ?? "";
 
-	if (path.length > 1) path = path.replace(/\/+$/g, "");
-	return `${path}${query}${hash}`;
-}
+// 	if (path.length > 1) path = path.replace(/\/+$/g, "");
+// 	return `${path}${query}${hash}`;
+// }
 
 export function getDir(path: string): string {
 	const lastSlashIndex = path.lastIndexOf("/");

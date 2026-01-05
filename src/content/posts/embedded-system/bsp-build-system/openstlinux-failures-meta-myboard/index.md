@@ -75,7 +75,7 @@ bitbake-layers show-appends | grep -i <recipe>
 
 ![local.conf 튜닝 예시](./images/local-conf-tuning.png)
 
-```conf
+```ini
 # conf/local.conf
 CONNECTIVITY_CHECK_URIS = "https://www.google.com/ https://www.st.com/"
 ```
@@ -95,7 +95,7 @@ Yocto 문서에서도 **병렬 빌드 실패(parallel build failures)**가 간�
 
 ### 4.2 특정 패키지에 한정해 병렬성 조정 예시
 
-```conf
+```ini
 # conf/local.conf
 PARALLEL_MAKEINST:pn-binutils-cross-aarch64 = ""
 ```

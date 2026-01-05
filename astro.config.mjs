@@ -27,7 +27,7 @@ import { pluginCustomCopyButton } from "./src/plugins/expressive-code/custom-cop
 export default defineConfig({
 	site: "https://pingu52.github.io/",
 	base: "/",
-	trailingSlash: "ignore",
+	trailingSlash: "always",
 	integrations: [
 		// tailwind() 제거
 		swup({
