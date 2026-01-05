@@ -41,7 +41,7 @@ ip link
 
 `ifconfig wlan0`에서 `UP` 표시가 없다면 아직 내려가 있는 상태입니다.
 
-[![ifconfig wlan0 출력 예시 (UP 없음)](./images/03-ifconfig-wlan0-down.png)](./images/03-ifconfig-wlan0-down.png)
+![ifconfig wlan0 출력 예시 (UP 없음)](./images/03-ifconfig-wlan0-down.png)
 
 올려줍니다.
 
@@ -51,7 +51,7 @@ ifconfig wlan0 up
 ip link set wlan0 up
 ```
 
-[![ifconfig wlan0 출력 예시 (UP 상태)](./images/04-ifconfig-wlan0-up.png)](./images/04-ifconfig-wlan0-up.png)
+![ifconfig wlan0 출력 예시 (UP 상태)](./images/04-ifconfig-wlan0-up.png)
 
 ---
 
@@ -63,7 +63,7 @@ ip link set wlan0 up
 iw dev wlan0 scan | grep SSID
 ```
 
-[![iw scan으로 SSID 목록 확인](./images/05-iw-scan-ssid.png)](./images/05-iw-scan-ssid.png)
+![iw scan으로 SSID 목록 확인](./images/05-iw-scan-ssid.png)
 
 ---
 
@@ -86,7 +86,7 @@ DHCP=ipv4
 cat /lib/systemd/network/51-wireless.network
 ```
 
-[![51-wireless.network에 DHCP=ipv4 설정](./images/02-networkd-51-wireless-network.png)](./images/02-networkd-51-wireless-network.png)
+![51-wireless.network에 DHCP=ipv4 설정](./images/02-networkd-51-wireless-network.png)
 
 ---
 
@@ -109,7 +109,7 @@ network={
 }
 ```
 
-[![wpa_supplicant-wlan0.conf 편집 화면](./images/07-wpa_supplicant-wlan0-conf.png)](./images/07-wpa_supplicant-wlan0-conf.png)
+![wpa_supplicant-wlan0.conf 편집 화면](./images/07-wpa_supplicant-wlan0-conf.png)
 
 :::tip
 실무에서는 `wpa_passphrase "<SSID>" "<PASS>"`로 `psk=`를 생성해 붙여 넣는 편이 안전합니다(따옴표/이스케이프 실수 방지).
@@ -126,7 +126,7 @@ systemctl restart systemd-networkd.service
 systemctl restart wpa_supplicant@wlan0.service
 ```
 
-[![wpa_supplicant@wlan0 enable 및 재시작](./images/01-systemctl-enable-wpa_supplicant.png)](./images/01-systemctl-enable-wpa_supplicant.png)
+![wpa_supplicant@wlan0 enable 및 재시작](./images/01-systemctl-enable-wpa_supplicant.png)
 
 ---
 
@@ -140,11 +140,11 @@ networkctl --no-pager
 
 연결이 아직 안 된 상황에서는 아래처럼 `wlan0`가 `no-carrier / unmanaged`로 보일 수 있습니다.
 
-[![networkctl 예시: wlan0 no-carrier/unmanaged](./images/06-networkctl-unmanaged.png)](./images/06-networkctl-unmanaged.png)
+![networkctl 예시: wlan0 no-carrier/unmanaged](./images/06-networkctl-unmanaged.png)
 
 정상 연결 후에는 `wlan0`가 `routable / configured`로 바뀌는 것을 확인할 수 있습니다.
 
-[![networkctl 예시: wlan0 routable/configured](./images/08-networkctl-routable.png)](./images/08-networkctl-routable.png)
+![networkctl 예시: wlan0 routable/configured](./images/08-networkctl-routable.png)
 
 ### 추가 확인(필요 시)
 
@@ -196,4 +196,4 @@ dmesg | grep -iE "wlan|wifi|firmware|cfg80211" | tail -n 200
 ## 참고
 
 - ST Wiki: How to setup a WLAN connection  
-  https://wiki.st.com/stm32mpu/index.php?title=How_to_setup_a_WLAN_connection&sfr=stm32mpu
+  <https://wiki.st.com/stm32mpu/index.php?title=How_to_setup_a_WLAN_connection&sfr=stm32mpu>
