@@ -11,7 +11,7 @@ draft: false
 안녕하세요, pingu52입니다.
 
 지난 글에서는 Windows 11에서 **WSL2(Ubuntu) 빌드 환경**을 세팅했습니다.  
-([지난 글: WSL2 세팅](/posts/2025-12-27-wsl-setup/))
+([지난 글: WSL2 세팅](/posts/system-engineering/virtualization/wsl2-install))
 
 이번 글은 그 다음 단계입니다.
 
