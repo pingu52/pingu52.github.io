@@ -128,6 +128,13 @@ const initialStatus = isConfigured
 			return `${year}-${month}-${day}`;
 		};
 
+		const addDaysYmd = (ymd: string, days: number) => {
+  			const [y, m, d] = ymd.split("-").map((v) => Number(v));
+  			const dt = new Date(Date.UTC(y, m - 1, d));
+  			dt.setUTCDate(dt.getUTCDate() + days);
+  			return dt.toISOString().slice(0, 10);
+		};
+
 		const buildGoatcounterUrl = (
 			path: string,
 			base: string,
@@ -237,10 +244,13 @@ const initialStatus = isConfigured
 				throw new Error("Missing GoatCounter configuration.");
 			}
 			const today = formatKstDate(new Date());
+			const tomorrow = addDaysYmd(today, 1);
+
 			const [dailyResponse, totalResponse] = await Promise.all([
 				fetch(
 					buildGoatcounterUrl(goatcounterPath, goatcounterBase, {
 						start: today,
+						end: tomorrow,
 					}).toString(),
 				),
 				fetch(buildGoatcounterUrl(goatcounterPath, goatcounterBase).toString()),
