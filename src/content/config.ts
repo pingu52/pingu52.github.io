@@ -1,8 +1,17 @@
-import { defineCollection, z } from "astro:content";
+import { defineCollection, z, glob } from "astro:content";
 
 type CollectionDef = ReturnType<typeof defineCollection>;
 
 const postsCollection: CollectionDef = defineCollection({
+
+	loader: glob({
+		base: "./src/content/posts",
+		pattern: [
+			"**/*.{md,mdx}",
+			"!**/image/**",
+			"!**/images/**",
+		],
+	}),
 	schema: z.object({
 		title: z.string(),
 		published: z.date(),
