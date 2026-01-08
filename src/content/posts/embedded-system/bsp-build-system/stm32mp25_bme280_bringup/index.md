@@ -1,9 +1,9 @@
 ---
 title: "[STM32MP25] BME280 Bring-up: DTS 패치 + Yocto 커널 모듈 + SD 카드 플래시"
 published: 2026-01-08
-description: "STM32MP257F-DK(STM32MP25-DISCO)에서 BME280(I2C0@0x76)을 Device Tree로 등록하고, Yocto(OpenSTLinux)에서 bmp280 드라이버를 모듈로 빌드한 뒤 SD 카드로 부팅해 IIO(sysfs)로 값 읽기까지 한 번에 정리합니다."
-tags: [Linux, Yocto, OpenEmbedded, OpenSTLinux, STM32MP25, STM32MP257, DeviceTree, I2C, BME280, IIO]
-category: "Bring-up & Debug"
+description: "STM32MP257F-DK(STM32MP25-DISCO)에서 BME280을 Device Tree로 등록하고, Yocto(OpenSTLinux)에서 bmp280 드라이버를 모듈로 빌드한 뒤 SD 카드로 부팅해 IIO(sysfs)로 값 읽기까지 정리합니다."
+tags: [Linux, Yocto, OpenEmbedded, OpenSTLinux, STM32MP25, DeviceTree, I2C, BME280]
+category: "BSP & Build"
 draft: false
 ---
 
@@ -242,10 +242,10 @@ bitbake -c menuconfig virtual/kernel
 
 menuconfig에서 아래 항목을 찾아 **M(모듈)** 로 설정합니다(메뉴 경로는 커널 버전에 따라 달라질 수 있습니다).
 
-- Device Drivers ---> 
+- Device Drivers --->
 - < * > Industrial I/O support --->
 - Pressure sensors --->
-- < M > Bosch ... 
+- < M > Bosch ...
 
 ![kernel config](./images/09_linux_kernel_config.png)
 ![bosch config](./images/10._bosch_config.png)
@@ -304,7 +304,6 @@ KERNEL_CONFIG_FRAGMENTS:append = " \
 ```
 
 ![bbappend_src_uri_cfg](./images/03_bbappend_src_uri_and_cfg.png)
-
 
 반영 여부는 `tmp-glibc/work/.../linux-stm32mp/.../temp/log.do_configure.*`에서  
 `NOTE: file = file://bmp280.cfg` 이후에 **“Could not find …”가 없어야** 합니다.
@@ -411,7 +410,6 @@ ls -l /sys/bus/i2c/devices/0-0076
 cat /sys/bus/i2c/devices/0-0076/modalias
 cat /sys/bus/i2c/devices/0-0076/of_node/compatible 2>/dev/null || true
 ```
-
 
 ![런타임 i2c 디바이스 확인](./images/05_runtime_model_and_i2c_devices.png)
 
