@@ -126,8 +126,54 @@ const bannerOffset =
 		<meta name="google-site-verification" content="xPJ7IfUVyhBtX7l9tZf9TQAVsB4NSe4GVfkEJS-jRew" />
 		<!-- naver-search-adviser -->
 		<meta name="naver-site-verification" content="b2de9f0e363e7bb00e895156aa081e386d8ecdfd" />
-		<!-- umami -->
-		<script is:inline defer src="https://cloud.umami.is/script.js" data-website-id="dd7b43b0-3d7a-4adf-8347-42fc439e4913"></script>
+		<!-- umami (Swup 사용 시: auto-track OFF + page:view마다 수동 track 1회) -->
+<script is:inline>
+	// Umami script는 "한 번만" 로드 (Swup 전환으로 head/script 재실행되어도 중복 로드 방지)
+	if (!window.__umamiScriptLoaded) {
+	  window.__umamiScriptLoaded = true;
+  
+	  const s = document.createElement("script");
+	  s.defer = true;
+	  s.src = "https://cloud.umami.is/script.js";
+	  s.setAttribute("data-website-id", "dd7b43b0-3d7a-4adf-8347-42fc439e4913");
+	  s.setAttribute("data-auto-track", "false"); // 핵심: 자동 추적 비활성화
+	  document.head.appendChild(s);
+	}
+  </script>
+  
+  <script is:inline>
+	// Swup page:view마다 "정확히 1회" track 되도록 바인딩 (중복 등록 방지)
+	if (!window.__umamiTrackBound) {
+	  window.__umamiTrackBound = true;
+  
+	  const trackWhenReady = (attempt = 0) => {
+		if (window.umami && typeof window.umami.track === "function") {
+		  window.umami.track();
+		  return;
+		}
+		if (attempt < 50) setTimeout(() => trackWhenReady(attempt + 1), 100);
+	  };
+  
+	  // 최초 로드 1회
+	  if (document.readyState === "complete") {
+		trackWhenReady();
+	  } else {
+		window.addEventListener("load", () => trackWhenReady(), { once: true });
+	  }
+  
+	  // Swup 전환 1회/페이지
+	  const bindSwup = () => {
+		if (!window.swup?.hooks) return;
+		window.swup.hooks.on("page:view", () => trackWhenReady());
+	  };
+  
+	  if (window.swup?.hooks) {
+		bindSwup();
+	  } else {
+		document.addEventListener("swup:enable", bindSwup, { once: true });
+	  }
+	}
+  </script>
 		
 		<title>{pageTitle}</title>
 
