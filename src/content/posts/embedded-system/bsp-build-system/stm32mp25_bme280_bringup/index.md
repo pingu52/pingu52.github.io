@@ -1,6 +1,7 @@
 ---
 title: "[STM32MP25] BME280 Bring-up: DTS 패치 + Yocto 커널 모듈 + SD 카드 플래시"
 published: 2026-01-08
+image: ./images/09_linux_kernel_config.png
 description: "STM32MP257F-DK(STM32MP25-DISCO)에서 BME280을 Device Tree로 등록하고, Yocto(OpenSTLinux)에서 bmp280 드라이버를 모듈로 빌드한 뒤 SD 카드로 부팅해 IIO(sysfs)로 값 읽기까지 정리합니다."
 tags: [Linux, Yocto, OpenEmbedded, OpenSTLinux, STM32MP25, DeviceTree, I2C, BME280]
 category: "BSP & Build"
@@ -111,7 +112,8 @@ I2C 디바이스 노드 이름은 보통 `<device>@<addr>` 형태를 씁니다.
 
 **&i2c2**를 찾아 내부에 bme280 노드를 추가합니다.
 
-```dts
+```ini
+
 &i2c2 {
     status = "okay";
 
@@ -189,7 +191,8 @@ DTS에서는 `&i2c2`에 붙였더라도, 런타임에서는 `i2c-0`처럼 “버
 
 파일: `yocto/meta-myboard/recipes-kernel/linux/linux-stm32mp_%.bbappend`
 
-```bitbake
+```ini
+
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 SRC_URI:append = " \
@@ -278,7 +281,9 @@ cp -v "$FRAG" "$CFG_DST"
 
 (옵션) fragment.cfg를 직접 만들고 싶다면, 최소한 아래 3줄만으로도 동작합니다.
 
-```cfg
+```ini
+# bme280.cfg
+
 CONFIG_IIO=y
 CONFIG_BMP280=m
 CONFIG_BMP280_I2C=m
@@ -291,7 +296,8 @@ CONFIG_BMP280_I2C=m
 
 `meta-myboard/recipes-kernel/linux/linux-stm32mp_%.bbappend` 예시:
 
-```bitbake
+```ini
+
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 SRC_URI:append = " \
