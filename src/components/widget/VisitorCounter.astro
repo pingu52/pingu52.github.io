@@ -7,21 +7,34 @@ import WidgetLayout from "./WidgetLayout.astro";
 interface Props {
 	class?: string;
 	style?: string;
+
+	/**
+	 * 기본값: 1 (대부분 "오늘"로 고정)
+	 * 필요하면 호출부(.astro)에서 <VisitorCounter rangeDays={7} /> 처럼 변경
+	 */
+	rangeDays?: number;
 }
 
 const className = Astro.props.class;
 const style = Astro.props.style;
 
 const provider = import.meta.env.PUBLIC_ANALYTICS_PROVIDER?.toLowerCase();
-const parsedRange = Number(import.meta.env.PUBLIC_VISITOR_COUNT_DAYS || "30");
+
+// ✅ .env에서 빼고 여기서 기본값을 고정합니다.
+const DEFAULT_RANGE_DAYS = 1;
+const parsedRange = Number(Astro.props.rangeDays ?? DEFAULT_RANGE_DAYS);
 const rangeDays =
-	Number.isFinite(parsedRange) && parsedRange > 0 ? parsedRange : 30;
+	Number.isFinite(parsedRange) && parsedRange > 0
+		? parsedRange
+		: DEFAULT_RANGE_DAYS;
 
-const umamiShareId = import.meta.env.PUBLIC_UMAMI_SHARE_ID;
-const umamiBaseUrl =
-	import.meta.env.PUBLIC_UMAMI_BASE_URL?.replace(/\/$/, "") ||
-	"https://analytics.umami.is";
+// Umami via Worker stats endpoint
+const umamiStatsUrl = import.meta.env.PUBLIC_UMAMI_STATS_URL?.replace(
+	/\/$/,
+	"",
+);
 
+// GoatCounter (optional)
 const goatcounterBaseUrl =
 	import.meta.env.PUBLIC_GOATCOUNTER_HOST?.replace(/\/$/, "") ||
 	(import.meta.env.PUBLIC_GOATCOUNTER_CODE
@@ -29,8 +42,8 @@ const goatcounterBaseUrl =
 		: undefined);
 const goatcounterPath = import.meta.env.PUBLIC_GOATCOUNTER_PATH || "/";
 
-const isUmami = provider === "umami" && umamiShareId;
-const isGoatcounter = provider === "goatcounter" && goatcounterBaseUrl;
+const isUmami = provider === "umami" && Boolean(umamiStatsUrl);
+const isGoatcounter = provider === "goatcounter" && Boolean(goatcounterBaseUrl);
 const isConfigured = Boolean(isUmami || isGoatcounter);
 
 const activeProvider = isUmami
@@ -43,11 +56,16 @@ const providerLabel = isUmami
 	: isGoatcounter
 		? "GoatCounter"
 		: i18n(I18nKey.visitorCounterNotConfigured);
+
+// days=1이면 "오늘", 그 외는 "최근 N일"
 const recentLabel = isUmami
-	? i18nFormat(I18nKey.visitorCounterRecent, { days: rangeDays })
+	? rangeDays === 1
+		? i18n(I18nKey.visitorCounterToday)
+		: i18nFormat(I18nKey.visitorCounterRecent, { days: rangeDays })
 	: isGoatcounter
 		? i18n(I18nKey.visitorCounterToday)
 		: i18nFormat(I18nKey.visitorCounterRecent, { days: rangeDays });
+
 const totalLabel = i18n(I18nKey.visitorCounterTotal);
 const initialStatus = isConfigured
 	? i18n(I18nKey.visitorCounterLoading)
@@ -64,8 +82,7 @@ const initialStatus = isConfigured
 		class="flex flex-col gap-3 px-1"
 		data-visitor-counter
 		data-provider={activeProvider}
-		data-umami-share-id={umamiShareId}
-		data-umami-base={umamiBaseUrl}
+		data-umami-stats-url={umamiStatsUrl}
 		data-goatcounter-base={goatcounterBaseUrl}
 		data-goatcounter-path={goatcounterPath}
 		data-range-days={String(rangeDays)}
@@ -104,55 +121,27 @@ const initialStatus = isConfigured
 		const root = document.querySelector("[data-visitor-counter]") as HTMLElement | null;
 		if (!root) return;
 
-		const countRecentEl = root.querySelector("[data-count-recent]");
-		const countTotalEl = root.querySelector("[data-count-total]");
-		const statusEl = root.querySelector("[data-status]");
-		const statusLoading = root.dataset.statusLoading || "";
-		const statusUnavailable = root.dataset.statusUnavailable || "";
-		const statusNotConfigured = root.dataset.statusNotConfigured || "";
-		const provider = root.dataset.provider;
-		const parsedRange = Number(root.dataset.rangeDays || "30");
-		const rangeDays = Number.isFinite(parsedRange) && parsedRange > 0 ? parsedRange : 30;
-		const umamiShareId = root.dataset.umamiShareId;
-		const umamiBase = root.dataset.umamiBase;
-		const goatcounterBase = root.dataset.goatcounterBase;
-		const goatcounterPath = root.dataset.goatcounterPath || "/";
+		const countRecentEl = root.querySelector("[data-count-recent]") as HTMLElement | null;
+		const countTotalEl = root.querySelector("[data-count-total]") as HTMLElement | null;
+		const statusEl = root.querySelector("[data-status]") as HTMLElement | null;
 
-		const formatKstDate = (date: Date) => {
-			const kstDate = new Date(
-				date.toLocaleString("en-US", { timeZone: "Asia/Seoul" }),
-			);
-			const year = kstDate.getFullYear();
-			const month = String(kstDate.getMonth() + 1).padStart(2, "0");
-			const day = String(kstDate.getDate()).padStart(2, "0");
-			return `${year}-${month}-${day}`;
-		};
+		const statusLoading = root.dataset.statusLoading ?? "";
+		const statusUnavailable = root.dataset.statusUnavailable ?? "";
+		const statusNotConfigured = root.dataset.statusNotConfigured ?? "";
 
-		const addDaysYmd = (ymd: string, days: number) => {
-  			const [y, m, d] = ymd.split("-").map((v) => Number(v));
-  			const dt = new Date(Date.UTC(y, m - 1, d));
-  			dt.setUTCDate(dt.getUTCDate() + days);
-  			return dt.toISOString().slice(0, 10);
-		};
+		const provider = (root.dataset.provider ?? "none") as "umami" | "goatcounter" | "none";
 
-		const buildGoatcounterUrl = (
-			path: string,
-			base: string,
-			range?: { start?: string; end?: string },
-		) => {
-			const url = new URL(
-				`/counter/${encodeURIComponent(path)}.json`,
-				base,
-			);
-			if (range?.start) url.searchParams.set("start", range.start);
-			if (range?.end) url.searchParams.set("end", range.end);
-			return url;
-		};
+		const parsedRange = Number(root.dataset.rangeDays ?? "1");
+		const rangeDays = Number.isFinite(parsedRange) && parsedRange > 0 ? parsedRange : 1;
 
-		const formatter = new Intl.NumberFormat(
-			document.documentElement.lang || "en",
-			{ maximumFractionDigits: 0 },
-		);
+		const umamiStatsUrl = root.dataset.umamiStatsUrl ?? "";
+
+		const goatcounterBase = root.dataset.goatcounterBase ?? "";
+		const goatcounterPath = root.dataset.goatcounterPath ?? "/";
+
+		const formatter = new Intl.NumberFormat(document.documentElement.lang || "en", {
+			maximumFractionDigits: 0,
+		});
 
 		const normalizeNumber = (value: unknown): number | null => {
 			if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -165,7 +154,7 @@ const initialStatus = isConfigured
 			return null;
 		};
 
-		const setCounts = (recent: number | null, total: number | null) => {
+		const setCounts = (recent: number | null, total: number | null): void => {
 			if (countRecentEl) {
 				countRecentEl.textContent =
 					typeof recent === "number" ? formatter.format(recent) : "—";
@@ -176,73 +165,71 @@ const initialStatus = isConfigured
 			}
 		};
 
-		const setStatus = (text: string) => {
+		const setStatus = (text: string): void => {
 			if (!statusEl) return;
 			statusEl.textContent = text;
 		};
 
+		// ===== GoatCounter helpers (optional) =====
+		const formatKstDate = (date: Date): string => {
+			const kstDate = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+			const year = kstDate.getFullYear();
+			const month = String(kstDate.getMonth() + 1).padStart(2, "0");
+			const day = String(kstDate.getDate()).padStart(2, "0");
+			return `${year}-${month}-${day}`;
+		};
+
+		const addDaysYmd = (ymd: string, days: number): string => {
+			const [y, m, d] = ymd.split("-").map((v: string) => Number(v));
+			const dt = new Date(Date.UTC(y, m - 1, d));
+			dt.setUTCDate(dt.getUTCDate() + days);
+			return dt.toISOString().slice(0, 10);
+		};
+
+		const buildGoatcounterUrl = (
+			path: string,
+			base: string,
+			range?: { start?: string; end?: string },
+		): URL => {
+			const url = new URL(`/counter/${encodeURIComponent(path)}.json`, base);
+			if (range?.start) url.searchParams.set("start", range.start);
+			if (range?.end) url.searchParams.set("end", range.end);
+			return url;
+		};
+
 		const extractNumber = (values: unknown[]): number | null => {
-			for (const value of values) {
-				const parsed = normalizeNumber(value);
+			for (const v of values) {
+				const parsed = normalizeNumber(v);
 				if (parsed != null) return parsed;
 			}
 			return null;
 		};
 
-		const fetchUmami = async () => {
-			if (!umamiShareId || !umamiBase) {
-				throw new Error("Missing Umami configuration.");
+		// ===== Providers =====
+		const fetchUmami = async (): Promise<{ recent: number; total: number }> => {
+			if (!umamiStatsUrl) {
+				throw new Error("Missing Umami stats URL.");
 			}
-			const endAt = Date.now();
-			const startAt = endAt - Math.max(1, rangeDays) * 24 * 60 * 60 * 1000;
-			const url = new URL(`/api/share/${umamiShareId}`, umamiBase);
-			url.searchParams.set("startAt", Math.floor(startAt).toString());
-			url.searchParams.set("endAt", Math.floor(endAt).toString());
 
-			const response = await fetch(url.toString());
-			if (!response.ok) {
-				throw new Error(`Umami responded with ${response.status}`);
-			}
-			const data = await response.json();
-			const values: unknown[] = [
-				data?.pageviews?.value,
-				data?.pageviews,
-				data?.totals?.pageviews,
-				data?.metrics?.pageviews?.value,
-			];
-			if (Array.isArray(data?.pageviews)) {
-				for (const entry of data.pageviews) {
-					values.push(entry?.pageviews, entry?.value, entry?.count);
-				}
-			}
-			const recent = extractNumber(values);
+			const u = new URL(umamiStatsUrl);
+			u.searchParams.set("days", String(rangeDays));
+			u.searchParams.set("t", String(Date.now())); // 필요 없으면 삭제 가능
 
-			const totalUrl = new URL(`/api/share/${umamiShareId}`, umamiBase);
-			const totalResponse = await fetch(totalUrl.toString());
-			if (!totalResponse.ok) {
-				throw new Error(`Umami total responded with ${totalResponse.status}`);
-			}
-			const totalData = await totalResponse.json();
-			const totalValues: unknown[] = [
-				totalData?.pageviews?.value,
-				totalData?.pageviews,
-				totalData?.totals?.pageviews,
-				totalData?.metrics?.pageviews?.value,
-			];
-			if (Array.isArray(totalData?.pageviews)) {
-				for (const entry of totalData.pageviews) {
-					totalValues.push(entry?.pageviews, entry?.value, entry?.count);
-				}
-			}
-			const total = extractNumber(totalValues);
+			const res = await fetch(u.toString(), { cache: "no-store" });
+			if (!res.ok) throw new Error(`Umami stats responded with ${res.status}`);
+
+			const data: unknown = await res.json();
+			const recent = normalizeNumber((data as any)?.recent) ?? 0;
+			const total = normalizeNumber((data as any)?.total) ?? 0;
 
 			return { recent, total };
 		};
 
-		const fetchGoatcounter = async () => {
+		const fetchGoatcounter = async (): Promise<{ recent: number | null; total: number | null }> => {
 			if (!goatcounterBase) {
 				throw new Error("Missing GoatCounter configuration.");
 			}
+
 			const today = formatKstDate(new Date());
 			const tomorrow = addDaysYmd(today, 1);
 
@@ -263,24 +250,27 @@ const initialStatus = isConfigured
 				throw new Error(`GoatCounter total responded with ${totalResponse.status}`);
 			}
 
-			const dailyData = await dailyResponse.json();
-			const totalData = await totalResponse.json();
+			const dailyData: unknown = await dailyResponse.json();
+			const totalData: unknown = await totalResponse.json();
+
 			const recent = extractNumber([
-				dailyData?.count,
-				dailyData?.hits,
-				dailyData?.views,
-				dailyData?.total,
+				(dailyData as any)?.count,
+				(dailyData as any)?.hits,
+				(dailyData as any)?.views,
+				(dailyData as any)?.total,
 			]);
+
 			const total = extractNumber([
-				totalData?.count,
-				totalData?.hits,
-				totalData?.views,
-				totalData?.total,
+				(totalData as any)?.count,
+				(totalData as any)?.hits,
+				(totalData as any)?.views,
+				(totalData as any)?.total,
 			]);
+
 			return { recent, total };
 		};
 
-		const load = async () => {
+		const load = async (): Promise<void> => {
 			try {
 				if (provider !== "umami" && provider !== "goatcounter") {
 					setStatus(statusNotConfigured);
@@ -289,9 +279,12 @@ const initialStatus = isConfigured
 				}
 
 				setStatus(statusLoading);
+
 				let result: { recent: number | null; total: number | null } | null = null;
+
 				if (provider === "umami") {
-					result = await fetchUmami();
+					const r = await fetchUmami();
+					result = { recent: r.recent, total: r.total };
 				} else if (provider === "goatcounter") {
 					result = await fetchGoatcounter();
 				}
@@ -299,10 +292,11 @@ const initialStatus = isConfigured
 				if (!result || (result.recent == null && result.total == null)) {
 					throw new Error("Visitor count not available.");
 				}
+
 				setCounts(result.recent, result.total);
 				setStatus("");
-			} catch (error) {
-				console.error("[VisitorCounter]", error);
+			} catch (e) {
+				console.error("[VisitorCounter]", e);
 				setCounts(null, null);
 				setStatus(statusUnavailable);
 			}
