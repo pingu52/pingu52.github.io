@@ -1,5 +1,5 @@
 ---
-title: "[STM32MP25] BME280 Bring-up: DTS 패치 + Yocto 커널 모듈 + SD 카드 플래시"
+title: "[STM32MP25] BME280 Bring-up: DTS 패치 + Yocto 커널 모듈 추가"
 published: 2026-01-08
 image: ./images/09_linux_kernel_config.png
 description: "STM32MP257F-DK(STM32MP25-DISCO)에서 BME280을 Device Tree로 등록하고, Yocto(OpenSTLinux)에서 bmp280 드라이버를 모듈로 빌드한 뒤 SD 카드로 부팅해 IIO(sysfs)로 값 읽기까지 정리합니다."
