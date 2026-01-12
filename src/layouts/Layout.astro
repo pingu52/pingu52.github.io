@@ -96,6 +96,25 @@ const goatcounterEndpoint = isGoatcounter
 const canonicalUrl = Astro.site
 	? new URL(Astro.url.pathname, Astro.site).toString()
 	: `${Astro.url.origin}${Astro.url.pathname}`;
+
+const siteHomeUrl = Astro.site
+	? new URL(url("/"), Astro.site).toString()
+	: `${Astro.url.origin}${url("/")}`;
+
+const websiteJsonLd = {
+	"@context": "https://schema.org",
+	"@type": "WebSite",
+	name: siteConfig.title,
+	alternativeName: siteConfig.subtitle,
+	url: siteHomeUrl,
+	inLanguage: siteLang,
+	publisher: {
+		"@type": "Person",
+		name: profileConfig.name,
+		url: siteHomeUrl,
+	},
+};
+
 const metaDescription =
 	description && description.trim() !== ""
 		? description
@@ -127,6 +146,11 @@ const bannerOffset =
 		<!-- naver-search-adviser -->
 		<meta name="naver-site-verification" content="b2de9f0e363e7bb00e895156aa081e386d8ecdfd" />
 		<!-- umami (Swup 사용 시: auto-track OFF + page:view마다 수동 track 1회) -->
+
+		{isHomePage && (
+			<script is:inline type="application/ld+json" set:html={JSON.stringify(websiteJsonLd)}></script>
+		)}
+
 <script is:inline>
 	// Umami script는 "한 번만" 로드 (Swup 전환으로 head/script 재실행되어도 중복 로드 방지)
 	if (!window.__umamiScriptLoaded) {
