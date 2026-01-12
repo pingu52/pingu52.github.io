@@ -2,7 +2,7 @@
 title: "[OSTEP] 02. 운영체제 개요 (Introduction)"
 published: 2026-01-12
 description: "OSTEP 2장 정리 노트. CPU/메모리 가상화(Virtualization), 동시성(Concurrency), 영속성(Persistence) 프레임과 System Call/User-Kernel Mode, 설계 목표를 정리합니다."
-image: "/images/_ostep.jpg"
+image: "./images/_ostep.jpg"
 tags: [OS, Linux, OSTEP]
 category: "OS & Arch"
 draft: false
@@ -50,7 +50,7 @@ gcc -o cpu cpu.c -Wall
 ./cpu A
 ```
 
-![01. CPU 한개만 실행](/images/01_cpu_A.png)
+![01. CPU 한개만 실행](./images/01_cpu_A.png)
 
 여기서 핵심은 한 번에 하나만 실행이 아니라 **여러 개를 동시에 실행**하는 상황이다.
 
@@ -59,7 +59,7 @@ gcc -o cpu cpu.c -Wall
 ./cpu A & ./cpu B & ./cpu C & ./cpu D &
 ```
 
-![02. CPU 여러개 실행](/images/02_cpu_multi.png)
+![02. CPU 여러개 실행](./images/02_cpu_multi.png)
 
 #### 관찰 포인트
 
@@ -84,7 +84,7 @@ gcc -o mem mem.c -Wall
 ./mem
 ```
 
-![03. 메모리 예제 1](/images/03_memory_single.png)
+![03. 메모리 예제 1](./images/03_memory_single.png)
 
 여러 인스턴스를 동시에 실행하면, 각 프로세스가 **같은 가상 주소(예: 0x200000)** 를 출력하면서도 서로 영향을 주지 않는 것처럼 보인다.
 
@@ -92,7 +92,7 @@ gcc -o mem mem.c -Wall
 ./mem & ./mem &
 ```
 
-![04. 메모리 예제 2](/images/04_memory_multi.png)
+![04. 메모리 예제 2](./images/04_memory_multi.png)
 
 #### 관찰 포인트
 
@@ -127,7 +127,7 @@ gcc -o threads threads.c -Wall -pthread
 ./threads 100000
 ```
 
-![05. 스레드 예제](/images/05_thread.png)
+![05. 스레드 예제](./images/05_thread.png)
 
 #### 관찰 포인트
 
