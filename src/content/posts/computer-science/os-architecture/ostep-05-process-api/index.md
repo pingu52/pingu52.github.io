@@ -2,7 +2,7 @@
 title: "[OSTEP] 05. 프로세스 API (Process API)"
 published: 2026-01-14
 image: ""
-description: "OSTEP ch.04 Interlude: Process API를 읽고 fork/exec/wait 조합의 의도, 셸 리다이렉션/파이프, 시그널 기반 프로세스 제어를 정리합니다."
+description: "OSTEP ch.05 Interlude: Process API를 읽고 fork/exec/wait 조합의 의도, 셸 리다이렉션/파이프, 시그널 기반 프로세스 제어를 정리합니다."
 tags: [OS, Linux, OSTEP]
 category: "OS & Arch"
 draft: false
@@ -123,6 +123,8 @@ make p1
 ### 3.1 예제: p2.c (fork + wait)
 
 ```c
+# p2.c
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
