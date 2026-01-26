@@ -1,6 +1,6 @@
 ---
 title: "[OSTEP] 19. 변환 색인 버퍼 (TLB: Translation Lookaside Buffers)"
-published: 2026-01-28
+published: 2026-01-25 21:00:00
 image: "./images/19_2.png"
 description: "페이징의 성능 문제인 메모리 접근 오버헤드를 해결하기 위한 하드웨어 캐시, TLB(Translation Lookaside Buffer)를 상세히 다룹니다. 기본 알고리즘, 지역성(Locality)의 원리, 미스 처리 방식, 그리고 문맥 교환 시 발생하는 문제와 해결책(ASID)을 정리합니다."
 tags: [OS, Linux, OSTEP, Memory, TLB, Performance]
