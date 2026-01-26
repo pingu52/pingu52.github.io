@@ -25,7 +25,7 @@ import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
 import { pluginCustomCopyButton } from "./src/plugins/expressive-code/custom-copy-button.js";
 
 export default defineConfig({
-	site: "https://pingu52.github.io/",
+	site: "https://pingu52.vercel.app/",
 	base: "/",
 	trailingSlash: "always",
 	integrations: [
