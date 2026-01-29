@@ -1,6 +1,6 @@
 ---
-title: "[OSTEP] 22. 물리 메모리 크기의 극복 - 정책 (Policies)"
-published: 2026-01-29
+title: "[OSTEP] 22. Beyond Physical Memory: Policies"
+published: 2026-01-29 18:00:00
 image: "./images/22_2.png"
 description: "AMAT 관점에서 OPT, FIFO, Random, LRU, Clock 정책을 비교하고 Dirty Page 처리와 Thrashing 대응까지 정리합니다."
 tags: [OS, Linux, OSTEP, Memory, Paging, Algorithm]

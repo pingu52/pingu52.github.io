@@ -1,6 +1,6 @@
 ---
-title: "[OSTEP] 23. 완전한 가상 메모리 시스템 (VAX/VMS & Linux)"
-published: 2026-01-30
+title: "[OSTEP] 23. Complete Virtual Memory Systems (VAX/VMS & Linux)"
+published: 2026-01-29 20:00:00
 image: "./images/23_1.png"
 description: "가상 메모리 이론이 실제 OS에서 어떻게 구현되는지 살펴봅니다. VAX/VMS의 설계와 Linux의 VM을 비교하며 핵심 아이디어를 정리합니다."
 tags: [OS, Linux, OSTEP, Memory, VMS, CaseStudy]
