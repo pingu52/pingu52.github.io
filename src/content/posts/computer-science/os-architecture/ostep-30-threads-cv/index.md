@@ -1,6 +1,6 @@
 ---
 title: "[OSTEP] 30. Condition Variables"
-published: 2026-02-04
+published: 2026-02-04 22:00:00
 image: ""
 description: "락만으로는 해결하기 어려운 대기 문제를 풀기 위한 조건 변수의 개념과 올바른 사용법(wait, signal, broadcast)을 정리합니다"
 tags: [OS, Linux, OSTEP, Concurrency, Synchronization]
