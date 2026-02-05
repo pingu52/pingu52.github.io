@@ -1,7 +1,7 @@
 ---
 title: "[OSTEP] 31. Semaphores"
 published: 2026-02-05 15:00:00
-image: "./images/31_1.png"
+image: ""
 description: "락과 조건 변수를 대체할 수 있는 강력한 동기화 도구인 세마포어의 정의와 사용법을 다룹니다. 생산자/소비자, 읽기/쓰기 락, 식사하는 철학자 문제 등 다양한 병행성 문제의 해결책을 제시합니다."
 tags: [OS, Linux, OSTEP, Concurrency, Semaphore]
 category: "OS & Arch"
