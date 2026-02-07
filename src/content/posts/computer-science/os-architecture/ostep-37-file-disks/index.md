@@ -80,10 +80,10 @@ HDD는 **기계적 장치**입니다. 즉, 탐색과 회전 같은 물리적 동
 
 디스크 요청 하나의 서비스 시간은 세 요소의 합으로 모델링합니다.
 
-\[
+$$
 T_{\mathrm{I/O}} = T_{\mathrm{seek}} + T_{\mathrm{rot}} + T_{\mathrm{xfer}}
 \tag{1}
-\]
+$$
 
 - $T_{\mathrm{seek}}$: 헤드를 목표 트랙으로 이동시키는 시간(가속, 이동, 감속, 안정화)
 - $T_{\mathrm{rot}}$: 목표 섹터가 헤드 아래로 올 때까지 기다리는 회전 지연
@@ -93,20 +93,20 @@ T_{\mathrm{I/O}} = T_{\mathrm{seek}} + T_{\mathrm{rot}} + T_{\mathrm{xfer}}
 
 RPM이 주어지면 한 바퀴 시간은 다음과 같습니다.
 
-\[
+$$
 T_{\mathrm{rev}} = \frac{60\,\mathrm{s}}{\mathrm{RPM}}
 = \frac{60\times 10^3}{\mathrm{RPM}}\,\mathrm{ms}
 \tag{2}
-\]
+$$
 
 평균적으로 반 바퀴를 기다리므로,
 
-\[
+$$
 \mathbb{E}\!\left[T_{\mathrm{rot}}\right]
 = \frac{1}{2}T_{\mathrm{rev}}
 = \frac{30\times 10^3}{\mathrm{RPM}}\,\mathrm{ms}
 \tag{3}
-\]
+$$
 
 예를 들어 $\mathrm{RPM}=10{,}000$이면 $T_{\mathrm{rev}}=6\,\mathrm{ms}$, 평균 회전 지연은 $3\,\mathrm{ms}$입니다.
 
@@ -116,10 +116,10 @@ T_{\mathrm{rev}} = \frac{60\,\mathrm{s}}{\mathrm{RPM}}
 
 처리율(대역폭)을 시간으로부터 계산할 때는 다음을 사용하면 됩니다.
 
-\[
+$$
 R_{\mathrm{I/O}} = \frac{\mathrm{Size}}{T_{\mathrm{I/O}}}
 \tag{4}
-\]
+$$
 
 ![Figure 37.6: Disk Drive Performance](./images/37_6.png)
 
