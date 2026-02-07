@@ -113,9 +113,9 @@ while (STATUS == BUSY) { /* spin */ }
 
 따라서 장치가 매우 빠른 경우에는
 
-\[
+$$
 T_{dev} \ll T_{int}
-\]
+$$
 
 일 때, 인터럽트 처리 비용 $T_{int}$ 가 지배적이 되어 오히려 폴링이 더 나을 수 있습니다. 그래서 현실의 시스템은 보통 **짧게 폴링하다가, 오래 걸리면 인터럽트로 전환하는 하이브리드**를 사용합니다.
 
@@ -282,9 +282,9 @@ void ide_intr(void) {
 
 완료 조건은 다음 불변식으로 요약할 수 있습니다.
 
-\[
+$$
 (b \texttt{->} \mathit{flags} \mathbin{\&} (\texttt{B\_VALID} \mid \texttt{B\_DIRTY})) = \texttt{B\_VALID}
-\]
+$$
 
 즉 I/O가 끝나면 버퍼는 유효하고(`B_VALID`), 더 이상 dirty가 아니어야 합니다.
 
