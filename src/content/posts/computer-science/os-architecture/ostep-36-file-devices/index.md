@@ -33,7 +33,7 @@ CPU와 메인 메모리는 보통 매우 빠른 **메모리 버스(memory bus)**
 
 그래서 고성능 장치는 CPU 가까운 고속 버스에, 나머지 장치는 한 단계 아래의 버스에 연결하는 계층 구조가 일반적입니다.
 
-<!-- 스크린샷 위치: PDF Figure 36.1 System Architecture (배너 이미지로 사용 중이면 본문 삽입은 생략해도 됩니다) -->
+![Figure 36.1 System Architecture](./images/36_1.png)
 
 ---
 
