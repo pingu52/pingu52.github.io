@@ -2,7 +2,7 @@
 title: "[OSTEP] 40. File System Implementation"
 published: 2026-02-09 21:00:00
 image: "./images/40_1.png"
-description: "VSFS(Very Simple File System)라는 학습용 파일 시스템 구현을 통해, 온디스크 자료구조(superblock, bitmap, inode table)와 open/read/write가 유발하는 실제 I/O 흐름을 구현 관점에서 추적합니다."
+description: "VSFS(Very Simple File System)라는 학습용 파일 시스템 구현을 통해, on-disk 자료구조(superblock, bitmap, inode table)와 open/read/write가 유발하는 실제 I/O 흐름을 구현 관점에서 추적합니다."
 tags: [OS, Linux, OSTEP, FileSystem, VSFS, Inode]
 category: "OS & Arch"
 draft: false
@@ -26,7 +26,7 @@ OSTEP는 이를 위해 **VSFS(Very Simple File System)** 라는 학습용 파일
 
 파일 시스템을 이해하는 가장 좋은 정신 모델은 두 축입니다.
 
-### 1.1 온디스크 자료구조
+### 1.1 on-disk 자료구조
 
 디스크를 블록 배열로 보고, 그 위에 **데이터와 메타데이터**를 어떤 구조로 올릴지 정합니다.
 
@@ -97,7 +97,7 @@ inode table을 5블록(블록 3–7)으로 잡으면 총 inode 수는 $$5 \times
 - data region 시작 블록 번호
 - 파일 시스템 식별용 magic number 등
 
-마운트 시 운영체제는 superblock을 먼저 읽고, 이후 필요한 온디스크 구조를 정확히 찾아갈 수 있게 됩니다.
+마운트 시 운영체제는 superblock을 먼저 읽고, 이후 필요한 on-disk 구조를 정확히 찾아갈 수 있게 됩니다.
 
 ---
 
@@ -112,9 +112,9 @@ inode는 파일 이름을 제외한 대부분의 메타데이터를 담는 구�
 
 ### 3.1 i-number로 inode 위치 계산하기
 
-inode는 디스크의 inode table에 배열로 저장됩니다. 따라서 i-number $$i$$ 만 알면 inode 위치를 계산할 수 있습니다.
+inode는 디스크의 inode table에 배열로 저장됩니다. 따라서 i-number $i$ 만 알면 inode 위치를 계산할 수 있습니다.
 
-inode table 시작 블록을 $$b_{\mathrm{it}}$$, 블록당 inode 수를 $$N_{\mathrm{ipb}}$$ 라 두면, i-number $$i$$ 의 inode가 들어있는 블록과 블록 내 오프셋은
+inode table 시작 블록을 $b_{\mathrm{it}}$, 블록당 inode 수를 $N_{\mathrm{ipb}}$ 라 두면, i-number $i$ 의 inode가 들어있는 블록과 블록 내 오프셋은
 
 $$
 b(i) = b_{\mathrm{it}} + \left\lfloor \frac{i}{N_{\mathrm{ipb}}} \right\rfloor,\qquad
@@ -143,7 +143,7 @@ VSFS 예시는 아래 구조를 사용합니다.
 - direct pointer 12개
 - single indirect pointer 1개
 
-블록 크기 $$B_{\mathrm{blk}} = 4\,\mathrm{KiB}$$, 포인터 크기 $$B_{\mathrm{ptr}} = 4\,\mathrm{B}$$ 이면, 간접 블록 하나가 담는 포인터 수는
+블록 크기 $B_{\mathrm{blk}} = 4\,\mathrm{KiB}$, 포인터 크기 $B_{\mathrm{ptr}} = 4\,\mathrm{B}$ 이면, 간접 블록 하나가 담는 포인터 수는
 
 $$
 N_{\mathrm{ptr}} = \frac{B_{\mathrm{blk}}}{B_{\mathrm{ptr}}}
@@ -350,7 +350,7 @@ read는 캐시로 완전히 필터링될 수 있지만, write는 영속성을 �
 
 ## 7. 요약
 
-- 파일 시스템은 **온디스크 자료구조**와 **접근 경로**로 보면 가장 빠르게 이해됩니다.
+- 파일 시스템은 **on-disk 자료구조**와 **접근 경로**로 보면 가장 빠르게 이해됩니다.
 - VSFS는 superblock, inode bitmap, data bitmap, inode table, data region으로 디스크를 구성합니다.
 - inode는 i-number로 위치를 계산할 수 있고, direct 및 indirect 포인터로 큰 파일을 지원합니다.
 - `open`은 pathname traversal 때문에 메타데이터 read를 누적시킵니다.
@@ -358,6 +358,17 @@ read는 캐시로 완전히 필터링될 수 있지만, write는 영속성을 �
 - create는 경로 탐색 + inode 할당 + 디렉터리 갱신이 겹쳐 매우 비쌉니다.
 - allocating write 1회는 data bitmap과 inode 갱신 때문에 **5 I/O**를 만들 수 있습니다.
 - 이를 줄이기 위해 unified page cache와 write buffering이 사실상 필수입니다.
+
+---
+
+## 8. 용어 정리
+
+- `VSFS`: Very Simple File System. 학습용으로 단순화한 파일 시스템 모델.
+- `Inode`: 파일의 메타데이터와 데이터 블록 위치를 저장하는 자료구조.
+- `Superblock`: 파일 시스템의 전체 크기, 레이아웃 정보 등을 담은 블록.
+- `Bitmap`: 블록의 할당 여부를 0과 1로 관리하는 자료구조.
+- `Indirect Pointer`: 데이터 블록이 아닌, 주소들을 담은 블록을 가리키는 포인터.
+- `Direct Pointer`: 실제 데이터 블록을 바로 가리키는 포인터.
 
 ---
 
