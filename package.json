@@ -40,13 +40,13 @@
         "astro-expressive-code": "^0.41.7",
         "astro-icon": "^1.1.5",
         "hastscript": "^9.0.1",
-        "katex": "^0.16.37",
+        "katex": "^0.16.38",
         "markdown-it": "^14.1.1",
         "mdast-util-to-string": "^4.0.0",
         "overlayscrollbars": "^2.14.0",
         "pagefind": "^1.4.0",
         "photoswipe": "^5.4.4",
-        "pnpm": "^10.30.3",
+        "pnpm": "^10.31.0",
         "reading-time": "^1.5.0",
         "rehype-autolink-headings": "^7.1.0",
         "rehype-components": "^0.3.0",
@@ -79,5 +79,5 @@
         "postcss-import": "^16.1.1",
         "postcss-nesting": "^13.0.2"
     },
-    "packageManager": "pnpm@10.26.1"
+    "packageManager": "pnpm@10.31.0"
 }
