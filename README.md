@@ -104,12 +104,14 @@ lang: ""
 사이드바 태그 위젯 아래에 방문자 수를 표기할 수 있도록 Umami 혹은 GoatCounter 기반 카운터를 추가했습니다.
 최근 N일 방문자와 누적 방문자를 함께 보여줍니다.
 
-1. `.env` (또는 배포 환경 변수)에 `PUBLIC_ANALYTICS_PROVIDER`를 설정합니다.  
+1. `.env` 또는 배포 환경 변수에 `PUBLIC_ANALYTICS_PROVIDER`를 설정합니다.  
    - `umami` 또는 `goatcounter` 값을 사용합니다.
 2. Umami 사용 시
-   - `PUBLIC_UMAMI_SHARE_ID`: 공개 대시보드(share 링크)의 ID
-   - `PUBLIC_UMAMI_BASE_URL`(선택): Umami 호스트 URL. 기본값 `https://analytics.umami.is`
-   - `PUBLIC_VISITOR_COUNT_DAYS`(선택): 집계 기간(일 단위, 기본 30일)
+   - 기본 호출 경로는 `/api/umami-stats`입니다.
+   - Vercel 환경 변수에 `UMAMI_API_KEY`를 설정합니다. 이 값은 서버 전용이므로 `PUBLIC_` 접두사를 붙이지 않습니다.
+   - `UMAMI_WEBSITE_ID` 또는 `PUBLIC_UMAMI_WEBSITE_ID`를 선택적으로 설정할 수 있습니다. 생략하면 현재 블로그의 기본 Website ID를 사용합니다.
+   - `UMAMI_API_BASE_URL` 또는 `UMAMI_API_CLIENT_ENDPOINT`를 선택적으로 설정할 수 있습니다. 기본값은 `https://api.umami.is/v1`입니다.
+   - 기존 외부 Worker를 유지해야 하는 경우에만 `PUBLIC_UMAMI_STATS_URL`을 설정합니다. `/api/umami-stats` 실패 시 fallback으로 사용됩니다.
 3. GoatCounter 사용 시
    - `PUBLIC_GOATCOUNTER_HOST` 또는 `PUBLIC_GOATCOUNTER_CODE` 중 하나를 지정  
      (예: `PUBLIC_GOATCOUNTER_HOST=https://example.goatcounter.com` 또는 `PUBLIC_GOATCOUNTER_CODE=example`)
