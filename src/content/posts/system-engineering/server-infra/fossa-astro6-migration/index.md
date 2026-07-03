@@ -26,10 +26,8 @@ category: "Server & Infra"
 
 FOSSA에서 확인한 이슈는 크게 두 종류였다.
 
-```text
 - 오래된 dependency
 - vulnerability가 있는 transitive dependency
-```
 
 처음에는 FOSSA 화면에서 수십 개의 dependency issue가 보였고, 로컬에서도 `pnpm audit`을 돌리면 여러 취약점이 나왔다.
 
@@ -57,13 +55,11 @@ pnpm audit
 
 우선 main에 안전하게 들어갈 수 있는 1차 범위를 정했다.
 
-```text
 - pnpm audit 기준 취약점 제거
 - Astro 6으로 dependency 업데이트
 - Astro 6에서 깨지는 content API 수정
 - build/check/type-check/lint 통과
 - FOSSA에 남는 transitive/outdated 항목은 별도 PR로 분리
-```
 
 FOSSA UI에 남아 있는 transitive dependency 목록까지 한 번에 다 처리하려고 하면 PR 범위가 너무 커진다.
 그래서 이번 PR에서는 로컬 audit과 빌드 안정화를 먼저 끝내고, 나머지 FOSSA 항목은 후속 브랜치에서 다루는 방향으로 잡았다.
@@ -99,9 +95,7 @@ Astro 6에서 content collection API가 바뀌었기 때문이다.
 
 기존에는 content collection 설정이 아래 위치에 있었다.
 
-```text
-src/content/config.ts
-```
+`src/content/config.ts`
 
 Astro 6에서는 프로젝트 루트의 `src/content.config.ts` 형태를 사용해야 했다.
 그래서 collection 설정을 새 파일로 옮기고, loader 기반으로 다시 정의했다.
@@ -312,21 +306,6 @@ esbuild >= 0.27.3 < 0.28.1
 }
 ```
 
-여기서 한 번 실수한 부분이 있었다.
-
-```json
-"rollup-plugin-tenser>serialize-javascript": "7.0.3"
-```
-
-처음에는 `terser`를 `tenser`로 잘못 적었다.
-이러면 override가 적용되지 않는다.
-
-정확한 이름은 아래처럼 `terser`다.
-
-```json
-"rollup-plugin-terser>serialize-javascript": "7.0.3"
-```
-
 수정 후 다시 설치하고 audit을 확인했다.
 
 ```bash
@@ -457,11 +436,9 @@ FOSSA 화면에는 여전히 transitive dependency 항목이 남을 수 있다.
 
 그래서 이번 PR은 다음 범위로 제한했다.
 
-```text
 - Astro 6 migration
 - local audit cleanup
 - build/check/type-check/lint/test 안정화
-```
 
 그리고 FOSSA UI에 남은 dependency 목록은 별도 브랜치에서 처리하기로 했다.
 
@@ -475,26 +452,19 @@ git checkout -b chore/fossa-transitive-cleanup
 
 ## 정리
 
-이번 작업은 단순한 dependency update가 아니었다.
-
-```text
-dependency update
-→ Astro 6 migration
-→ content collection 수정
-→ slug/image path 수정
-→ pnpm overrides
-→ type-check script 조정
-→ test stub 수정
-```
+- Astro 6 migration
+- content collection 수정
+- slug/image path 수정
+- pnpm overrides
+- type-check script 조정
+- test stub 수정
 
 처음에는 FOSSA 이슈를 줄이는 것이 목적이었지만, 실제로는 블로그 빌드 파이프라인 전체를 한 번 점검하는 작업이 되었다.
 
 특히 기억할 점은 세 가지다.
 
-```text
 1. transitive vulnerability는 override 경로를 정확히 써야 한다.
 2. Astro content config는 schema inference를 해치면 post.data 타입이 unknown이 된다.
 3. 테스트가 alias/stub을 쓰고 있다면 실제 코드 export만 고쳐서는 부족하다.
-```
 
 이번 PR을 main에 먼저 넣고, FOSSA에 남은 transitive/outdated 항목은 후속 PR에서 따로 정리할 예정이다.
