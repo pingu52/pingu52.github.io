@@ -10,7 +10,7 @@
     "build": "astro build && pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
-    "type-check": "tsc --noEmit --isolatedDeclarations",
+    "type-check": "tsc -p tsconfig.typecheck.json --noEmit",
     "new-post": "node scripts/blog-cli.mjs post",
     "format": "biome format --write ./src",
     "lint": "biome check --write ./src",

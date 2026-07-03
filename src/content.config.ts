@@ -19,7 +19,6 @@ const postsCollection = defineCollection({
 		categoryPath: z.array(z.string()).optional().default([]),
 		lang: z.string().optional().default(""),
 
-		/* For internal use */
 		prevTitle: z.string().optional().default(""),
 		prevSlug: z.string().optional().default(""),
 		nextTitle: z.string().optional().default(""),
