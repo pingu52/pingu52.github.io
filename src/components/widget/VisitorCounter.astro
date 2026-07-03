@@ -30,10 +30,9 @@ const rangeDays =
 
 // Umami stats endpoint
 // - 기본값: Vercel same-origin serverless function (/api/umami-stats)
-// - 외부 Worker/프록시를 계속 쓰고 싶으면 PUBLIC_UMAMI_STATS_URL로 override
-const umamiStatsUrl =
-	import.meta.env.PUBLIC_UMAMI_STATS_URL?.replace(/\/$/, "") ||
-	"/api/umami-stats";
+// - 기존 외부 Worker/프록시는 primary 실패 시 fallback으로만 사용
+const umamiStatsUrl = "/api/umami-stats";
+const legacyUmamiStatsUrl = import.meta.env.PUBLIC_UMAMI_STATS_URL?.replace(/\/$/, "") || "";
 
 // GoatCounter (optional)
 const goatcounterBaseUrl =
@@ -214,7 +213,7 @@ const initialStatus = isConfigured
 				throw new Error("Missing Umami stats URL.");
 			}
 
-			const u = new URL(umamiStatsUrl, window.location.origin);
+			const u = new URL(endpoint, window.location.origin);
 			u.searchParams.set("days", String(rangeDays));
 
 			const res = await fetch(u.toString());
