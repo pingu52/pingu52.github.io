@@ -111,7 +111,6 @@ lang: ""
    - `PUBLIC_UMAMI_SHARE_ID`에 Umami 공개 share 링크의 slug 또는 전체 share URL을 설정합니다.
    - `PUBLIC_UMAMI_BASE_URL`(선택): Umami 호스트 URL. 기본값은 Umami Cloud입니다.
    - 방문자 수는 공개 share 페이지 기반으로 조회합니다.
-   - 기존 외부 Worker를 유지해야 하는 경우에만 `PUBLIC_UMAMI_STATS_URL`을 설정합니다. `/api/umami-stats` 실패 시 fallback으로 사용됩니다.
 3. GoatCounter 사용 시
    - `PUBLIC_GOATCOUNTER_HOST` 또는 `PUBLIC_GOATCOUNTER_CODE` 중 하나를 지정  
      (예: `PUBLIC_GOATCOUNTER_HOST=https://example.goatcounter.com` 또는 `PUBLIC_GOATCOUNTER_CODE=example`)
