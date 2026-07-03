@@ -48,7 +48,6 @@ export function sortPostsByPublishedDesc(posts: PostEntry[]): PostEntry[] {
 		);
 }
 
-
 export function attachPrevNext(posts: PostEntry[]): PostEntry[] {
 	return posts.map((post, idx) => {
 		const next = idx > 0 ? posts[idx - 1] : undefined;
