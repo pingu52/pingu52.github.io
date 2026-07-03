@@ -32,7 +32,8 @@ const rangeDays =
 // - 기본값: Vercel same-origin serverless function (/api/umami-stats)
 // - 기존 외부 Worker/프록시는 primary 실패 시 fallback으로만 사용
 const umamiStatsUrl = "/api/umami-stats";
-const legacyUmamiStatsUrl = import.meta.env.PUBLIC_UMAMI_STATS_URL?.replace(/\/$/, "") || "";
+const legacyUmamiStatsUrl =
+	import.meta.env.PUBLIC_UMAMI_STATS_URL?.replace(/\/$/, "") || "";
 
 // GoatCounter (optional)
 const goatcounterBaseUrl =
