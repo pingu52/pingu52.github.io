@@ -89,7 +89,7 @@ function toNumber(value, fallback = 0) {
 }
 
 function visitorCount(data) {
-	return toNumber(data?.visitors ?? data?.visits ?? data?.pageviews, 0);
+	return toNumber(data?.visits ?? data?.visitors ?? data?.pageviews, 0);
 }
 
 async function fetchJson(url, headers = {}) {
