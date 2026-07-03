@@ -108,9 +108,9 @@ lang: ""
    - `umami` 또는 `goatcounter` 값을 사용합니다.
 2. Umami 사용 시
    - 기본 호출 경로는 `/api/umami-stats`입니다.
-   - Vercel 환경 변수에 `UMAMI_API_KEY`를 설정합니다. 이 값은 서버 전용이므로 `PUBLIC_` 접두사를 붙이지 않습니다.
-   - `UMAMI_WEBSITE_ID` 또는 `PUBLIC_UMAMI_WEBSITE_ID`를 선택적으로 설정할 수 있습니다. 생략하면 현재 블로그의 기본 Website ID를 사용합니다.
-   - `UMAMI_API_BASE_URL` 또는 `UMAMI_API_CLIENT_ENDPOINT`를 선택적으로 설정할 수 있습니다. 기본값은 `https://api.umami.is/v1`입니다.
+   - `PUBLIC_UMAMI_SHARE_ID`에 Umami 공개 share 링크의 slug 또는 전체 share URL을 설정합니다.
+   - `PUBLIC_UMAMI_BASE_URL`(선택): Umami 호스트 URL. 기본값은 Umami Cloud입니다.
+   - 방문자 수는 공개 share 페이지 기반으로 조회합니다.
    - 기존 외부 Worker를 유지해야 하는 경우에만 `PUBLIC_UMAMI_STATS_URL`을 설정합니다. `/api/umami-stats` 실패 시 fallback으로 사용됩니다.
 3. GoatCounter 사용 시
    - `PUBLIC_GOATCOUNTER_HOST` 또는 `PUBLIC_GOATCOUNTER_CODE` 중 하나를 지정  
