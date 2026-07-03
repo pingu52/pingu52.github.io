@@ -28,21 +28,32 @@ function normalizeUmamiBaseUrl(value) {
 		if (url.hostname === "analytics.umami.is") {
 			url.hostname = "cloud.umami.is";
 		}
+		url.pathname = "";
+		url.search = "";
+		url.hash = "";
 		return url.toString().replace(/\/+$/, "");
 	} catch {
 		return DEFAULT_UMAMI_BASE_URL;
 	}
 }
 
-function normalizeShareId(value) {
-	if (!value) return undefined;
+function parseShareSource(value) {
+	if (!value) return { shareId: undefined, baseUrl: undefined };
+	const raw = value.trim();
 	try {
-		const url = new URL(value);
+		const url = new URL(raw);
 		const parts = url.pathname.split("/").filter(Boolean);
 		const shareIndex = parts.indexOf("share");
-		return shareIndex >= 0 ? parts[shareIndex + 1] : parts.at(-1);
+		const shareId = shareIndex >= 0 ? parts[shareIndex + 1] : parts.at(-1);
+		return {
+			shareId,
+			baseUrl: normalizeUmamiBaseUrl(url.origin),
+		};
 	} catch {
-		return value.trim().replace(/^\/+|\/+$/g, "");
+		return {
+			shareId: raw.replace(/^\/+|\/+$/g, ""),
+			baseUrl: undefined,
+		};
 	}
 }
 
@@ -108,14 +119,14 @@ function safeErrorMessage(error) {
 }
 
 async function buildShareClient(request) {
-	const queryShareId = firstQueryValue(request.query?.share || request.query?.shareId);
+	const queryShareSource = firstQueryValue(request.query?.share || request.query?.shareId);
+	const envShareSource = readEnv("PUBLIC_UMAMI_SHARE_ID", "UMAMI_SHARE_ID", "PUBLIC_UMAMI_SHARE_SLUG", "UMAMI_SHARE_SLUG");
+	const shareSource = queryShareSource || envShareSource;
+	const parsedShare = parseShareSource(shareSource);
 	const queryBaseUrl = firstQueryValue(request.query?.baseUrl);
-	const shareId = normalizeShareId(
-		queryShareId || readEnv("PUBLIC_UMAMI_SHARE_ID", "UMAMI_SHARE_ID", "PUBLIC_UMAMI_SHARE_SLUG", "UMAMI_SHARE_SLUG"),
-	);
-	const baseUrl = normalizeUmamiBaseUrl(
-		queryBaseUrl || readEnv("PUBLIC_UMAMI_BASE_URL", "UMAMI_BASE_URL"),
-	);
+	const envBaseUrl = readEnv("PUBLIC_UMAMI_BASE_URL", "UMAMI_BASE_URL");
+	const shareId = parsedShare.shareId;
+	const baseUrl = normalizeUmamiBaseUrl(queryBaseUrl || parsedShare.baseUrl || envBaseUrl);
 
 	if (!shareId) {
 		const error = new Error("MISSING_SHARE_ID");
