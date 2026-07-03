@@ -2,13 +2,17 @@ import { type CollectionEntry, getCollection } from "astro:content";
 
 export type PostEntry = CollectionEntry<"posts">;
 
-export function getPostContentDir(post: Pick<PostEntry, "id" | "filePath">): string {
+export function getPostContentDir(
+	post: Pick<PostEntry, "id" | "filePath">,
+): string {
 	const normalizedFilePath = post.filePath?.replace(/\\/g, "/");
 
 	if (normalizedFilePath) {
 		const marker = "src/content/posts/";
 		const relativePath = normalizedFilePath.includes(marker)
-			? normalizedFilePath.slice(normalizedFilePath.indexOf(marker) + marker.length)
+			? normalizedFilePath.slice(
+					normalizedFilePath.indexOf(marker) + marker.length,
+				)
 			: normalizedFilePath.replace(/^.*content\/posts\//, "");
 
 		const lastSlash = relativePath.lastIndexOf("/");
