@@ -6,6 +6,7 @@ import {
 import {
 	attachPrevNext,
 	getAllPosts,
+	getPostSlug,
 	type PostEntry,
 	sortPostsByPublishedDesc,
 } from "@utils/post-utils";
@@ -31,7 +32,10 @@ export type PostForList = {
 
 export async function getSortedPostsList(): Promise<PostForList[]> {
 	const sortedFullPosts = await getSortedPosts();
-	return sortedFullPosts.map((post) => ({ slug: post.slug, data: post.data }));
+	return sortedFullPosts.map((post) => ({
+		slug: getPostSlug(post),
+		data: post.data,
+	}));
 }
 
 export type Tag = {

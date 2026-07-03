@@ -2,6 +2,22 @@ import { type CollectionEntry, getCollection } from "astro:content";
 
 export type PostEntry = CollectionEntry<"posts">;
 
+export function getPostContentDir(post: Pick<PostEntry, "id" | "filePath">): string {
+	const normalizedFilePath = post.filePath?.replace(/\\/g, "/");
+
+	if (normalizedFilePath) {
+		const marker = "src/content/posts/";
+		const relativePath = normalizedFilePath.includes(marker)
+			? normalizedFilePath.slice(normalizedFilePath.indexOf(marker) + marker.length)
+			: normalizedFilePath.replace(/^.*content\/posts\//, "");
+
+		const lastSlash = relativePath.lastIndexOf("/");
+		return lastSlash >= 0 ? relativePath.slice(0, lastSlash + 1) : "";
+	}
+
+	return `${post.id.replace(/\/index$/, "")}/`;
+}
+
 export function includePostInBuild(data: PostEntry["data"]): boolean {
 	return import.meta.env.PROD ? data.draft !== true : true;
 }
@@ -24,8 +40,11 @@ export function sortPostsByPublishedDesc(posts: PostEntry[]): PostEntry[] {
 		);
 }
 
+export function getPostSlug(post: Pick<PostEntry, "id">): string {
+	return post.id.replace(/\/index$/, "");
+}
+
 export function attachPrevNext(posts: PostEntry[]): PostEntry[] {
-	// Avoid mutating Astro content entries; return shallow copies with updated `data`.
 	return posts.map((post, idx) => {
 		const next = idx > 0 ? posts[idx - 1] : undefined;
 		const prev = idx < posts.length - 1 ? posts[idx + 1] : undefined;
@@ -34,9 +53,9 @@ export function attachPrevNext(posts: PostEntry[]): PostEntry[] {
 			...post,
 			data: {
 				...post.data,
-				nextSlug: next?.slug ?? "",
+				nextSlug: next ? getPostSlug(next) : "",
 				nextTitle: next?.data.title ?? "",
-				prevSlug: prev?.slug ?? "",
+				prevSlug: prev ? getPostSlug(prev) : "",
 				prevTitle: prev?.data.title ?? "",
 			},
 		};

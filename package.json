@@ -21,8 +21,8 @@
     "blog:post": "node scripts/blog-cli.mjs post"
   },
   "dependencies": {
-    "@astrojs/check": "^0.9.7",
-    "@astrojs/rss": "^4.0.16",
+    "@astrojs/check": "^0.9.9",
+    "@astrojs/rss": "^4.0.19",
     "@astrojs/svelte": "^7.2.5",
     "@expressive-code/core": "^0.41.7",
     "@expressive-code/plugin-collapsible-sections": "^0.41.7",
@@ -32,21 +32,20 @@
     "@iconify-json/fa6-brands": "^1.2.6",
     "@iconify-json/fa6-regular": "^1.2.4",
     "@iconify-json/fa6-solid": "^1.2.4",
-    "@iconify-json/material-symbols": "^1.2.61",
-    "@iconify/svelte": "^5.2.1",
+    "@iconify-json/material-symbols": "^1.2.82",
+    "@iconify/svelte": "^5.2.2",
     "@swup/astro": "^1.8.0",
-    "@tailwindcss/vite": "^4.2.1",
-    "astro": "^5.18.0",
+    "@tailwindcss/vite": "^4.3.2",
+    "astro": "^6.4.8",
     "astro-expressive-code": "^0.41.7",
     "astro-icon": "^1.1.5",
     "hastscript": "^9.0.1",
-    "katex": "^0.16.38",
-    "markdown-it": "^14.1.1",
+    "katex": "^0.16.47",
+    "markdown-it": "^14.3.0",
     "mdast-util-to-string": "^4.0.0",
-    "overlayscrollbars": "^2.14.0",
-    "pagefind": "^1.4.0",
+    "overlayscrollbars": "^2.16.0",
+    "pagefind": "^1.5.2",
     "photoswipe": "^5.4.4",
-    "pnpm": "^10.32.0",
     "reading-time": "^1.5.0",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-components": "^0.3.0",
@@ -57,21 +56,19 @@
     "remark-github-admonitions-to-directives": "^2.1.0",
     "remark-math": "^6.0.0",
     "remark-sectionize": "^2.1.0",
-    "sanitize-html": "^2.17.1",
+    "sanitize-html": "^2.17.5",
     "sharp": "^0.34.5",
     "stylus": "^0.64.0",
-    "svelte": "^5.53.9",
-    "tailwindcss": "^4.2.1",
+    "svelte": "^5.56.4",
+    "tailwindcss": "^4.3.2",
     "typescript": "^5.9.3",
     "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {
-    "@astrojs/sitemap": "^3.7.1",
-    "@astrojs/ts-plugin": "^1.10.7",
-    "@biomejs/biome": "^2.4.6",
-    "@rollup/plugin-yaml": "^4.1.2",
+    "@astrojs/sitemap": "^3.7.3",
+    "@astrojs/ts-plugin": "^1.10.10",
+    "@biomejs/biome": "^2.5.2",
     "@tailwindcss/typography": "0.5.19",
-    "@tailwindcss/upgrade": "^4.2.1",
     "@types/hast": "^3.0.4",
     "@types/markdown-it": "^14.1.2",
     "@types/mdast": "^4.0.4",
@@ -79,5 +76,14 @@
     "postcss-import": "^16.1.1",
     "postcss-nesting": "^14.0.0"
   },
-  "packageManager": "pnpm@10.32.0"
+  "packageManager": "pnpm@10.34.2",
+  "pnpm": {
+    "overrides": {
+      "rollup-plugin-terser>serialize-javascript": "7.0.5",
+      "astro>esbuild": "0.28.1"
+    },
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
 }
