@@ -2,6 +2,10 @@ import { type CollectionEntry, getCollection } from "astro:content";
 
 export type PostEntry = CollectionEntry<"posts">;
 
+export function getPostSlug(post: Pick<PostEntry, "id">): string {
+	return post.id.replace(/\/index$/, "").replace(/\.(md|mdx)$/, "");
+}
+
 export function getPostContentDir(
 	post: Pick<PostEntry, "id" | "filePath">,
 ): string {
@@ -19,7 +23,7 @@ export function getPostContentDir(
 		return lastSlash >= 0 ? relativePath.slice(0, lastSlash + 1) : "";
 	}
 
-	return `${post.id.replace(/\/index$/, "")}/`;
+	return `${post.id.replace(/\/index$/, "").replace(/\.(md|mdx)$/, "")}/`;
 }
 
 export function includePostInBuild(data: PostEntry["data"]): boolean {
@@ -44,9 +48,6 @@ export function sortPostsByPublishedDesc(posts: PostEntry[]): PostEntry[] {
 		);
 }
 
-export function getPostSlug(post: Pick<PostEntry, "id">): string {
-	return post.id.replace(/\/index$/, "");
-}
 
 export function attachPrevNext(posts: PostEntry[]): PostEntry[] {
 	return posts.map((post, idx) => {
