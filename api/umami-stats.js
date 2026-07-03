@@ -28,7 +28,6 @@ function normalizeUmamiBaseUrl(value) {
 		if (url.hostname === "analytics.umami.is") {
 			url.hostname = "cloud.umami.is";
 		}
-		url.pathname = "";
 		url.search = "";
 		url.hash = "";
 		return url.toString().replace(/\/+$/, "");
@@ -45,9 +44,12 @@ function parseShareSource(value) {
 		const parts = url.pathname.split("/").filter(Boolean);
 		const shareIndex = parts.indexOf("share");
 		const shareId = shareIndex >= 0 ? parts[shareIndex + 1] : parts.at(-1);
+		const basePathParts = shareIndex >= 0 ? parts.slice(0, shareIndex) : [];
+		const basePath = basePathParts.length > 0 ? `/${basePathParts.join("/")}` : "";
+
 		return {
 			shareId,
-			baseUrl: normalizeUmamiBaseUrl(url.origin),
+			baseUrl: normalizeUmamiBaseUrl(`${url.origin}${basePath}`),
 		};
 	} catch {
 		return {
