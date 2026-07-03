@@ -71,7 +71,7 @@ export const getStaticPaths = (async () => {
 		.map((pathStr) => pathStr.split("/"))
 		.flatMap((slugPath) => {
 			const node = findNodeBySlugPath(slugPath, taxonomyData)?.node;
-			const isLeaf = !node || !node.children?.length;
+			const isLeaf = !node?.children?.length;
 			const countKey = slugPath.join("/");
 			const totalForLeaf = leafCountsObj[countKey] ?? 0;
 			const totalPages = isLeaf
@@ -93,7 +93,7 @@ const taxonomyData = pruneTaxonomyToDepth(taxonomy as CategoryNode[]);
 const leafLabelMap = buildLeafLabelMap(taxonomyData);
 const nodeMatch = findNodeBySlugPath(slugPath, taxonomyData);
 const children = getChildrenBySlugPath(slugPath, taxonomyData);
-const isLeaf = !nodeMatch?.node || !nodeMatch.node.children?.length;
+const isLeaf = !nodeMatch?.node?.children?.length;
 const labelPath =
 	nodeMatch?.labelPath ??
 	(slugPath[0] === UNCATEGORIZED_SLUG && slugPath.length === 1
