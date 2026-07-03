@@ -28,8 +28,11 @@ const rangeDays =
 		? parsedRange
 		: DEFAULT_RANGE_DAYS;
 
-// Umami via Worker stats endpoint
-const umamiStatsUrl = import.meta.env.PUBLIC_UMAMI_STATS_URL?.replace(
+// Umami stats endpoint
+// 기본값은 Vercel same-origin serverless function입니다.
+// 기존 외부 Worker를 유지해야 하는 경우에만 PUBLIC_UMAMI_STATS_URL을 fallback으로 사용합니다.
+const umamiStatsUrl = "/api/umami-stats";
+const legacyUmamiStatsUrl = import.meta.env.PUBLIC_UMAMI_STATS_URL?.replace(
 	/\/$/,
 	"",
 );
@@ -42,7 +45,7 @@ const goatcounterBaseUrl =
 		: undefined);
 const goatcounterPath = import.meta.env.PUBLIC_GOATCOUNTER_PATH || "/";
 
-const isUmami = provider === "umami" && Boolean(umamiStatsUrl);
+const isUmami = provider === "umami";
 const isGoatcounter = provider === "goatcounter" && Boolean(goatcounterBaseUrl);
 const isConfigured = Boolean(isUmami || isGoatcounter);
 
@@ -83,6 +86,7 @@ const initialStatus = isConfigured
 		data-visitor-counter
 		data-provider={activeProvider}
 		data-umami-stats-url={umamiStatsUrl}
+		data-legacy-umami-stats-url={legacyUmamiStatsUrl}
 		data-goatcounter-base={goatcounterBaseUrl}
 		data-goatcounter-path={goatcounterPath}
 		data-range-days={String(rangeDays)}
@@ -135,6 +139,7 @@ const initialStatus = isConfigured
 		const rangeDays = Number.isFinite(parsedRange) && parsedRange > 0 ? parsedRange : 1;
 
 		const umamiStatsUrl = root.dataset.umamiStatsUrl ?? "";
+		const legacyUmamiStatsUrl = root.dataset.legacyUmamiStatsUrl ?? "";
 
 		const goatcounterBase = root.dataset.goatcounterBase ?? "";
 		const goatcounterPath = root.dataset.goatcounterPath ?? "/";
@@ -206,16 +211,15 @@ const initialStatus = isConfigured
 		};
 
 		// ===== Providers =====
-		const fetchUmami = async (): Promise<{ recent: number; total: number }> => {
-			if (!umamiStatsUrl) {
+		const fetchUmamiFrom = async (endpoint: string): Promise<{ recent: number; total: number }> => {
+			if (!endpoint) {
 				throw new Error("Missing Umami stats URL.");
 			}
 
-			const u = new URL(umamiStatsUrl);
+			const u = new URL(endpoint, window.location.origin);
 			u.searchParams.set("days", String(rangeDays));
-			u.searchParams.set("t", String(Date.now())); // 필요 없으면 삭제 가능
 
-			const res = await fetch(u.toString(), { cache: "no-store" });
+			const res = await fetch(u.toString());
 			if (!res.ok) throw new Error(`Umami stats responded with ${res.status}`);
 
 			const data: unknown = await res.json();
@@ -223,6 +227,18 @@ const initialStatus = isConfigured
 			const total = normalizeNumber((data as any)?.total) ?? 0;
 
 			return { recent, total };
+		};
+
+		const fetchUmami = async (): Promise<{ recent: number; total: number }> => {
+			try {
+				return await fetchUmamiFrom(umamiStatsUrl);
+			} catch (primaryError) {
+				if (legacyUmamiStatsUrl) {
+					console.warn("[VisitorCounter] Primary Umami stats endpoint failed. Trying legacy endpoint.", primaryError);
+					return fetchUmamiFrom(legacyUmamiStatsUrl);
+				}
+				throw primaryError;
+			}
 		};
 
 		const fetchGoatcounter = async (): Promise<{ recent: number | null; total: number | null }> => {
