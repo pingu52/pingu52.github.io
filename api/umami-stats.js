@@ -1,5 +1,4 @@
-const DEFAULT_API_BASE_URL = "https://api.umami.is/v1";
-const DEFAULT_WEBSITE_ID = "dd7b43b0-3d7a-4adf-8347-42fc439e4913";
+const DEFAULT_UMAMI_BASE_URL = "https://cloud.umami.is";
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const MAX_RANGE_DAYS = 366;
 
@@ -16,6 +15,31 @@ function parseDays(value) {
 	const parsed = Number(raw ?? 1);
 	if (!Number.isFinite(parsed) || parsed < 1) return 1;
 	return Math.min(Math.floor(parsed), MAX_RANGE_DAYS);
+}
+
+function normalizeUmamiBaseUrl(value) {
+	const raw = (value || DEFAULT_UMAMI_BASE_URL).replace(/\/+$/, "");
+	try {
+		const url = new URL(raw);
+		if (url.hostname === "analytics.umami.is") {
+			url.hostname = "cloud.umami.is";
+		}
+		return url.toString().replace(/\/+$/, "");
+	} catch {
+		return DEFAULT_UMAMI_BASE_URL;
+	}
+}
+
+function normalizeShareId(value) {
+	if (!value) return undefined;
+	try {
+		const url = new URL(value);
+		const parts = url.pathname.split("/").filter(Boolean);
+		const shareIndex = parts.indexOf("share");
+		return shareIndex >= 0 ? parts[shareIndex + 1] : parts.at(-1);
+	} catch {
+		return value.trim().replace(/^\/+|\/+$/g, "");
+	}
 }
 
 function getKstDateParts(date) {
@@ -51,7 +75,7 @@ function visitorCount(data) {
 	return toNumber(data?.visitors ?? data?.visits ?? data?.pageviews, 0);
 }
 
-async function fetchJson(url, headers) {
+async function fetchJson(url, headers = {}) {
 	const response = await fetch(url, { headers });
 	const text = await response.text();
 	let data = null;
@@ -74,50 +98,66 @@ function sendJson(response, statusCode, body, cacheControl) {
 	response.end(JSON.stringify(body));
 }
 
+async function buildShareClient() {
+	const shareId = normalizeShareId(
+		readEnv("PUBLIC_UMAMI_SHARE_ID", "UMAMI_SHARE_ID", "PUBLIC_UMAMI_SHARE_SLUG", "UMAMI_SHARE_SLUG"),
+	);
+	const baseUrl = normalizeUmamiBaseUrl(readEnv("PUBLIC_UMAMI_BASE_URL", "UMAMI_BASE_URL"));
+
+	if (!shareId) {
+		throw new Error("Missing PUBLIC_UMAMI_SHARE_ID in environment variables.");
+	}
+
+	const share = await fetchJson(buildUrl(baseUrl, `/api/share/${encodeURIComponent(shareId)}`), {
+		Accept: "application/json",
+	});
+
+	if (!share?.websiteId || !share?.token) {
+		throw new Error("Umami share endpoint did not return websiteId/token.");
+	}
+
+	return {
+		baseUrl,
+		websiteId: share.websiteId,
+		headers: {
+			Accept: "application/json",
+			"x-umami-share-token": share.token,
+			"x-umami-share-context": "1",
+		},
+	};
+}
+
 export default async function handler(request, response) {
 	if (request.method !== "GET" && request.method !== "HEAD") {
 		response.setHeader("Allow", "GET, HEAD");
 		return sendJson(response, 405, { error: "Method not allowed" });
 	}
 
-	const apiKey = readEnv("UMAMI_API_KEY");
-	const websiteId = readEnv("UMAMI_WEBSITE_ID", "PUBLIC_UMAMI_WEBSITE_ID") || DEFAULT_WEBSITE_ID;
-	const apiBaseUrl = readEnv("UMAMI_API_BASE_URL", "UMAMI_API_CLIENT_ENDPOINT") || DEFAULT_API_BASE_URL;
-
-	if (!apiKey) {
-		return sendJson(response, 500, {
-			error: "Missing UMAMI_API_KEY in server environment variables.",
-		});
-	}
-
 	try {
 		const days = parseDays(request.query?.days);
 		const now = Date.now();
 		const recentStartAt = startOfKstDayMs(new Date(now - (days - 1) * ONE_DAY_MS));
-		const headers = {
-			Accept: "application/json",
-			"x-umami-api-key": apiKey,
-		};
+		const client = await buildShareClient();
 
-		const recentStatsUrl = buildUrl(apiBaseUrl, `/websites/${websiteId}/stats`, {
+		const recentStatsUrl = buildUrl(client.baseUrl, `/api/websites/${client.websiteId}/stats`, {
 			startAt: recentStartAt,
 			endAt: now,
 		});
-		const dateRangeUrl = buildUrl(apiBaseUrl, `/websites/${websiteId}/daterange`);
+		const dateRangeUrl = buildUrl(client.baseUrl, `/api/websites/${client.websiteId}/daterange`);
 
 		const [recentStats, dateRange] = await Promise.all([
-			fetchJson(recentStatsUrl, headers),
-			fetchJson(dateRangeUrl, headers).catch(() => null),
+			fetchJson(recentStatsUrl, client.headers),
+			fetchJson(dateRangeUrl, client.headers).catch(() => null),
 		]);
 
 		const totalStartAt = Number.isFinite(Date.parse(dateRange?.startDate))
 			? Date.parse(dateRange.startDate)
 			: 0;
-		const totalStatsUrl = buildUrl(apiBaseUrl, `/websites/${websiteId}/stats`, {
+		const totalStatsUrl = buildUrl(client.baseUrl, `/api/websites/${client.websiteId}/stats`, {
 			startAt: totalStartAt,
 			endAt: now,
 		});
-		const totalStats = await fetchJson(totalStatsUrl, headers);
+		const totalStats = await fetchJson(totalStatsUrl, client.headers);
 
 		return sendJson(
 			response,
