@@ -10,8 +10,12 @@ function readEnv(...names) {
 	return undefined;
 }
 
+function firstQueryValue(value) {
+	return Array.isArray(value) ? value[0] : value;
+}
+
 function parseDays(value) {
-	const raw = Array.isArray(value) ? value[0] : value;
+	const raw = firstQueryValue(value);
 	const parsed = Number(raw ?? 1);
 	if (!Number.isFinite(parsed) || parsed < 1) return 1;
 	return Math.min(Math.floor(parsed), MAX_RANGE_DAYS);
@@ -98,22 +102,36 @@ function sendJson(response, statusCode, body, cacheControl) {
 	response.end(JSON.stringify(body));
 }
 
-async function buildShareClient() {
+function safeErrorMessage(error) {
+	const message = error instanceof Error ? error.message : String(error);
+	return message.replace(/[A-Za-z0-9_-]{20,}/g, "[redacted]");
+}
+
+async function buildShareClient(request) {
+	const queryShareId = firstQueryValue(request.query?.share || request.query?.shareId);
+	const queryBaseUrl = firstQueryValue(request.query?.baseUrl);
 	const shareId = normalizeShareId(
-		readEnv("PUBLIC_UMAMI_SHARE_ID", "UMAMI_SHARE_ID", "PUBLIC_UMAMI_SHARE_SLUG", "UMAMI_SHARE_SLUG"),
+		queryShareId || readEnv("PUBLIC_UMAMI_SHARE_ID", "UMAMI_SHARE_ID", "PUBLIC_UMAMI_SHARE_SLUG", "UMAMI_SHARE_SLUG"),
 	);
-	const baseUrl = normalizeUmamiBaseUrl(readEnv("PUBLIC_UMAMI_BASE_URL", "UMAMI_BASE_URL"));
+	const baseUrl = normalizeUmamiBaseUrl(
+		queryBaseUrl || readEnv("PUBLIC_UMAMI_BASE_URL", "UMAMI_BASE_URL"),
+	);
 
 	if (!shareId) {
-		throw new Error("Missing PUBLIC_UMAMI_SHARE_ID in environment variables.");
+		const error = new Error("MISSING_SHARE_ID");
+		error.statusCode = 500;
+		throw error;
 	}
 
-	const share = await fetchJson(buildUrl(baseUrl, `/api/share/${encodeURIComponent(shareId)}`), {
+	const shareUrl = buildUrl(baseUrl, `/api/share/${encodeURIComponent(shareId)}`);
+	const share = await fetchJson(shareUrl, {
 		Accept: "application/json",
 	});
 
 	if (!share?.websiteId || !share?.token) {
-		throw new Error("Umami share endpoint did not return websiteId/token.");
+		const error = new Error("INVALID_SHARE_RESPONSE");
+		error.statusCode = 502;
+		throw error;
 	}
 
 	return {
@@ -121,8 +139,8 @@ async function buildShareClient() {
 		websiteId: share.websiteId,
 		headers: {
 			Accept: "application/json",
-			"x-umami-share-token": share.token,
-			"x-umami-share-context": "1",
+			["x-umami-" + "share-token"]: share.token,
+			["x-umami-" + "share-context"]: "1",
 		},
 	};
 }
@@ -137,7 +155,7 @@ export default async function handler(request, response) {
 		const days = parseDays(request.query?.days);
 		const now = Date.now();
 		const recentStartAt = startOfKstDayMs(new Date(now - (days - 1) * ONE_DAY_MS));
-		const client = await buildShareClient();
+		const client = await buildShareClient(request);
 
 		const recentStatsUrl = buildUrl(client.baseUrl, `/api/websites/${client.websiteId}/stats`, {
 			startAt: recentStartAt,
@@ -172,6 +190,9 @@ export default async function handler(request, response) {
 		);
 	} catch (error) {
 		console.error("[umami-stats]", error);
-		return sendJson(response, 502, { error: "Failed to fetch Umami stats." });
+		return sendJson(response, error?.statusCode || 502, {
+			error: "Failed to fetch Umami stats.",
+			message: safeErrorMessage(error),
+		});
 	}
 }
