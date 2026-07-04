@@ -11,7 +11,7 @@ tags:
   - FOSSA
   - Dependency
   - Troubleshooting
-category: "Server/Infra"
+category: "Server & Infra"
 ---
 
 이번 작업의 시작은 FOSSA였다. 처음에는 단순히 취약한 패키지를 몇 개 올리면 끝날 줄 알았는데, 막상 들여다보니 직접 의존성보다 transitive dependency가 훨씬 많았다.

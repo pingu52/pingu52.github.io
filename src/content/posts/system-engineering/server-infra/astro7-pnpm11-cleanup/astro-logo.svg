@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<title id="astro-logo-title">Astro logo</title>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="274px" height="150px" viewBox="0 0 274 150" version="1.1">
+<title id="astro-logo-title">Astro logo</title>
 <defs>
 <linearGradient id="linear0" gradientUnits="userSpaceOnUse" x1="61.000301" y1="136" x2="104.622002" y2="115.389999" gradientTransform="matrix(0.595652,0,0,0.9375,0,0)">
 <stop offset="0" style="stop-color:rgb(84.705882%,20%,20%);stop-opacity:1;"/>
