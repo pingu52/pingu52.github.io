@@ -5,7 +5,7 @@
 
 개인 기술 블로그입니다. **Astro 7** 기반의 정적 사이트로 빌드되며, **Tailwind CSS v4**를 사용해 라이트/다크 테마, 카드형 포스트 목록, 마크다운 타이포그래피, 코드블록 스타일을 구성합니다.
 
-- Live: https://pingu52.github.io/
+- Live: https://pingu52.vercel.app/
 - Preview/Service: https://pingu52.vercel.app/
 - Repo: https://github.com/pingu52/pingu52.github.io
 
