@@ -1,0 +1,10 @@
+packages:
+  - .
+
+
+#overrides:
+#  rollup-plugin-terser>serialize-javascript: 7.0.7
+#  astro>esbuild: 0.28.1
+
+allowBuilds:
+  esbuild: true

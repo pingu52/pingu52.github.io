@@ -77,14 +77,5 @@
     "postcss-import": "^16.1.1",
     "postcss-nesting": "^14.0.0"
   },
-  "packageManager": "pnpm@10.34.2",
-  "pnpm": {
-    "overrides": {
-      "rollup-plugin-terser>serialize-javascript": "7.0.5",
-      "astro>esbuild": "0.28.1"
-    },
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
-  }
+  "packageManager": "pnpm@11.9.0"
 }
