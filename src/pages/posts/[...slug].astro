@@ -83,8 +83,15 @@ const jsonLd = {
 
             <!-- always show cover as long as it has one -->
 
-            {entry.data.image &&
-                <ImageWrapper id="post-cover" src={entry.data.image} basePath={path.join("content/posts/", getPostContentDir(entry))} class="mb-8 rounded-xl banner-container onload-animation"/>
+            {
+                entry.data.image && (
+                    <ImageWrapper
+                        id="post-cover"
+                        src={entry.data.image}
+                        basePath={path.join("content/posts/", getPostContentDir(entry))}
+                        class="mb-8 rounded-xl banner-container onload-animation"
+                    />
+                )
             }
 
 
@@ -92,7 +99,14 @@ const jsonLd = {
                 <Content />
             </Markdown>
 
-            {licenseConfig.enable && <License title={entry.data.title} slug={getPostSlug(entry)} pubDate={entry.data.published} class="mb-6 rounded-xl license-container onload-animation" />
+            {licenseConfig.enable && (
+                <License
+                    title={entry.data.title}
+                    slug={getPostSlug(entry)}
+                    pubDate={entry.data.published}
+                    class="mb-6 rounded-xl license-container onload-animation"
+                />
+            )}
 
         </div>
     </div>
