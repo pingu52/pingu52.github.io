@@ -46,7 +46,8 @@
 		"slug": "log-life",
 		"children": [
 			{ "label": "일상", "slug": "daily" },
-			{ "label": "애니", "slug": "anime" }
+			{ "label": "애니", "slug": "anime" },
+			{ "label": "게임", "slug": "game" }
 		]
 	}
 ]
