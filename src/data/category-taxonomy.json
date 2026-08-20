@@ -13,7 +13,8 @@
 		"children": [
 			{ "label": "BSP & Build", "slug": "bsp-build-system" },
 			{ "label": "Kernel & Driver", "slug": "linux-kernel-driver" },
-			{ "label": "Firmware & MCU", "slug": "firmware-mcu" }
+			{ "label": "Firmware & MCU", "slug": "firmware-mcu" },
+			{ "label": "Protocol & Security", "slug": "protocol-security" }
 		]
 	},
 	{
