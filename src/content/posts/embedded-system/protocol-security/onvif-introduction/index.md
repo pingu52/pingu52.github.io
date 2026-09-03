@@ -25,8 +25,9 @@ IP 카메라를 공부하다 보면 ONVIF와 RTSP가 거의 항상 함께 등장
 ## 시리즈 구성
 
 - 1편: ONVIF의 역할과 전체 구조 이해하기 — 현재 글
-- 2편: WS-Discovery로 같은 네트워크의 ONVIF 장치 찾기
-- 3편: Device/Media Service를 호출해 스트림 URI 얻기
+- [2편: WS-Discovery로 같은 네트워크의 ONVIF 장치 찾기](/posts/embedded-system/protocol-security/onvif-ws-discovery/)
+- [3편: Device/Media Service를 호출해 스트림 URI 얻기](/posts/embedded-system/protocol-security/onvif-device-media-stream-uri/)
+- 4편: RTSP 세션과 RTP frame 수신 경계 확인하기
 
 ## 1. ONVIF가 필요한 이유
 
