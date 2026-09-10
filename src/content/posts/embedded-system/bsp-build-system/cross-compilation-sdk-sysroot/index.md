@@ -5,7 +5,7 @@ description: "Yocto 기반 SDK에서 크로스 컴파일러, sysroot, 환경 설
 image: ""
 tags: [Embedded Linux, Cross Compilation, Yocto, SDK, GCC]
 category: "BSP & Build"
-draft: true
+draft: false
 ---
 
 안녕하세요, pingu52입니다.
