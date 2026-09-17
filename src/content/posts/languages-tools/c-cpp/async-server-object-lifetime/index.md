@@ -2,7 +2,7 @@
 title: "[C/C++] 객체는 해제됐는데 서버는 왜 실행 중이라고 생각할까? — 비동기 서버의 수명 관리"
 published: 2026-09-17
 description: "재생 서버의 크래시와 무프레임 문제를 통해 객체 소유권, 비소유 포인터, 상태 플래그의 수명이 어긋나는 과정을 살펴봅니다. NULL 검사와 재시작만으로 해결되지 않은 이유를 분석하고, AddressSanitizer로 작은 C++ 예제를 검증합니다."
-image: ""
+image: "./thumbnail.svg"
 tags: ["C++", Embedded Linux, Debugging, Memory Management, AddressSanitizer]
 category: "C / C++"
 draft: false
