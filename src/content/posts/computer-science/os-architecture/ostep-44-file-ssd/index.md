@@ -12,7 +12,7 @@ draft: false
 
 지난 장들에서 우리는 회전 플래터와 암을 가진 HDD를 기준으로 스토리지와 파일 시스템을 배웠습니다. 하지만 오늘날 성능 중심 스토리지의 핵심은 **SSD(Solid-State Drive)** 입니다.
 
-SSD는 기계적인 구동부가 없어서 seek나 회전 지연이 없습니다. 대신 트랜지스터 기반의 **NAND 플래시**를 사용하며, 이 플래시는 HDD에는 없던 제약을 가집니다. 이번 글에서는 그 제약을 숨기고 OS에게는 여전히 블록 디바이스처럼 보이게 만드는 **FTL(Flash Translation Layer)** 의 내부 메커니즘을 정리합니다.
+SSD는 기계적인 구동부가 없어서 seek나 회전 지연이 없습니다. 대신 트랜지스터 기반의 **NAND 플래시**를 사용하며 이 플래시는 HDD에는 없던 제약을 가집니다. 이번 글에서는 그 제약을 숨기고 OS에게는 여전히 블록 디바이스처럼 보이게 만드는 **FTL(Flash Translation Layer)** 의 내부 메커니즘을 정리합니다.
 
 ---
 
@@ -20,27 +20,27 @@ SSD는 기계적인 구동부가 없어서 seek나 회전 지연이 없습니다
 
 ### 1.1 용어 주의: 블록과 페이지
 
-플래시에서도 block, page라는 단어를 쓰지만, 우리가 디스크/VM에서 쓰던 의미와 다릅니다.
+플래시에서도 block, page라는 단어를 쓰지만 우리가 디스크/VM에서 쓰던 의미와 다릅니다.
 
 - **페이지(page)**: 읽기(read)와 쓰기(program)의 단위, 보통 수 KB(예: 4 KiB)
 - **블록(block, erase block)**: 지우기(erase)의 단위, 보통 수백 KB 이상(예: 128 KiB, 256 KiB)
-- 플래시 칩은 많은 **bank/plane**으로 구성되고, 각 bank/plane은 많은 block, 각 block은 많은 page로 구성됩니다
+- 플래시 칩은 많은 **bank/plane**으로 구성되고 각 bank/plane은 많은 block, 각 block은 많은 page로 구성됩니다
 
 ![Figure 44.1: Pages Within Blocks](./images/44_1.png)
 
 ### 1.2 3가지 기본 연산: read / erase / program
 
-플래시에는 3개의 기본 연산이 있고, 여기서 모든 난제가 시작됩니다.
+플래시에는 3개의 기본 연산이 있고 여기서 모든 난제가 시작됩니다.
 
 1. **read(페이지)**  
    임의 위치를 빠르게 읽습니다. 대략 수십 $\mu\mathrm{s}$ 수준입니다.
 
 2. **erase(블록)**  
-   쓰기 전에 반드시 필요합니다. 블록 단위로만 지울 수 있고, 비용이 가장 큽니다. 대략 수 $\mathrm{ms}$ 수준입니다.  
-   erase는 블록 내 모든 비트를 1로 만드는 동작으로 볼 수 있고, 기존 내용은 파괴됩니다.
+   쓰기 전에 반드시 필요합니다. 블록 단위로만 지울 수 있고 비용이 가장 큽니다. 대략 수 $\mathrm{ms}$ 수준입니다.  
+   erase는 블록 내 모든 비트를 1로 만드는 동작으로 볼 수 있고 기존 내용은 파괴됩니다.
 
 3. **program(페이지)**  
-   erase 이후에만 가능하며, 페이지를 한 번 program하면 같은 페이지를 다시 program할 수 없습니다.  
+   erase 이후에만 가능하며 페이지를 한 번 program하면 같은 페이지를 다시 program할 수 없습니다.  
    또한 program은 보통 1을 0으로만 바꾸는 방향으로 동작합니다.
 
 이 제약을 상태 전이로 보면 직관적입니다.
@@ -53,7 +53,7 @@ SSD는 기계적인 구동부가 없어서 seek나 회전 지연이 없습니다
 
 ### 1.3 성능과 신뢰성
 
-플래시는 read는 빠르지만, program과 erase가 훨씬 비쌉니다. 또한 신뢰성 이슈도 존재합니다.
+플래시는 read는 빠르지만 program과 erase가 훨씬 비쌉니다. 또한 신뢰성 이슈도 존재합니다.
 
 - **wear out**: 블록은 program/erase(P/E) 사이클을 반복하면 열화됩니다
 - **disturbance**: 인접 페이지 비트가 뒤집히는 read/program disturb가 발생할 수 있습니다
@@ -72,7 +72,7 @@ FTL의 목표는 3가지로 요약됩니다.
 - **write amplification 최소화**: 내부 복사/GC로 인한 추가 쓰기 감소
 - **wear leveling**: 특정 블록만 닳지 않도록 P/E 사이클을 분산
 
-SSD 내부는 플래시 칩들 + volatile memory(SRAM/DRAM) + 컨트롤 로직으로 구성되고, FTL은 컨트롤 로직의 핵심 기능입니다.
+SSD 내부는 플래시 칩들 + volatile memory(SRAM/DRAM) + 컨트롤 로직으로 구성되고 FTL은 컨트롤 로직의 핵심 기능입니다.
 
 ![Figure 44.3: SSD Logical Diagram](./images/44_3.png)
 
@@ -87,7 +87,7 @@ PDF에서 말하는 **direct-mapped** 는 페이지 단위 매핑이 아니라, 
   - 해당 페이지가 속한 **블록 전체를 읽고**
   - 블록을 **erase**
   - 원래 데이터들과 변경된 페이지를 **program**
-- 결과적으로 write는 블록 크기에 비례하는 write amplification을 만들고,
+- 결과적으로 write는 블록 크기에 비례하는 write amplification을 만들고
   hot data overwrite가 특정 블록을 빨리 죽게 만들어 신뢰성도 최악입니다
 
 이 방식은 성능/수명 관점에서 실질적으로 사용할 수 없는 접근입니다.
@@ -115,7 +115,7 @@ read(L)은 현재 물리 위치를 알아야 합니다.
 
 매핑 테이블은 volatile memory에 있으므로 전원이 나가면 사라집니다. 따라서 SSD는 매핑 정보를 복구할 수 있어야 합니다.
 
-- 가장 단순한 방식: 각 페이지의 OOB(out-of-band)에 논리 주소 정보를 기록해두고, 부팅 시 전체를 스캔하여 매핑 테이블을 재구성
+- 가장 단순한 방식: 각 페이지의 OOB(out-of-band)에 논리 주소 정보를 기록해두고 부팅 시 전체를 스캔하여 매핑 테이블을 재구성
 - 단점: 대용량 SSD에서 스캔 비용이 큼
 - 고급 SSD는 logging/checkpointing으로 복구 시간을 줄이기도 합니다
 
@@ -143,7 +143,7 @@ $$
 
 **TRIM** 은 호스트가 더 이상 필요 없는 LBA 범위를 SSD에 알려 GC 효율을 높입니다.
 
-추가로 많은 SSD는 **overprovisioning** 으로 여유 공간을 두어 GC를 더 늦추고, 백그라운드에서 처리하기 쉽게 만듭니다.
+추가로 많은 SSD는 **overprovisioning** 으로 여유 공간을 두어 GC를 더 늦추고 백그라운드에서 처리하기 쉽게 만듭니다.
 
 ---
 
@@ -188,26 +188,26 @@ merge는 3가지 케이스가 있습니다.
 
 페이지 매핑을 유지하되,
 working set의 translation만 메모리에 캐싱하는 방식도 연구됩니다.
-working set이 작으면 좋지만, working set이 크면 translation miss 때문에 추가 read/write가 발생할 수 있습니다.
+working set이 작으면 좋지만 working set이 크면 translation miss 때문에 추가 read/write가 발생할 수 있습니다.
 
 ---
 
 ## 7. wear leveling
 
-log-structured와 GC는 기본적으로 write load를 퍼뜨리지만, 여전히 문제가 남습니다.
+log-structured와 GC는 기본적으로 write load를 퍼뜨리지만 여전히 문제가 남습니다.
 
 - 어떤 블록이 **long-lived data** 로 가득 차면 overwrite가 없어서 GC로는 회수되지 않음
 - 그러면 그 블록은 P/E 사이클을 거의 받지 않아 wear leveling 관점에서 불균형이 생김
 
 따라서 FTL은 때때로 이런 블록의 live data를 다른 곳으로 옮겨,
 해당 블록도 쓰기 대상이 되게 만들어 P/E 사이클을 평준화합니다.
-이 과정은 write amplification을 늘리지만, SSD 수명을 위해 필수입니다.
+이 과정은 write amplification을 늘리지만 SSD 수명을 위해 필수입니다.
 
 ---
 
 ## 8. SSD 성능과 비용 감각
 
-SSD는 랜덤 I/O에서 HDD를 압도하지만, 순차 I/O에서는 격차가 상대적으로 줄어듭니다.
+SSD는 랜덤 I/O에서 HDD를 압도하지만 순차 I/O에서는 격차가 상대적으로 줄어듭니다.
 
 ![Figure 44.4: SSD vs HDD Performance](./images/44_4.png)
 
@@ -218,11 +218,11 @@ SSD는 랜덤 I/O에서 HDD를 압도하지만, 순차 I/O에서는 격차가 �
 ## 9. 요약
 
 - 플래시는 **erase-before-program** 제약 때문에 overwrite가 불가능하고 erase가 비쌉니다
-- FTL은 플래시 위에 블록 디바이스 인터페이스를 구현하며, 성능/수명 목표를 동시에 만족해야 합니다
+- FTL은 플래시 위에 블록 디바이스 인터페이스를 구현하며 성능/수명 목표를 동시에 만족해야 합니다
 - direct-mapped 같은 단순 고정 매핑은 write amplification과 wear out 때문에 실용적이지 않습니다
-- 대부분의 SSD는 log-structured FTL을 사용하고, GC로 인해 write amplification이 발생합니다
-- page-level mapping은 유연하지만 테이블이 커지고, 이를 줄이기 위해 block/hybrid/caching 절충이 등장합니다
-- wear leveling은 수명 확보를 위해 필수이며, 역시 추가 write amplification을 동반합니다
+- 대부분의 SSD는 log-structured FTL을 사용하고 GC로 인해 write amplification이 발생합니다
+- page-level mapping은 유연하지만 테이블이 커지고 이를 줄이기 위해 block/hybrid/caching 절충이 등장합니다
+- wear leveling은 수명 확보를 위해 필수이며 역시 추가 write amplification을 동반합니다
 
 ---
 

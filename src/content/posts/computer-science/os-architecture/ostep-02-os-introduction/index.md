@@ -11,7 +11,7 @@ draft: false
 안녕하세요, pingu52입니다.
 
 이번 글은 『Operating Systems: Three Easy Pieces(OSTEP)』 **2장(Introduction to Operating Systems)** 을 읽고 정리한 노트입니다.  
-1장 Dialogue는 별도 글로 만들지 않고, 이 장의 흐름(세 가지 축 + Mechanism/Policy) 안에 자연스럽게 섞어서 정리합니다.
+1장 Dialogue는 별도 글로 만들지 않고 이 장의 흐름(세 가지 축 + Mechanism/Policy) 안에 자연스럽게 섞어서 정리합니다.
 
 ---
 
@@ -30,7 +30,7 @@ cd ostep-code/intro
 
 ## 1. 이 장에서 잡아야 할 관점
 
-운영체제(Operating System)는 물리 자원(CPU/Memory/Disk)을 직접 드러내지 않고, 프로그램이 쓰기 쉬운 추상화(Abstraction)로 제공합니다.  
+운영체제(Operating System)는 물리 자원(CPU/Memory/Disk)을 직접 드러내지 않고 프로그램이 쓰기 쉬운 추상화(Abstraction)로 제공합니다.  
 그리고 운영체제는 아래 세 가지 큰 문제를 반복해서 다룹니다.
 
 - 가상화(Virtualization): CPU/메모리 같은 자원을 **마치 분리되어 있는 것처럼** 보이게 만듭니다.
@@ -58,7 +58,7 @@ gcc -o cpu cpu.c -Wall
 
 ![01. CPU 한개만 실행](./images/01_cpu_A.png)
 
-여기서 핵심은 **한 번에 하나만 실행**이 아니라 **여러 개를 동시에 실행**하는 상황입니다.
+여기서는 **한 번에 하나만 실행**하는 경우 대신 **여러 개를 동시에 실행**하는 상황을 살펴봅니다.
 
 ```bash
 # zsh 기준 예시: 백그라운드로 여러 프로세스 실행
@@ -83,7 +83,7 @@ gcc -o cpu cpu.c -Wall
 
 ## 3. Virtualization 2: 메모리 가상화 (Virtualizing Memory)
 
-물리 메모리(physical memory)는 바이트 배열이고, 주소를 통해 읽고/씁니다.  
+물리 메모리(physical memory)는 바이트 배열이고 주소를 통해 읽고/씁니다.  
 그런데 각 프로세스는 자기만의 주소 공간(Address Space, Virtual Address Space)을 가진 것처럼 보입니다.
 
 ### 3.1 예제: mem.c
@@ -108,8 +108,8 @@ gcc -o mem mem.c -Wall
 
 #### 관찰 포인트
 
-- **같은 주소인데 왜 충돌이 없나?** → 여기서 주소는 가상 주소(virtual address)이고, 운영체제가 이를 물리 메모리(physical memory)로 매핑(mapping)합니다.
-- 결과적으로 프로세스마다 사적인(private) 메모리를 가진 것처럼 보이지만, 실제 물리 메모리는 공유 자원(shared resource)이며 OS가 관리합니다.
+- **같은 주소인데 왜 충돌이 없나?** → 여기서 주소는 가상 주소(virtual address)이고 운영체제가 이를 물리 메모리(physical memory)로 매핑(mapping)합니다.
+- 결과적으로 프로세스마다 사적인(private) 메모리를 가진 것처럼 보이지만 실제 물리 메모리는 공유 자원(shared resource)이며 OS가 관리합니다.
 
 :::note
 이 예제는 주소 공간 랜덤화(ASLR, Address Space Layout Randomization)가 켜져 있으면 책의 출력과 다르게 보일 수 있습니다. **같은 주소가 반복된다**는 현상을 재현하려면 ASLR을 끄는 방식이 필요합니다.
@@ -148,7 +148,7 @@ gcc -o threads threads.c -Wall -pthread
 
 - loops=1000일 때는 기대값(2N)이 잘 나올 수 있습니다.
 - loops를 크게 하면 결과가 틀리거나 실행마다 달라질 수 있습니다 → 경쟁 조건(Race Condition)의 전형적인 증상입니다.
-- 원인은 `counter++`가 원자적(atomic) 연산이 아니기 때문입니다. 일반적으로 `load → increment → store` 같은 여러 단계로 분해되어 실행되며, 그 사이에 스케줄링이 끼어들면 결과가 깨집니다.
+- 원인은 `counter++`가 원자적(atomic) 연산이 아니기 때문입니다. 일반적으로 `load → increment → store` 같은 여러 단계로 분해되어 실행되며 그 사이에 스케줄링이 끼어들면 결과가 깨집니다.
 
 이 파트는 이후 챕터에서 동기화(Synchronization), 상호배제(Mutual Exclusion), 락(Lock) 같은 기본 도구로 확장됩니다.
 
@@ -163,9 +163,9 @@ DRAM 같은 메모리는 휘발성(volatile)이라 전원이 꺼지거나 크래
 - 소프트웨어(운영체제): 파일 시스템(File System)
 
 CPU/메모리와 달리, 디스크는 **프로세스마다 사적인 가상 디스크**를 제공하기보다 **공유(share)** 를 전제로 합니다.  
-에디터로 파일을 만들고, 컴파일러로 빌드하고, 실행 파일을 돌리는 일련의 흐름이 바로 그 공유를 활용합니다.
+에디터로 파일을 만들고 컴파일러로 빌드하고 실행 파일을 돌리는 일련의 흐름이 바로 그 공유를 활용합니다.
 
-또한 OS는 저장장치에 접근하는 복잡한 세부를 감추고, 시스템 콜(System Call) 형태의 단순한 인터페이스로 I/O를 제공합니다(예: open/write/close).
+또한 OS는 저장장치에 접근하는 복잡한 세부를 감추고 시스템 콜(System Call) 형태의 단순한 인터페이스로 I/O를 제공합니다(예: open/write/close).
 
 ---
 
@@ -202,7 +202,7 @@ OSTEP는 **가능하게 하는 방법(How)** 과 **무엇을 선택할지(Which)
 - 시스템 콜(System Call): OS로 점프하면서 권한 레벨(privilege level)을 올립니다.
 
 일반 앱은 사용자 모드(User Mode)에서 실행되어 I/O 요청이나 물리 메모리 접근 같은 위험한 작업이 제한됩니다.  
-시스템 콜은 트랩(trap) 같은 특별한 하드웨어 명령을 통해 커널 모드(Kernel Mode)로 진입하고, OS가 요청을 처리한 뒤 다시 사용자 모드로 돌아옵니다.
+시스템 콜은 트랩(trap) 같은 특별한 하드웨어 명령을 통해 커널 모드(Kernel Mode)로 진입하고 OS가 요청을 처리한 뒤 다시 사용자 모드로 돌아옵니다.
 
 이 구조가 곧 격리(Isolation)와 보호(Protection)의 기반입니다.
 
@@ -233,4 +233,4 @@ OSTEP는 **가능하게 하는 방법(How)** 과 **무엇을 선택할지(Which)
 ---
 
 다음 글은 4장 가상화(Virtualization) 파트로 들어갑니다.  
-3장 Dialogue(가상화에 관한 대화)는 별도 글로 만들지 않고, 4장(프로세스 Process) 서두에서 필요한 프레임만 짧게 연결하겠습니다.
+3장 Dialogue(가상화에 관한 대화)는 별도 글로 만들지 않고 4장(프로세스 Process) 서두에서 필요한 프레임만 짧게 연결하겠습니다.

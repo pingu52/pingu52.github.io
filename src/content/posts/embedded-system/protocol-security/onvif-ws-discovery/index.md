@@ -12,7 +12,7 @@ draft: false
 
 [1편](/posts/embedded-system/protocol-security/onvif-introduction/)에서는 ONVIF 장치를 찾고 스트림을 받기까지의 전체 구조를 살펴봤습니다. 이번 글에서는 그 첫 단계인 **WS-Discovery**만 떼어 Probe를 보낼 수 있는 코드와 Wireshark 확인 방법을 정리합니다.
 
-이번 글을 준비하면서 기존 ONVIF 작업 기록도 다시 살펴봤습니다. 기록으로 확인할 수 있었던 것은 이미 알고 있는 Device Service 주소로 보낸 SOAP 요청이었고, `Probe`와 `ProbeMatches`를 함께 확인한 패킷 캡처는 남아 있지 않았습니다.
+이번 글을 준비하면서 기존 ONVIF 작업 기록도 다시 살펴봤습니다. 기록으로 확인할 수 있었던 것은 이미 알고 있는 Device Service 주소로 보낸 SOAP 요청이었고 `Probe`와 `ProbeMatches`를 함께 확인한 패킷 캡처는 남아 있지 않았습니다.
 
 다음 HTTP 요청을 봤다는 사실만으로는 WS-Discovery가 수행됐다고 말할 수 없습니다.
 
@@ -20,10 +20,10 @@ draft: false
 POST /onvif/device_service HTTP/1.1
 ```
 
-클라이언트가 주소를 미리 설정했거나 캐시에 저장해 두었을 수도 있고, Discovery가 끝난 뒤 캡처를 시작했을 수도 있기 때문입니다.
+클라이언트가 주소를 미리 설정했거나 캐시에 저장해 두었을 수도 있고 Discovery가 끝난 뒤 캡처를 시작했을 수도 있기 때문입니다.
 
 :::note
-기존 기록에서 확인한 사실은 **알고 있는 endpoint로 Device Service를 호출한 단계**까지입니다. 이 글의 Probe와 ProbeMatches XML, Python 코드는 ONVIF 공식 명세 기반 학습용 예제이며, 실제 장치를 대상으로 `Probe`를 송신하거나 응답을 캡처한 결과는 포함하지 않습니다.
+기존 기록에서 확인한 사실은 **알고 있는 endpoint로 Device Service를 호출한 단계**까지입니다. 이 글의 Probe와 ProbeMatches XML, Python 코드는 ONVIF 공식 명세 기반 학습용 예제이며 실제 장치를 대상으로 `Probe`를 송신하거나 응답을 캡처한 결과는 포함하지 않습니다.
 :::
 
 ## 시리즈 구성
@@ -54,9 +54,9 @@ Client                                            ONVIF Device
 2. 조건에 맞는 장치는 `ProbeMatches`로 클라이언트에 unicast 응답합니다.
 3. `XAddrs`는 별도 메시지가 아니라 `ProbeMatches` 안에 들어 있는 Device Service 주소 필드입니다.
 
-따라서 흐름을 `Probe → ProbeMatches → XAddrs`라고 축약해 말할 수는 있지만, `XAddrs`라는 세 번째 패킷이 오는 것은 아닙니다.
+따라서 흐름을 `Probe → ProbeMatches → XAddrs`라고 축약해 말할 수는 있지만 `XAddrs`라는 세 번째 패킷이 오는 것은 아닙니다.
 
-또 하나 주의할 점은 두 단계 모두 SOAP 메시지라는 것입니다.
+두 단계 모두 SOAP 메시지를 사용합니다.
 
 | 구간 | 메시지 | 전송 |
 | --- | --- | --- |
@@ -96,7 +96,7 @@ WS-Discovery의 IPv4 multicast 목적지는 다음과 같습니다.
 239.255.255.250:3702/UDP
 ```
 
-IPv6에서는 link-local multicast 주소 `FF02::C`와 UDP 3702를 사용하지만, 이번 글의 실습 범위는 IPv4로 한정합니다.
+IPv6에서는 link-local multicast 주소 `FF02::C`와 UDP 3702를 사용하지만 이번 글의 실습 범위는 IPv4로 한정합니다.
 
 `239.255.255.250`은 broadcast 주소가 아니라 multicast 주소입니다. 따라서 다음 상황에서는 일반 IP 통신이 되더라도 자동 검색만 실패할 수 있습니다.
 
@@ -106,7 +106,7 @@ IPv6에서는 link-local multicast 주소 `FF02::C`와 UDP 3702를 사용하지�
 - VLAN 또는 multicast routing 정책이 트래픽을 전달하지 않는 경우
 - Probe의 `Types` 또는 `Scopes` 조건과 장치가 일치하지 않는 경우
 
-ONVIF Core는 discoverable mode의 장치가 `Probe`와 `Resolve`를 수신하고 응답하도록 정의합니다. 기본 동작도 discoverable mode이지만, DoS 공격 완화를 위해 Device Service의 `SetDiscoveryMode`로 non-discoverable mode를 설정할 수 있습니다.
+ONVIF Core는 discoverable mode의 장치가 `Probe`와 `Resolve`를 수신하고 응답하도록 정의합니다. 기본 동작도 discoverable mode이지만 DoS 공격 완화를 위해 Device Service의 `SetDiscoveryMode`로 non-discoverable mode를 설정할 수 있습니다.
 
 :::note
 이 글에서 다루는 것은 일반적인 로컬 multicast discovery입니다. WS-Discovery에는 이미 주소를 알고 있을 때의 unicast Probe도 있으므로 “모든 Probe는 반드시 multicast”라고 일반화하면 안 됩니다.
@@ -220,7 +220,7 @@ ONVIF Core 26.06은 일치한 Probe Match에 Device Service 주소를 담은 `XA
 
 ## 6. Python으로 학습용 Probe 보내기
 
-다음 코드는 Python 표준 라이브러리만 사용해 Probe를 보내고, 자신이 보낸 `MessageID`와 연결되는 `ProbeMatches`에서 `XAddrs`를 출력합니다.
+다음 코드는 Python 표준 라이브러리만 사용해 Probe를 보내고 자신이 보낸 `MessageID`와 연결되는 `ProbeMatches`에서 `XAddrs`를 출력합니다.
 
 ```python
 #!/usr/bin/env python3
@@ -409,10 +409,10 @@ HTTPS를 사용하면 URI와 SOAP body는 TLS 안에서 암호화되므로 동�
 ## 9. 정리
 
 - 일반적인 IPv4 로컬 discovery에서 `Probe`는 `239.255.255.250:3702/UDP`로 multicast됩니다.
-- 일치하는 장치는 `ProbeMatches`를 클라이언트로 unicast하며, Device Service 주소는 그 안의 `ProbeMatch`에 있는 `XAddrs`에 포함됩니다.
+- 일치하는 장치는 `ProbeMatches`를 클라이언트로 unicast하며 Device Service 주소는 그 안의 `ProbeMatch`에 있는 `XAddrs`에 포함됩니다.
 - `ProbeMatches`의 `RelatesTo`가 보낸 `Probe`의 `MessageID`와 일치하는지 확인해야 요청과 응답의 관계를 판단할 수 있습니다.
 - ONVIF Core 26.06은 2005년 XMLSOAP WS-Discovery와 2004년 WS-Addressing namespace를 사용합니다.
-- Discovery 메시지도 SOAP이지만 UDP로 전달되고, 이후 Device Service SOAP 요청은 HTTP 또는 HTTPS로 전달됩니다.
+- Discovery 메시지도 SOAP이지만 UDP로 전달되고 이후 Device Service SOAP 요청은 HTTP 또는 HTTPS로 전달됩니다.
 - 캡처에서 `POST /onvif/device_service`만 보인다면 WS-Discovery가 수행됐다고 단정할 수 없습니다.
 
 다음 글에서는 `XAddrs`로 얻은 Device Service를 시작점으로 `GetServices`, Media Service의 `GetProfiles`, `GetStreamUri`를 차례로 호출해 스트림 URI를 얻는 과정을 살펴보겠습니다.

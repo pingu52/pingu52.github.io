@@ -31,13 +31,13 @@ ST도 “Starter Package로 보드가 정상 부팅되는 것”을 먼저 확�
 ### 1.1 경로 길이
 
 Yocto는 **절대 경로 길이** 때문에 파일명이 길어지면 빌드가 실패할 수 있습니다.  
-따라서 DP는 너무 깊은 경로(예: `/home/<user>/very/long/...`)에 두지 말고, 가능하면 짧게 잡으세요.
+따라서 DP는 너무 깊은 경로(예: `/home/<user>/very/long/...`)에 두지 말고 가능하면 짧게 잡으세요.
 
 예) `~/work/stm32mp25/Distribution-Package` 처럼
 
 ### 1.2 디스크 여유
 
-DP 자체는 크지 않지만, **빌드 산출물 포함하면 수십 GB**가 필요합니다(최소 30GB 이상을 잡는 것이 안전).
+DP 자체는 크지 않지만 **빌드 산출물 포함하면 수십 GB**가 필요합니다(최소 30GB 이상을 잡는 것이 안전).
 
 ### 1.3 WSL2 사용 시
 
@@ -78,7 +78,7 @@ sudo apt-get install python-is-python3
 ## 3. repo(Repo tool) 설치/검증
 
 ST의 DP는 “manifest + repo” 방식으로 내려받는 것이 기본 흐름입니다.  
-Ubuntu에서는 우선 apt로 설치를 시도하고, 안 되면 수동 설치(검증 포함)로 진행하면 됩니다.
+Ubuntu에서는 우선 apt로 설치를 시도하고 안 되면 수동 설치(검증 포함)로 진행하면 됩니다.
 
 ### 3.1 apt로 설치
 ```bash
@@ -172,7 +172,7 @@ envsetup 스크립트는 보통 다음을 자동으로 합니다.
 
 ## 6. local.conf에서 MACHINE/DISTRO 확인
 
-envsetup 이후 현재 디렉토리는 빌드 디렉토리이며, 설정 파일은 `conf/`에 있습니다.
+envsetup 이후 현재 디렉토리는 빌드 디렉토리이며 설정 파일은 `conf/`에 있습니다.
 
 ```bash
 pwd

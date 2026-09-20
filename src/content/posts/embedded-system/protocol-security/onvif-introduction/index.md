@@ -10,7 +10,7 @@ draft: false
 
 안녕하세요, pingu52입니다.
 
-IP 카메라를 공부하다 보면 ONVIF와 RTSP가 거의 항상 함께 등장합니다. 처음에는 둘 다 영상을 가져오기 위한 프로토콜처럼 보이지만, 실제 역할은 다릅니다.
+IP 카메라를 공부하다 보면 ONVIF와 RTSP가 거의 항상 함께 등장합니다. 처음에는 둘 다 영상을 가져오기 위한 프로토콜처럼 보이지만 실제 역할은 다릅니다.
 
 - ONVIF는 서로 다른 제조사의 IP 기반 보안 장치와 클라이언트가 연동하기 위한 **인터페이스 표준 모음**입니다.
 - RTSP는 스트리밍 세션을 제어하기 위한 프로토콜입니다.
@@ -46,7 +46,7 @@ IP 카메라와 VMS(Video Management System), NVR(Network Video Recorder)이 모
 
 ONVIF는 2008년 Axis Communications, Bosch Security Systems, Sony Corporation이 설립한 포럼입니다. 현재 범위는 네트워크 비디오뿐 아니라 출입 통제와 분석 메타데이터 등으로 확장되어 있습니다.
 
-여기서 중요한 점은 ONVIF가 특정 카메라 제품이나 하나의 프로그램 이름이 아니라는 것입니다. ONVIF는 표준을 만들고, 그 표준을 구현한 Device와 Client가 공통된 방식으로 통신할 수 있도록 인터페이스를 정의합니다.
+ONVIF는 특정 카메라 제품이나 하나의 프로그램 이름이 아닙니다. ONVIF는 표준을 만들고 그 표준을 구현한 Device와 Client가 공통된 방식으로 통신할 수 있도록 인터페이스를 정의합니다.
 
 ## 2. ONVIF가 표준화하는 것과 하지 않는 것
 
@@ -103,13 +103,13 @@ ONVIF를 이해하기 어려운 이유 중 하나는 통신 과정 전체가 하
 
 Core Specification은 장치 발견, 장치 관리, 이벤트 프레임워크를 정의합니다. 미디어 설정, PTZ, Imaging, Analytics, Recording과 같은 기능은 각각 별도의 Service Specification으로 나뉩니다.
 
-이 구조는 운영체제의 system call처럼 하나의 거대한 요청으로 모든 일을 처리하는 방식이 아닙니다. Device가 제공하는 Service를 확인하고, 목적에 맞는 Service의 연산을 차례로 호출하는 방식에 가깝습니다.
+이 구조는 운영체제의 system call처럼 하나의 거대한 요청으로 모든 일을 처리하는 방식이 아닙니다. Device가 제공하는 Service를 확인하고 목적에 맞는 Service의 연산을 차례로 호출하는 방식에 가깝습니다.
 
 ## 5. 장치를 찾는 WS-Discovery
 
 처음 연결하는 카메라의 IP 주소를 모른다면 Client는 먼저 장치를 찾아야 합니다. ONVIF의 장치 발견은 WS-Discovery를 기반으로 합니다.
 
-WS-Discovery의 ad hoc mode에서는 Client가 UDP multicast로 `Probe` 메시지를 보내고, 조건에 맞는 Device가 `ProbeMatch`로 응답합니다. IPv4 multicast 주소와 port는 다음과 같습니다.
+WS-Discovery의 ad hoc mode에서는 Client가 UDP multicast로 `Probe` 메시지를 보내고 조건에 맞는 Device가 `ProbeMatch`로 응답합니다. IPv4 multicast 주소와 port는 다음과 같습니다.
 
 ```text
 239.255.255.250:3702/UDP
@@ -123,7 +123,7 @@ WS-Discovery의 ad hoc mode에서는 Client가 UDP multicast로 `Probe` 메시�
 - `Resolve`: endpoint reference에 해당하는 주소를 요청
 - `Bye`: Device가 네트워크를 떠남을 알림
 
-ONVIF Device는 discoverable mode일 때 `Probe`를 수신하고, 일치하면 Device Service에 접근할 수 있는 주소를 `XAddrs`에 담아 응답합니다.
+ONVIF Device는 discoverable mode일 때 `Probe`를 수신하고 일치하면 Device Service에 접근할 수 있는 주소를 `XAddrs`에 담아 응답합니다.
 
 :::note
 WS-Discovery는 일반적인 IPv4 broadcast가 아니라 multicast를 사용합니다. 라우터나 VLAN 경계를 넘어 multicast가 전달된다고 가정할 수 없으므로, IP 통신은 가능하지만 자동 검색만 되지 않는 상황도 별도로 구분해야 합니다.
@@ -175,7 +175,7 @@ Client                                                   Device
   | == RTSP session control / RTP media stream ============ |
 ```
 
-흐름의 핵심은 다음과 같습니다.
+단계별로 정리하면 다음과 같습니다.
 
 1. WS-Discovery로 Device Service endpoint를 찾습니다.
 2. Device Service에서 장치가 제공하는 Service와 capability를 확인합니다.
@@ -204,13 +204,13 @@ ONVIF와 RTSP를 같은 계층의 경쟁 기술로 보면 흐름이 잘 이해�
 
 즉, RTSP 주소를 이미 알고 있다면 ONVIF 호출 없이 영상만 재생할 수도 있습니다. 하지만 이 경우 장치 자동 발견, capability 조회, 표준화된 미디어 설정, PTZ와 이벤트 같은 ONVIF 기능은 별개의 문제로 남습니다.
 
-한 문장으로 정리하면 **ONVIF로 장치와 스트림을 협상하고, RTSP/RTP로 스트림을 제어하고 전달한다**고 볼 수 있습니다.
+한 문장으로 정리하면 **ONVIF로 장치와 스트림을 협상하고 RTSP/RTP로 스트림을 제어하고 전달한다**고 볼 수 있습니다.
 
 ## 9. ONVIF Profile은 기능 호환성의 기준이다
 
 ONVIF Specification 전체는 범위가 매우 넓습니다. 모든 Device와 Client가 모든 기능을 구현하도록 요구하면 현실적으로 상호 운용이 어려워집니다.
 
-ONVIF Profile은 특정 사용 사례를 구현하는 데 필요한 기능을 고정된 집합으로 묶습니다. Profile에는 필수 기능과 조건부 기능이 있으며, Device와 Client가 같은 Profile의 대응 요구사항을 구현할 때 해당 범위에서 상호 운용을 기대할 수 있습니다.
+ONVIF Profile은 특정 사용 사례를 구현하는 데 필요한 기능을 고정된 집합으로 묶습니다. Profile에는 필수 기능과 조건부 기능이 있으며 Device와 Client가 같은 Profile의 대응 요구사항을 구현할 때 해당 범위에서 상호 운용을 기대할 수 있습니다.
 
 IP 비디오를 공부할 때 자주 만나는 Profile은 다음과 같습니다.
 
@@ -223,13 +223,13 @@ IP 비디오를 공부할 때 자주 만나는 Profile은 다음과 같습니다
 
 2026년 8월 현재 Profile S는 지원 종료(deprecation) 절차가 진행 중입니다. 2027년 3월 31일 이후에는 제조사가 새 제품이나 새 firmware/software version을 Profile S 적합 제품으로 제출할 수 없습니다.
 
-이 날짜에 기존 Profile S 시스템이 동작을 멈춘다는 뜻은 아닙니다. ONVIF는 배포된 Profile S 기반 시스템의 동작에는 영향이 없으며, 등록된 특정 software/firmware version의 적합성도 제조사가 선언을 철회하기 전까지 유지된다고 설명합니다. 다만 지원 종료의 배경이 현재 권고에 맞지 않는 username token authentication인 만큼, 새 제품이나 구현을 검토할 때는 Profile T와 TLS/HTTPS 등 필요한 보안 기능을 함께 확인해야 합니다.
+이 날짜에 기존 Profile S 시스템이 동작을 멈춘다는 뜻은 아닙니다. ONVIF는 배포된 Profile S 기반 시스템의 동작에는 영향이 없으며 등록된 특정 software/firmware version의 적합성도 제조사가 선언을 철회하기 전까지 유지된다고 설명합니다. 다만 지원 종료의 배경이 현재 권고에 맞지 않는 username token authentication인 만큼, 새 제품이나 구현을 검토할 때는 Profile T와 TLS/HTTPS 등 필요한 보안 기능을 함께 확인해야 합니다.
 
 접근 통제 영역에는 Profile A, C, D가 있지만 이번 네트워크 비디오 개념편에서는 다루지 않습니다.
 
 ### Profile과 Add-on
 
-Profile은 독립적인 제품 기능을 구성할 수 있는 고정된 요구사항 집합입니다. 반면 Add-on은 특정 사용 사례를 추가하는 더 작은 기능 집합이며, Add-on 적합성을 주장하려면 기본적으로 하나 이상의 ONVIF Profile에도 적합해야 합니다.
+Profile은 독립적인 제품 기능을 구성할 수 있는 고정된 요구사항 집합입니다. 반면 Add-on은 특정 사용 사례를 추가하는 더 작은 기능 집합이며 Add-on 적합성을 주장하려면 기본적으로 하나 이상의 ONVIF Profile에도 적합해야 합니다.
 
 Profile의 기능 집합은 하위 호환성을 위해 고정되지만 Add-on은 버전을 갖고 기술 변화에 맞게 갱신될 수 있다는 차이도 있습니다.
 
@@ -242,7 +242,7 @@ ONVIF 문서를 읽을 때 가장 헷갈리기 쉬운 용어가 Profile입니다
 | ONVIF Profile | 제품 간 기능 호환성을 정의한 요구사항 집합 | Profile S, T, G, M |
 | Media Profile | 한 Device 안에서 stream 구성을 묶은 설정 단위 | video source, encoder, audio, PTZ, analytics configuration의 조합 |
 
-Media Profile에는 video source와 encoder, audio, PTZ, analytics, metadata configuration 등이 장치 capability에 따라 연결됩니다. Client는 `GetProfiles`로 이 목록을 받고, 특정 Media Profile의 token을 `GetStreamUri`에 전달해 해당 구성의 stream URI를 요청합니다.
+Media Profile에는 video source와 encoder, audio, PTZ, analytics, metadata configuration 등이 장치 capability에 따라 연결됩니다. Client는 `GetProfiles`로 이 목록을 받고 특정 Media Profile의 token을 `GetStreamUri`에 전달해 해당 구성의 stream URI를 요청합니다.
 
 예를 들어 하나의 카메라가 다음 Media Profile을 제공할 수 있습니다.
 
@@ -262,7 +262,7 @@ Media Profile에는 video source와 encoder, audio, PTZ, analytics, metadata con
 4. 필요한 기능이 해당 Profile에서 필수인지 조건부인지 확인합니다.
 5. 실제 환경에서는 장치 검색, 인증, Service 조회, stream 연결을 각각 검증합니다.
 
-“ONVIF compatible”이라는 제조사의 표현과 공식 Profile conformant product는 같은 의미로 단정할 수 없습니다. ONVIF 공식 설명에 따르면 Profile 적합성을 주장하려는 제품은 ONVIF test tool을 통과해야 하며, 회원사가 정해진 적합성 절차에 따라 등록합니다.
+“ONVIF compatible”이라는 제조사의 표현과 공식 Profile conformant product는 같은 의미로 단정할 수 없습니다. ONVIF 공식 설명에 따르면 Profile 적합성을 주장하려는 제품은 ONVIF test tool을 통과해야 하며 회원사가 정해진 적합성 절차에 따라 등록합니다.
 
 또한 ONVIF Profile 적합 제품끼리라도 모든 조합과 제조사 고유 기능이 동일하게 동작한다고 보장되는 것은 아닙니다. Profile이 정의한 범위와 실제 필요한 기능의 교집합을 확인해야 합니다.
 
@@ -270,12 +270,12 @@ Media Profile에는 video source와 encoder, audio, PTZ, analytics, metadata con
 
 - ONVIF는 IP 카메라 영상만을 위한 단일 streaming protocol이 아니라, IP 기반 물리 보안 제품의 상호 운용을 위한 network interface specification 모음입니다.
 - Device는 Service를 제공하고 Client는 정해진 Web Service 연산으로 이를 요청합니다.
-- WS-Discovery는 Device를 찾고, SOAP/WSDL 기반 Service는 장치와 미디어를 설정합니다.
-- RTSP는 streaming session을 제어하고, 실제 media는 주로 RTP로 전달됩니다.
-- ONVIF Profile은 제품의 기능 호환 범위를 나타내며, Media Profile은 Device 내부의 stream configuration 묶음입니다.
+- WS-Discovery는 Device를 찾고 SOAP/WSDL 기반 Service는 장치와 미디어를 설정합니다.
+- RTSP는 streaming session을 제어하고 실제 media는 주로 RTP로 전달됩니다.
+- ONVIF Profile은 제품의 기능 호환 범위를 나타내며 Media Profile은 Device 내부의 stream configuration 묶음입니다.
 - ONVIF 적합성은 제품 품질이나 시스템 전체의 보안을 보장하지 않습니다.
 
-다음 글에서는 이 구조의 첫 단계인 WS-Discovery를 직접 전송하고, `ProbeMatch` 응답에서 Device Service 주소를 확인해 보겠습니다.
+다음 글에서는 이 구조의 첫 단계인 WS-Discovery를 직접 전송하고 `ProbeMatch` 응답에서 Device Service 주소를 확인해 보겠습니다.
 
 ## 참고 자료
 

@@ -10,7 +10,7 @@ draft: false
 
 안녕하세요, pingu52입니다.
 
-이번 글은 **STM32MP257F-DK(빌드 머신: `stm32mp25-disco`)** 환경에서 **BME280 센서(I2C0, 주소 `0x76`)** 를 붙이고,
+이번 글은 **STM32MP257F-DK(빌드 머신: `stm32mp25-disco`)** 환경에서 **BME280 센서(I2C0, 주소 `0x76`)** 를 붙이고
 
 - **Device Tree(DTS)에 노드 추가**
 - **Yocto에서 커널 드라이버(bmp280)를 모듈로 활성화**
@@ -41,7 +41,7 @@ MACHINE=stm32mp25-disco
 source layers/meta-st/scripts/envsetup.sh
 ```
 
-- 커스텀 레이어(예: `~/work/stm32mp257/stm32mp257f-bsp-lab/yocto/meta-myboard`)를 운영 중이며,
+- 커스텀 레이어(예: `~/work/stm32mp257/stm32mp257f-bsp-lab/yocto/meta-myboard`)를 운영 중이며
   **bblayers.conf에 추가**되어 있어야 합니다.
 
 ```bash
@@ -54,7 +54,7 @@ bitbake-layers show-layers | grep -E "meta-myboard|meta-st" || true
 
 ### 1.1 파일 배치 위치
 
-이번 글에서 사용하는 파일은 아래 두 개입니다.
+이번 글에서 사용하는 파일은 아래 세 개입니다.
 
 - `linux-stm32mp_%.bbappend`
 - `0001-...bme280...patch` (DTS 수정 패치)
@@ -69,7 +69,7 @@ bitbake-layers show-layers | grep -E "meta-myboard|meta-st" || true
 ## 2. Device Tree 수정 패치 만들기
 
 BME280를 커널이 자동으로 인식하게 하려면, 보드 DTS에 I2C 디바이스 노드를 추가해야 합니다.  
-여기서는 **Yocto devshell 없이**, 현재 빌드 환경(Distribution-Package) 안에서 커널 소스 트리를 “확정적으로” 찾고, 그 변경을 **패치 파일(0001-*.patch)** 로 만들어 `meta-myboard`에 보관합니다.
+여기서는 **Yocto devshell 없이**, 현재 빌드 환경(Distribution-Package) 안에서 커널 소스 트리를 “확정적으로” 찾고 그 변경을 **패치 파일(0001-*.patch)** 로 만들어 `meta-myboard`에 보관합니다.
 
 ### 2.1 커널 소스 트리 경로를 확정(S 변수)
 
@@ -106,7 +106,7 @@ cp -v "$DTS" "${DTS}.orig"
 ### 2.3 DTS에 BME280 노드 추가
 
 I2C 디바이스 노드 이름은 보통 `<device>@<addr>` 형태를 씁니다.  
-예를 들어 0x76이면 `bme280@76`처럼 표기하는 것이 일반적이며, 이 “노드 이름”은 **사람이 읽기 좋은 방식**이고 실제 드라이버 매칭은 `compatible` / `reg`로 결정됩니다.
+예를 들어 0x76이면 `bme280@76`처럼 표기하는 것이 일반적이며 이 “노드 이름”은 **사람이 읽기 좋은 방식**이고 실제 드라이버 매칭은 `compatible` / `reg`로 결정됩니다.
 
 ![stm32mp257f-dk.dts](./images/02_dts_bme280_node.png)
 
@@ -180,14 +180,14 @@ cp -v "$PATCH_OUT" "$DST_DIR/"
 
 :::note
 DTS에서는 `&i2c2`에 붙였더라도, 런타임에서는 `i2c-0`처럼 “버스 번호”가 다르게 매겨질 수 있습니다.  
-이때는 `0-0076`처럼 보이는 sysfs 경로가 정상이며, Device Tree의 `compatible/reg`와 드라이버 매칭이 핵심입니다.
+이때는 `0-0076`처럼 보이는 sysfs 경로가 정상이며 Device Tree의 `compatible/reg`와 드라이버 매칭이 핵심입니다.
 :::
 
 ## 3. meta-myboard에서 패치 적용(bbappend)
 
 ### 3.1 linux-stm32mp_%.bbappend 작성
 
-`meta-myboard` 안에 `linux-stm32mp_%.bbappend`를 만들고, 2장에서 만든 patch를 `SRC_URI`에 추가합니다.
+`meta-myboard` 안에 `linux-stm32mp_%.bbappend`를 만들고 2장에서 만든 patch를 `SRC_URI`에 추가합니다.
 
 파일: `yocto/meta-myboard/recipes-kernel/linux/linux-stm32mp_%.bbappend`
 
@@ -200,8 +200,8 @@ SRC_URI:append = " \
 "
 ```
 
-::note
-`local.conf`에 우회로로 넣으면 당장은 편해 보이지만, **빌드 디렉토리 로컬 설정에 종속**되어 재현·공유가 어렵습니다.
+:::note
+`local.conf`에 우회로로 넣으면 당장은 편해 보이지만 **빌드 디렉토리 로컬 설정에 종속**되어 재현·공유가 어렵습니다.
 DTS/커널 변경은 `bbappend + patch`로 레이어에서 관리하는 편이 BSP 실습/협업/블로그 기록에 훨씬 유리합니다.
 :::
 

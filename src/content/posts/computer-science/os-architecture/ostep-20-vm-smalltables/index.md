@@ -10,7 +10,7 @@ draft: false
 
 안녕하세요, pingu52입니다.
 
-이전 장에서 Paging의 동작과 TLB 기반 가속을 봤다면, 이번 장의 핵심은 **Page Table의 공간(Space) 비용**입니다.
+이전 장에서 Paging의 동작과 TLB 기반 가속을 봤다면, 이번 장에서는 **Page Table의 공간(Space) 비용**을 살펴봅니다.
 TLB로 시간(Time)은 어느 정도 잡았는데, Page Table은 프로세스 수만큼 존재하니 메모리 소모가 무시하기 어렵습니다.
 
 **32-bit 주소 공간**, **4KB Page**, **4-byte PTE**를 가정하면 다음과 같습니다.
@@ -44,7 +44,7 @@ TLB로 시간(Time)은 어느 정도 잡았는데, Page Table은 프로세스 �
 ## 2. Hybrid 접근법: Paging + Segmentation
 
 Linear Page Table이 큰 이유는 **사용하지 않는 가상 주소 영역까지 PTE를 전부 만들어** 들고 있기 때문입니다.
-일반적인 프로세스 주소 공간은 Code, Heap, Stack만 듬성듬성 쓰고, 중간에 큰 Hole(빈 공간)이 남는 경우가 많습니다.
+일반적인 프로세스 주소 공간은 Code, Heap, Stack만 듬성듬성 쓰고 중간에 큰 Hole(빈 공간)이 남는 경우가 많습니다.
 
 ![Figure 20.1 16KB Address Space with 1KB Pages](./images/20_1.png)
 *Figure 20.1: 대부분이 비어있는(Sparse) 주소 공간의 예시. 이 빈 공간을 위해 Page Table을 유지하는 것은 낭비입니다.*
@@ -67,7 +67,7 @@ Linear Page Table이 큰 이유는 **사용하지 않는 가상 주소 영역까
 ### 단점: External Fragmentation(다시 등장)
 
 이 방식은 Page Table이 “페이지 단위”가 아니라 **PTE 개수 단위로(가변 크기)** 메모리를 차지하게 됩니다.
-즉, 물리 메모리에서 **딱 맞는 빈 공간을 찾아 넣는 문제**가 생기며, 결과적으로 **External Fragmentation 성격의 복잡성**을 다시 불러옵니다.
+즉, 물리 메모리에서 **딱 맞는 빈 공간을 찾아 넣는 문제**가 생기며 결과적으로 **External Fragmentation 성격의 복잡성**을 다시 불러옵니다.
 
 또한 문맥 교환 시 세그먼트별 Base/Bounds도 함께 교체되어야 하므로 구현/관리 부담이 늘어납니다.
 
@@ -91,10 +91,10 @@ Hybrid가 Segmentation을 끌어온 타협이라면, Multi-level은 **Page Table
 Multi-level이 하는 일을 가장 직관적으로 보여주는 그림이 **Figure 20.3** 입니다.
 
 - **Linear**: 주소 공간 중간이 비어 있어도, 중간에 해당하는 Page Table Page까지 전부 메모리에 존재해야 합니다.
-- **Multi-level**: Page Directory가 필요한 조각만 Valid로 표시하고, 나머지 조각은 **Not Allocated** 상태로 둡니다.
+- **Multi-level**: Page Directory가 필요한 조각만 Valid로 표시하고 나머지 조각은 **Not Allocated** 상태로 둡니다.
 
 ![Figure 20.3 Linear vs Multi-level](./images/20_3.png)
-*Figure 20.3: Linear(좌) vs Multi-level(우). 중간 Page Table Page를 사라지게 만들고, Page Directory로 추적합니다.*
+*Figure 20.3: Linear(좌) vs Multi-level(우). 중간 Page Table Page를 사라지게 만들고 Page Directory로 추적합니다.*
 
 ### 3.2 Page Directory / PDE의 의미
 
@@ -106,10 +106,10 @@ PDE는 최소한 다음을 포함합니다.
 - **Valid Bit**
 - **PFN** (해당 Page Table Page가 올라간 물리 프레임 번호)
 
-중요한 포인트 하나: **PDE의 Valid 의미는 PTE의 Valid와 조금 다릅니다.**
+**PDE의 Valid 의미는 PTE의 Valid와 조금 다릅니다.**
 
 - **PDE Valid**: 이 PDE가 가리키는 Page Table Page 안에 **Valid PTE가 최소 1개라도 존재**한다
-- **PDE Invalid**: 그 조각은 아예 존재하지 않으며, PFN 등 나머지 필드는 정의되지 않습니다.
+- **PDE Invalid**: 그 조각은 아예 존재하지 않으며 PFN 등 나머지 필드는 정의되지 않습니다.
 
 ### 3.3 장단점 (Time–Space Trade-off)
 
@@ -139,7 +139,7 @@ OSTEP는 Multi-level이 어떻게 인덱싱되는지를 작은 예제로 풀어�
 - PTE 크기: $4\text{B}$
 
 Linear Page Table은 $2^8 = 256$ 엔트리 → $256 \times 4\text{B} = 1\text{KB}$가 됩니다.
-그런데 페이지가 $64\text{B}$이므로, $1\text{KB}$ Page Table은 $1024 / 64 = 16$개의 Page Table Page로 나눌 수 있고, 각 Page Table Page는 $64 / 4 = 16$개의 PTE를 담습니다.
+그런데 페이지가 $64\text{B}$이므로, $1\text{KB}$ Page Table은 $1024 / 64 = 16$개의 Page Table Page로 나눌 수 있고 각 Page Table Page는 $64 / 4 = 16$개의 PTE를 담습니다.
 
 ### 4.1 주소공간 예시 (Figure 20.4)
 
@@ -155,7 +155,7 @@ Figure 20.5는 Page Directory가 **어떤 Page Table Page(PFN 100, 101 등)를 �
 
 **핵심 결론:**
 
-- Linear였다면 Page Table Page를 16개 다 잡아야 하지만,
+- Linear였다면 Page Table Page를 16개 다 잡아야 하지만
 - Multi-level에서는:
   - Page Directory 1페이지
   - 실제로 쓰는 PT 조각 2페이지
@@ -236,7 +236,7 @@ if (PDE.Valid == False) {
 Multi-level과는 다른 방향으로, 공간을 더 줄이는 접근이 **Inverted Page Table**입니다.
 
 - “프로세스마다 Page Table”을 두는 대신,
-- 시스템에 **단 하나의 Page Table**만 두고,
+- 시스템에 **단 하나의 Page Table**만 두고
 - 엔트리는 “가상 페이지”가 아니라 **물리 페이지(Physical Page)마다 하나씩** 둡니다.
 
 즉, 각 엔트리는 대략 다음 정보를 담습니다.
@@ -252,9 +252,9 @@ Multi-level과는 다른 방향으로, 공간을 더 줄이는 접근이 **Inver
 ## 7. Swapping the Page Tables to Disk
 
 지금까지는 Page Table이 **항상 물리 메모리(커널 소유)** 에 있다고 가정했습니다.
-하지만 트릭을 다 써도 Page Table이 너무 커질 수 있고, 이때 일부 시스템은 다음과 같이 동작합니다.
+하지만 트릭을 다 써도 Page Table이 너무 커질 수 있고 이때 일부 시스템은 다음과 같이 동작합니다.
 
-- Page Table을 **Kernel Virtual Memory**에 두고,
+- Page Table을 **Kernel Virtual Memory**에 두고
 - 메모리 압박이 크면 Page Table의 일부를 **디스크로 Swap Out** 하기도 합니다.
 
 ---
@@ -263,7 +263,7 @@ Multi-level과는 다른 방향으로, 공간을 더 줄이는 접근이 **Inver
 
 - **Bigger Pages**: Page Table은 줄지만 Internal Fragmentation이 커짐.
 - **Hybrid (Paging + Segmentation)**: Hole을 피할 수 있으나, Page Table이 가변 크기로 흩어지며 외부 단편화 성격의 문제와 복잡성이 다시 등장.
-- **Multi-level Page Table**: Page Table을 Page-sized 조각으로 나누고, 필요한 조각만 할당.
+- **Multi-level Page Table**: Page Table을 Page-sized 조각으로 나누고 필요한 조각만 할당.
   - Sparse Address Space에 강함.
   - TLB Miss 시 Page Walk 비용(추가 접근)이 증가.
 - **More Than Two Levels**: Directory도 Page-sized Unit으로 유지하려면 트리를 더 깊게 해야 함.

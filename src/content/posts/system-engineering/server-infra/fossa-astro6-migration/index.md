@@ -29,13 +29,13 @@ FOSSA에서 확인한 이슈는 크게 두 종류였다.
 - 오래된 dependency
 - vulnerability가 있는 transitive dependency
 
-처음에는 FOSSA 화면에서 수십 개의 dependency issue가 보였고, 로컬에서도 `pnpm audit`을 돌리면 여러 취약점이 나왔다.
+처음에는 FOSSA 화면에서 수십 개의 dependency issue가 보였고 로컬에서도 `pnpm audit`을 돌리면 여러 취약점이 나왔다.
 
 ```bash
 pnpm audit
 ```
 
-이때 중요한 점은 모든 항목이 직접 설치한 패키지에서 나온 것은 아니라는 것이다.
+모든 항목이 직접 설치한 패키지에서 나온 것은 아니었다.
 대부분은 다음처럼 여러 단계 아래에 있는 transitive dependency에서 발생했다.
 
 ```text
@@ -62,7 +62,7 @@ pnpm audit
 - FOSSA에 남는 transitive/outdated 항목은 별도 PR로 분리
 
 FOSSA UI에 남아 있는 transitive dependency 목록까지 한 번에 다 처리하려고 하면 PR 범위가 너무 커진다.
-그래서 이번 PR에서는 로컬 audit과 빌드 안정화를 먼저 끝내고, 나머지 FOSSA 항목은 후속 브랜치에서 다루는 방향으로 잡았다.
+그래서 이번 PR에서는 로컬 audit과 빌드 안정화를 먼저 끝내고 나머지 FOSSA 항목은 후속 브랜치에서 다루는 방향으로 잡았다.
 
 ## dependency 업데이트
 
@@ -98,7 +98,7 @@ Astro 6에서 content collection API가 바뀌었기 때문이다.
 `src/content/config.ts`
 
 Astro 6에서는 프로젝트 루트의 `src/content.config.ts` 형태를 사용해야 했다.
-그래서 collection 설정을 새 파일로 옮기고, loader 기반으로 다시 정의했다.
+그래서 collection 설정을 새 파일로 옮기고 loader 기반으로 다시 정의했다.
 
 ```ts
 import { defineCollection } from "astro:content";
@@ -214,9 +214,9 @@ src/content/posts/computer-science/os-architecture/ostep-45-file-integrity/index
 src/content/posts/problem-solving/boj/10773.md
 ```
 
-첫 번째는 폴더 기반 post이고, 두 번째는 flat markdown post이다.
+첫 번째는 폴더 기반 post이고 두 번째는 flat markdown post이다.
 
-이때 단순히 `entry.id` 기준으로 parent directory를 계산하면 folder-based post에서는 맞지만, flat post에서는 이미지 경로가 어긋날 수 있다.
+이때 단순히 `entry.id` 기준으로 parent directory를 계산하면 folder-based post에서는 맞지만 flat post에서는 이미지 경로가 어긋날 수 있다.
 
 그래서 `filePath`를 우선 사용해서 실제 markdown 파일의 위치를 기준으로 base path를 계산했다.
 
@@ -277,7 +277,7 @@ if (!file) {
 }
 ```
 
-이미지가 필수인 글이라면 warning을 보고 고치면 되고, 임시로 이미지가 비어 있는 글 때문에 전체 빌드가 막히지는 않게 된다.
+이미지가 필수인 글이라면 warning을 보고 고치면 되고 임시로 이미지가 비어 있는 글 때문에 전체 빌드가 막히지는 않게 된다.
 
 ## 남은 audit 2개 처리
 
@@ -333,7 +333,7 @@ pnpm audit
 `postsCollection`에 억지로 넓은 타입을 붙이면 `post.data`가 전부 `unknown`으로 무너졌다.
 
 그래서 이 프로젝트에서는 `--isolatedDeclarations`를 제거하는 쪽으로 정리했다.
-블로그는 library가 아니라 Astro app이고, 현재 script도 `--noEmit`이라 선언 파일을 만들지 않는다.
+블로그는 library가 아니라 Astro app이고 현재 script도 `--noEmit`이라 선언 파일을 만들지 않는다.
 
 ```json
 {
@@ -448,7 +448,7 @@ git pull
 git checkout -b chore/fossa-transitive-cleanup
 ```
 
-이렇게 나누면 1차 PR은 안전하게 리뷰할 수 있고, 2차 PR에서는 FOSSA 항목만 집중해서 볼 수 있다.
+이렇게 나누면 1차 PR은 안전하게 리뷰할 수 있고 2차 PR에서는 FOSSA 항목만 집중해서 볼 수 있다.
 
 ## 정리
 
@@ -459,7 +459,7 @@ git checkout -b chore/fossa-transitive-cleanup
 - type-check script 조정
 - test stub 수정
 
-처음에는 FOSSA 이슈를 줄이는 것이 목적이었지만, 실제로는 블로그 빌드 파이프라인 전체를 한 번 점검하는 작업이 되었다.
+처음에는 FOSSA 이슈를 줄이는 것이 목적이었지만 실제로는 블로그 빌드 파이프라인 전체를 한 번 점검하는 작업이 되었다.
 
 특히 기억할 점은 세 가지다.
 
@@ -467,4 +467,4 @@ git checkout -b chore/fossa-transitive-cleanup
 2. Astro content config는 schema inference를 해치면 post.data 타입이 unknown이 된다.
 3. 테스트가 alias/stub을 쓰고 있다면 실제 코드 export만 고쳐서는 부족하다.
 
-이번 PR을 main에 먼저 넣고, FOSSA에 남은 transitive/outdated 항목은 후속 PR에서 따로 정리할 예정이다.
+이번 PR을 main에 먼저 넣고 FOSSA에 남은 transitive/outdated 항목은 후속 PR에서 따로 정리할 예정이다.

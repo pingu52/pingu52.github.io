@@ -10,7 +10,7 @@ draft: false
 
 안녕하세요, pingu52입니다.
 
-[3편](/posts/embedded-system/protocol-security/onvif-device-media-stream-uri/)에서는 `GetStreamUri`로 스트림 URI를 얻었습니다. 이제 그 주소에 접속하면 영상이 나올 것 같지만, 실제 시험에서는 한 단계가 더 남아 있었습니다.
+[3편](/posts/embedded-system/protocol-security/onvif-device-media-stream-uri/)에서는 `GetStreamUri`로 스트림 URI를 얻었습니다. 이제 그 주소에 접속하면 영상이 나올 것 같지만 실제 시험에서는 한 단계가 더 남아 있었습니다.
 
 RTSP `DESCRIBE`, `SETUP`, `PLAY`는 모두 통과했습니다. `PLAY` 응답도 `200 OK`였습니다. 그런데 다음 단계에서 시험 도구가 센 프레임은 **0개**였습니다.
 
@@ -21,7 +21,7 @@ RTSP `DESCRIBE`, `SETUP`, `PLAY`는 모두 통과했습니다. `PLAY` 응답도 
 :::note
 2026년 9월 작업 세션에 보존된 시험 결과와 RTSP 응답 발췌를 바탕으로 작성했습니다. 해당 실패 실행의 패킷 캡처는 확보하지 못했으므로 패킷 손실 위치나 근본 원인을 확정하지 않습니다.
 
-RTSP·SDP·패킷 예제는 설명용으로 새로 구성했고, 실제 장치 주소, 계정, 세션 식별자와 내부 경로는 사용하지 않았습니다.
+RTSP·SDP·패킷 예제는 설명용으로 새로 구성했고 실제 장치 주소, 계정, 세션 식별자와 내부 경로는 사용하지 않았습니다.
 :::
 
 ## 시리즈 구성
@@ -61,7 +61,7 @@ RTSP PLAY                     PASS  (응답: 200 OK)
 
 이 글은 **RTSP 1.0**을 기준으로 설명합니다. ONVIF Streaming 26.06은 세션 제어에 RFC 2326과 TCP를 사용하도록 정의합니다. RTP가 UDP로 전달되는 경우에도 이 RTSP 제어 연결은 TCP입니다. [ONVIF Streaming §5.2.2](https://www.onvif.org/specs/2606/ONVIF-Streaming-Spec-v2606.pdf)
 
-RTSP 2.0은 RFC 7826으로 따로 정의됐으며, 기본적인 버전 협상 외에는 1.0과 하위 호환되지 않습니다. 최신 RFC라는 이유로 두 버전의 메시지 규칙을 섞으면 안 됩니다. [RFC 7826 §1](https://www.rfc-editor.org/rfc/rfc7826.html#section-1)
+RTSP 2.0은 RFC 7826으로 따로 정의됐으며 기본적인 버전 협상 외에는 1.0과 하위 호환되지 않습니다. 최신 RFC라는 이유로 두 버전의 메시지 규칙을 섞으면 안 됩니다. [RFC 7826 §1](https://www.rfc-editor.org/rfc/rfc7826.html#section-1)
 
 주요 요청의 역할은 다음과 같습니다.
 
@@ -72,9 +72,9 @@ RTSP 2.0은 RFC 7826으로 따로 정의됐으며, 기본적인 버전 협상 �
 | `PLAY` | 재생 시작 요청의 수락 |
 | `TEARDOWN` | 사용한 세션의 해제 |
 
-요청과 응답은 `CSeq`로 짝을 맞추고, `SETUP`에서 받은 `Session` 식별자는 후속 요청에 사용합니다. TCP 연결이 열렸다는 사실과 RTSP 세션이 준비됐다는 사실은 구분해야 합니다. [RFC 2326 §10, §12.17, §12.37](https://www.rfc-editor.org/rfc/rfc2326.html#section-10)
+요청과 응답은 `CSeq`로 짝을 맞추고 `SETUP`에서 받은 `Session` 식별자는 후속 요청에 사용합니다. TCP 연결이 열렸다는 사실과 RTSP 세션이 준비됐다는 사실은 구분해야 합니다. [RFC 2326 §10, §12.17, §12.37](https://www.rfc-editor.org/rfc/rfc2326.html#section-10)
 
-SOAP 인증이 끝났어도 RTSP 인증은 별개입니다. 첫 `401` 이후 인증 재요청이 성공했는지 확인해야 하며, 첫 응답 한 줄만 보고 실패로 분류하지 않습니다.
+SOAP 인증이 끝났어도 RTSP 인증은 별개입니다. 첫 `401` 이후 인증 재요청이 성공했는지 확인해야 하며 첫 응답 한 줄만 보고 실패로 분류하지 않습니다.
 
 또한 `PLAY` 응답의 `RTP-Info`는 수신 패킷 목록이 아닙니다. 서버가 알려 준 sequence·timestamp 기준값이므로, 실제 수신 여부는 수신 측에서 확인해야 합니다. [RFC 2326 §12.33](https://www.rfc-editor.org/rfc/rfc2326.html#section-12.33)
 
@@ -141,7 +141,7 @@ TCP에서 바이트를 읽었다는 로그만으로 RTP parsing까지 성공했�
 
 ### 4.3 UDP multicast: 그룹 가입과 수신 인터페이스까지 본다
 
-multicast는 장치 IP로 향하는 unicast 경로만 확인해서는 부족합니다. IPv4의 그룹 membership은 IGMP로 알리며, 다중 NIC 환경에서는 어느 인터페이스에서 그룹에 가입했는지도 중요합니다. [RFC 2236 §2](https://www.rfc-editor.org/rfc/rfc2236.html#section-2)
+multicast는 장치 IP로 향하는 unicast 경로만 확인해서는 부족합니다. IPv4의 그룹 membership은 IGMP로 알리며 다중 NIC 환경에서는 어느 인터페이스에서 그룹에 가입했는지도 중요합니다. [RFC 2236 §2](https://www.rfc-editor.org/rfc/rfc2236.html#section-2)
 
 확인할 것은 SDP·Transport의 그룹 주소와 포트, 클라이언트의 membership, 송신 인터페이스와 TTL, 그리고 스위치의 multicast 전달 상태입니다. ONVIF multicast SDP의 `c=`에는 유효한 multicast 주소가 있어야 합니다. [ONVIF Streaming §5.2.2.5](https://www.onvif.org/specs/2606/ONVIF-Streaming-Spec-v2606.pdf)
 
@@ -176,7 +176,7 @@ tcp.stream eq 3
 
 필터는 한 번에 하나씩 적용합니다. 예제의 포트·그룹·stream 번호는 실제 협상값으로 바꿔야 합니다. multicast의 목적지는 장치 IP가 아니라 그룹 주소이므로 `ip.dst == 장치_IP`만으로 수신 트래픽을 찾으면 놓칠 수 있습니다.
 
-협상 내용을 확인한 뒤 필요하면 **Decode As**로 RTP 해석을 지정합니다. 임의의 UDP를 RTP로 강제 해석한 화면 자체를 증거로 삼지는 않습니다. RTP Streams와 Stream Analysis에서는 sequence, delta, jitter, 추정 손실 등을 볼 수 있지만, 캡처 누락도 함께 검토해야 합니다. [Wireshark RTP Streams·Stream Analysis](https://www.wireshark.org/docs/wsug_html_chunked/ChTelRTP.html)
+협상 내용을 확인한 뒤 필요하면 **Decode As**로 RTP 해석을 지정합니다. 임의의 UDP를 RTP로 강제 해석한 화면 자체를 증거로 삼지는 않습니다. RTP Streams와 Stream Analysis에서는 sequence, delta, jitter, 추정 손실 등을 볼 수 있지만 캡처 누락도 함께 검토해야 합니다. [Wireshark RTP Streams·Stream Analysis](https://www.wireshark.org/docs/wsug_html_chunked/ChTelRTP.html)
 
 RTP 헤더에서 먼저 비교할 값은 다음과 같습니다.
 
@@ -188,7 +188,7 @@ RTP 헤더에서 먼저 비교할 값은 다음과 같습니다.
 | Timestamp | 같은 시점의 미디어 조각과 다음 시점을 구분할 수 있는가? |
 | Marker | 해당 codec의 경계 규칙에 맞는가? |
 
-sequence는 패킷 순서용이지 프레임 번호가 아닙니다. timestamp도 수신 시각이나 Unix 시간이 아니라 미디어 clock에 따른 값입니다. RTCP Sender Report는 RTP와 NTP 시간의 대응 등을 제공하지만, 그 존재만으로 영상 디코딩을 보장하지 않습니다. [RFC 3550 §5.1, §6.4.1](https://www.rfc-editor.org/rfc/rfc3550.html#section-5.1)
+sequence는 패킷 순서용이지 프레임 번호가 아닙니다. timestamp도 수신 시각이나 Unix 시간이 아니라 미디어 clock에 따른 값입니다. RTCP Sender Report는 RTP와 NTP 시간의 대응 등을 제공하지만 그 존재만으로 영상 디코딩을 보장하지 않습니다. [RFC 3550 §5.1, §6.4.1](https://www.rfc-editor.org/rfc/rfc3550.html#section-5.1)
 
 여기서 말하는 “도착”은 **그 캡처 지점에서 관찰했다**는 뜻입니다. 애플리케이션이 다른 포트나 인터페이스에 bind했다면 NIC에서 보인 패킷도 수신 콜백에는 오지 않을 수 있습니다.
 
@@ -217,7 +217,7 @@ seq=4101  timestamp=900000  offset=1200  marker=0  관측되지 않음
 seq=4102  timestamp=900000  offset=2400  marker=1  수신
 ```
 
-RTP는 두 패킷을 관측했고 마지막 표시도 있지만, 빠진 구간의 데이터는 없습니다. 순서가 뒤바뀌어 늦게 도착하는지와 캡처 자체가 누락됐는지를 확인한 뒤 프레임 완성 여부를 판단해야 합니다.
+RTP 패킷 두 개와 마지막 표시는 관측됐지만 빠진 구간의 데이터는 없습니다. 순서가 뒤바뀌어 늦게 도착하는지와 캡처 자체가 누락됐는지를 확인한 뒤 프레임 완성 여부를 판단해야 합니다.
 
 JPEG의 quantization 정보 등 복원에 필요한 헤더도 확인 대상입니다. 여기까지 조사하지 않고 H.264용 SPS/PPS나 IDR부터 찾으면 다른 codec의 문제를 디버깅하게 됩니다.
 
@@ -225,7 +225,7 @@ JPEG의 quantization 정보 등 복원에 필요한 헤더도 확인 대상입�
 
 H.264에서는 큰 NAL unit을 FU-A로 나누거나 여러 NAL unit을 STAP-A로 묶을 수 있습니다. 따라서 RTP packet 하나, NAL unit 하나, 영상 frame 하나를 일대일로 세면 안 됩니다. [RFC 6184 §5.6–5.8](https://www.rfc-editor.org/rfc/rfc6184.html#section-5.6)
 
-H.264 RTP의 marker는 access unit의 마지막 패킷을 알리는 단서지만, 앞선 조각의 완전성이나 디코딩 성공 증명은 아닙니다. SPS/PPS 같은 parameter set과 참조 영상이 필요한 상태인지도 봐야 합니다. 중간에 접속한 경우에는 디코딩을 시작할 수 있는 지점, 예를 들어 IDR picture까지의 대기도 구분합니다. [RFC 6184 §5.1, §8.5](https://www.rfc-editor.org/rfc/rfc6184.html#section-5.1)
+H.264 RTP의 marker는 access unit의 마지막 패킷을 알리는 단서지만 앞선 조각의 완전성이나 디코딩 성공 증명은 아닙니다. SPS/PPS 같은 parameter set과 참조 영상이 필요한 상태인지도 봐야 합니다. 중간에 접속한 경우에는 디코딩을 시작할 수 있는 지점, 예를 들어 IDR picture까지의 대기도 구분합니다. [RFC 6184 §5.1, §8.5](https://www.rfc-editor.org/rfc/rfc6184.html#section-5.1)
 
 즉 “패킷은 있는데 프레임이 없다”면 네트워크만 계속 바꾸기보다 **수신 소켓 → payload 복원 → 디코더** 사이에서 어디까지 진행됐는지 확인하는 편이 낫습니다.
 
@@ -251,7 +251,7 @@ UDP unicast를 비교할 때는 입력 옵션의 `tcp`만 `udp`로 바꿉니다.
 여기서 주의할 점은 다음과 같습니다.
 
 - `-timeout 5000000`은 RTSP의 TCP socket I/O timeout이며 단위는 마이크로초입니다. 모든 단계의 전체 실행 시간을 제한하는 옵션은 아닙니다.
-- 바깥의 GNU `timeout`은 30초 뒤 종료를 요청하고, 종료되지 않으면 추가 5초 뒤 강제 종료합니다. 제한에 걸린 종료 코드 `124`나 강제 종료의 `137`은 프레임 0개라는 뜻이 아니므로 로그와 함께 읽습니다.
+- 바깥의 GNU `timeout`은 30초 뒤 종료를 요청하고 종료되지 않으면 추가 5초 뒤 강제 종료합니다. 제한에 걸린 종료 코드 `124`나 강제 종료의 `137`은 프레임 0개라는 뜻이 아니므로 로그와 함께 읽습니다.
 - `-frames:v 100`은 출력 프레임 수의 상한입니다. 수신이 멈췄을 때 100개를 기다리는 작업이 자동으로 끝난다는 뜻은 아닙니다.
 - `-c copy`를 쓰지 않으므로 디코딩 경로를 거칩니다. `frame=` 증가와 decode 오류를 함께 확인합니다. `-f null -`은 화면 표시를 시험하지는 않습니다.
 
@@ -269,7 +269,7 @@ UDP unicast를 비교할 때는 입력 옵션의 `tcp`만 `udp`로 바꿉니다.
 
 처음부터 0프레임이라면 `SETUP` 결과, 송신 여부, 수신 인터페이스, payload 복원 순서로 봅니다. 반면 처음에는 나오다가 일정 시간 뒤 끊긴다면 **마지막 프레임 시각과 세션 만료 시각**을 비교할 이유가 생깁니다.
 
-`Session` 응답에 `timeout`이 있다면 keep-alive가 그 안에 처리됐는지 확인합니다. ONVIF는 `TEARDOWN` 이외의 RTSP 요청을 keep-alive로 해석하도록 하며, unicast에서는 RTCP Receiver Report도 해당합니다. 지원 여부를 모른 채 `GET_PARAMETER` 하나를 모든 장치의 필수 방식으로 가정하지 않습니다. [ONVIF Streaming §5.2.2.2](https://www.onvif.org/specs/2606/ONVIF-Streaming-Spec-v2606.pdf)
+`Session` 응답에 `timeout`이 있다면 keep-alive가 그 안에 처리됐는지 확인합니다. ONVIF는 `TEARDOWN` 이외의 RTSP 요청을 keep-alive로 해석하도록 하며 unicast에서는 RTCP Receiver Report도 해당합니다. 지원 여부를 모른 채 `GET_PARAMETER` 하나를 모든 장치의 필수 방식으로 가정하지 않습니다. [ONVIF Streaming §5.2.2.2](https://www.onvif.org/specs/2606/ONVIF-Streaming-Spec-v2606.pdf)
 
 RTSP session timeout은 `GetStreamUri` 응답 URI의 유효기간과 다른 값입니다. 끝난 세션 식별자를 재사용하는 문제도 “주소가 만료됐다”는 문제와 분리해야 합니다.
 

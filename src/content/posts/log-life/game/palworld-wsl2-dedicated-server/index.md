@@ -17,7 +17,7 @@ category: "게임"
 
 팰월드 일반 멀티플레이는 방장이 게임을 실행하고 있어야 친구들이 같은 월드에 들어올 수 있다.
 
-이번에는 기존 Windows 11 PC를 그대로 사용하면서, WSL2 Ubuntu에서 Linux용 Palworld Dedicated Server를 실행하는 방식으로 바꿨다. 게임 클라이언트와 서버 프로세스를 분리할 수 있고, 서버 관리는 Linux 명령으로 처리할 수 있다는 점이 마음에 들었다.
+이번에는 기존 Windows 11 PC를 그대로 사용하면서 WSL2 Ubuntu에서 Linux용 Palworld Dedicated Server를 실행하는 방식으로 바꿨다. 게임 클라이언트와 서버 프로세스를 분리할 수 있고 서버 관리는 Linux 명령으로 처리할 수 있다는 점이 마음에 들었다.
 
 Palworld 1.0 공식 가이드는 Linux 64비트와 SteamCMD 구성을 지원한다. 다만 WSL2 자체가 공식 지원 대상으로 명시된 것은 아니므로, 이 글의 구성은 **Windows 위의 WSL2에서 공식 Linux 서버를 실행하는 형태**다.
 
@@ -48,7 +48,7 @@ Hyper-V 방화벽
 WSL2 PalServer:8211/UDP
 ```
 
-여기서 중요한 점은 세 가지다.
+네트워크는 다음 세 가지를 기준으로 구성했다.
 
 - WSL2는 `mirrored` 네트워크 모드로 사용한다.
 - 공유기는 WSL IP가 아니라 Windows PC의 내부 IP로 포트포워딩한다.
@@ -99,9 +99,9 @@ wsl --set-version Ubuntu 2
 
 ## 2. mirrored networking 설정
 
-Palworld는 기본적으로 `UDP 8211`을 사용한다. WSL2 기본 NAT 모드에서도 서버를 실행할 수는 있지만, 외부 UDP 트래픽을 WSL까지 전달하는 구성이 복잡해진다.
+Palworld는 기본적으로 `UDP 8211`을 사용한다. WSL2 기본 NAT 모드에서도 서버를 실행할 수는 있지만 외부 UDP 트래픽을 WSL까지 전달하는 구성이 복잡해진다.
 
-Windows 11 22H2 이상에서는 `mirrored` 네트워크 모드를 사용할 수 있다. 이 모드에서는 Windows의 네트워크 인터페이스가 WSL에 미러링되고, Windows와 WSL 사이에서 `localhost`를 사용할 수 있으며, LAN에서도 WSL 서비스에 직접 접근할 수 있다.
+Windows 11 22H2 이상에서는 `mirrored` 네트워크 모드를 사용할 수 있다. 이 모드에서는 Windows의 네트워크 인터페이스가 WSL에 미러링되고 Windows와 WSL 사이에서 `localhost`를 사용할 수 있으며 LAN에서도 WSL 서비스에 직접 접근할 수 있다.
 
 PowerShell에서 다음 파일을 연다.
 
@@ -136,7 +136,7 @@ wsl --shutdown
 그다음 Ubuntu를 다시 실행한다.
 
 :::important
-`wsl --shutdown`은 설치된 파일을 삭제하지 않지만, 실행 중인 모든 WSL 배포판과 프로세스를 종료한다. 다른 빌드나 개발 서버가 실행 중이라면 먼저 작업을 저장해야 한다.
+`wsl --shutdown`은 설치된 파일을 삭제하지 않지만 실행 중인 모든 WSL 배포판과 프로세스를 종료한다. 다른 빌드나 개발 서버가 실행 중이라면 먼저 작업을 저장해야 한다.
 :::
 
 ## 3. SteamCMD 설치
@@ -215,7 +215,7 @@ palserver
 └─ PalServer.sh
 ```
 
-서버 파일은 `/mnt/c`가 아니라 WSL의 Linux 파일시스템인 `~/work/palserver`에 두었다. Linux 명령으로 작업하는 파일은 WSL 파일시스템에 둘 때 성능이 더 좋고, 저장 데이터도 Windows 마운트 경로와 분리할 수 있다.
+서버 파일은 `/mnt/c`가 아니라 WSL의 Linux 파일시스템인 `~/work/palserver`에 두었다. Linux 명령으로 작업하는 파일은 WSL 파일시스템에 둘 때 성능이 더 좋고 저장 데이터도 Windows 마운트 경로와 분리할 수 있다.
 
 ## 5. 서버 최초 실행
 
@@ -601,7 +601,7 @@ WSL VMCreatorId에 UDP 8211 인바운드 허용
 ./PalServer.sh -port=8211 -players=8
 ```
 
-Windows에서 WSL IP로 별도의 포트 프록시를 만들 필요는 없다. 필요한 포트만 최소한으로 열고, RCON과 REST API는 사용하지 않는다면 비활성화한 상태로 두는 편이 안전하다.
+Windows에서 WSL IP로 별도의 포트 프록시를 만들 필요는 없다. 필요한 포트만 최소한으로 열고 RCON과 REST API는 사용하지 않는다면 비활성화한 상태로 두는 편이 안전하다.
 
 ## 참고 자료
 
