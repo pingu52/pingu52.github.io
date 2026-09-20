@@ -58,7 +58,7 @@ wsl --version
 wsl -v
 ```
 
-(선택) 설치 할 수 있는 리눅스 배포판 확인
+(선택) 설치할 수 있는 리눅스 배포판 확인
 
 ```powershell
 wsl --list --online
@@ -88,7 +88,7 @@ WSL에서 Windows 드라이브는 `/mnt/c`, `/mnt/d`처럼 마운트됩니다.
 - 파일 I/O가 엄청 많고
 - 작은 파일을 수만~수십만 개 만지기 때문에
 
-`/mnt/c` 같은 Windows 파일시스템에서 돌리면 속도도 느리고, 권한/대소문자/링크 문제로 터질 확률이 올라갑니다.
+`/mnt/c` 같은 Windows 파일시스템에서 돌리면 속도도 느리고 권한/대소문자/링크 문제로 터질 확률이 올라갑니다.
 
 ### 권장 구조
 
@@ -171,5 +171,5 @@ Yocto는 디스크/CPU/메모리를 정말 많이 씁니다.
 
 ## 요약
 
-- 설치는 `wsl --install`로 끝내고, Ubuntu에서는 `apt update/upgrade`부터 진행한다.
+- 설치는 `wsl --install`로 끝내고 Ubuntu에서는 `apt update/upgrade`부터 진행한다.
 - 대규모 빌드(특히 Yocto)는 **절대 `/mnt/c`에서 돌리지 말고**, WSL의 Linux 파일시스템(`~/work`)에 둔다.

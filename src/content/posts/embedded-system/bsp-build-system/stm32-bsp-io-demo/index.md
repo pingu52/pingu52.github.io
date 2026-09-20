@@ -33,7 +33,7 @@ draft: false
 
 - OpenSTLinux 부팅 완료, root 쉘 접근 가능
 - BME280 bring-up 완료(IIO sysfs에서 값 읽기 가능)
-- 보드가 서버(PC)와 같은 L2/L3 망에 있고, HTTP 포트가 열려 있음
+- 보드가 서버(PC)와 같은 L2/L3 망에 있고 HTTP 포트가 열려 있음
 
 ---
 
@@ -41,7 +41,7 @@ draft: false
 
 ### 1.1 gpio-keys가 어떤 input event로 잡혔는지 확인
 
-보드에 기본으로 올라간 버튼은 보통 `gpio-keys`로 구성되어 있고, 결과적으로 Linux에서는 **키보드 이벤트처럼** `/dev/input/eventX`로 노출됩니다.
+보드에 기본으로 올라간 버튼은 보통 `gpio-keys`로 구성되어 있고 결과적으로 Linux에서는 **키보드 이벤트처럼** `/dev/input/eventX`로 노출됩니다.
 
 ```bash
 cat /proc/bus/input/devices | sed -n '/gpio-keys/,+25p'
@@ -94,7 +94,7 @@ echo 0 > /sys/class/leds/${LED}/brightness
 
 ![ip route get](./images/03-ip-route-get.png)
 
-그리고 TCP 레벨에서는 연결까지는 되었지만, 서버가 예외로 죽어서 `Empty reply from server`가 발생하는 상태였습니다.
+그리고 TCP 레벨에서는 연결까지는 되었지만 서버가 예외로 죽어서 `Empty reply from server`가 발생하는 상태였습니다.
 
 ![curl empty reply](./images/04-curl-empty-reply.png)
 
@@ -388,13 +388,13 @@ int main(void) {
 
 ## 4. Yocto(meta-myboard)로 패키징: 이미지 포함 + systemd 자동 실행
 
-이 글에서는 커널/DT를 건드리지 않고, **userspace 앱을 레이어에서 패키징해서 이미지에 포함**시키는 쪽에 집중합니다.
+이 글에서는 커널/DT를 건드리지 않고 **userspace 앱을 레이어에서 패키징해서 이미지에 포함**시키는 쪽에 집중합니다.
 
 ### 4.1 레이어 파일 배치(예시)
 
 `meta-myboard`에 아래처럼 배치하는 구성을 기준으로 합니다.
 
-[github stm32mp257f-bsp-lab](<https://github.io/pingu52/stm32mp257f-bsp-lab>)를 기반으로 작성하였습니다.
+[github stm32mp2-bsp-lab](https://github.com/pingu52/stm32mp2-bsp-lab)를 기반으로 작성하였습니다.
 
 ```bash
 meta-myboard/
@@ -454,7 +454,7 @@ do_install() {
 ```
 
 :::TIP
-위에서 중요한 포인트는 `--libs`가 쉘에서 **명령으로 오해되지 않도록** `$(${PKG_CONFIG} ...)` 형태로 감싸는 것입니다.
+`--libs`가 쉘에서 **명령으로 오해되지 않도록** `$(${PKG_CONFIG} ...)` 형태로 감쌉니다.
 :::
 
 ### 4.3 systemd 유닛(bsp-io-demo.service)
@@ -504,7 +504,7 @@ IMAGE_INSTALL:append = " bsp-io-demo"
 systemctl status bsp-io-demo --no-pager
 ```
 
-서비스가 `active (running)`이고, 환경변수가 로그에 찍히면 1차 OK입니다.
+서비스가 `active (running)`이고 환경변수가 로그에 찍히면 1차 OK입니다.
 
 ![systemctl status](./images/01-systemctl-status.png)
 

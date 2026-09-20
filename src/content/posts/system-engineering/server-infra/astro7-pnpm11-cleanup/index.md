@@ -16,7 +16,7 @@ category: "Server & Infra"
 
 이번 작업의 시작은 FOSSA였다. 처음에는 단순히 취약한 패키지를 몇 개 올리면 끝날 줄 알았는데, 막상 들여다보니 직접 의존성보다 transitive dependency가 훨씬 많았다.
 
-`pnpm audit` 기준으로는 취약점을 모두 없앨 수 있었지만, FOSSA 화면에는 여전히 오래된 하위 의존성들이 남아 있었다. 특히 `ansi-regex`, `chalk`, `commander`, `cssnano`, `ejs`, `entities` 같은 패키지들이 계속 보였다.
+`pnpm audit` 기준으로는 취약점을 모두 없앨 수 있었지만 FOSSA 화면에는 여전히 오래된 하위 의존성들이 남아 있었다. 특히 `ansi-regex`, `chalk`, `commander`, `cssnano`, `ejs`, `entities` 같은 패키지들이 계속 보였다.
 
 그래서 이번에는 단순 override가 아니라, 블로그의 기반 프레임워크인 Astro를 7로 올리고 pnpm도 11로 올리는 방식으로 의존성 트리를 한 번 정리했다.
 
@@ -28,7 +28,7 @@ category: "Server & Infra"
 - FOSSA transitive dependency 이슈 감소
 - 기존 블로그 동작과 페이지 전환 효과 유지
 
-다만 범위를 너무 넓히지는 않기로 했다. `@swup/astro`를 제거하면 FOSSA에 남아 있는 오래된 transitive dependency가 많이 줄어들 수 있지만, 현재 블로그의 페이지 전환 애니메이션이 바뀔 수 있다. 그래서 이번 PR에서는 `@swup/astro`는 유지하고, Astro 7과 pnpm 11 업그레이드까지만 처리했다.
+다만 범위를 너무 넓히지는 않기로 했다. `@swup/astro`를 제거하면 FOSSA에 남아 있는 오래된 transitive dependency가 많이 줄어들 수 있지만 현재 블로그의 페이지 전환 애니메이션이 바뀔 수 있다. 그래서 이번 PR에서는 `@swup/astro`는 유지하고 Astro 7과 pnpm 11 업그레이드까지만 처리했다.
 
 브랜치는 다음처럼 따로 만들었다.
 
@@ -63,7 +63,7 @@ pnpm up @expressive-code/core@latest \
   @tailwindcss/typography@latest
 ```
 
-TypeScript는 `6.x`가 보였지만 이번 작업에서는 올리지 않았다. Astro 7과 pnpm 11만으로도 변경 범위가 충분히 컸고, TypeScript major update까지 같이 넣으면 문제 발생 지점을 분리하기 어려워진다.
+TypeScript는 `6.x`가 보였지만 이번 작업에서는 올리지 않았다. Astro 7과 pnpm 11만으로도 변경 범위가 충분히 컸고 TypeScript major update까지 같이 넣으면 문제 발생 지점을 분리하기 어려워진다.
 
 ## `@astrojs/markdown-remark` 명시 추가
 
@@ -106,7 +106,7 @@ Location:
 src/pages/posts/[...slug].astro:97:9
 ```
 
-처음에는 정규식 문제처럼 보였지만, 실제 원인은 Astro 컴포넌트의 조건부 렌더링 문법이었다.
+처음에는 정규식 문제처럼 보였지만 실제 원인은 Astro 컴포넌트의 조건부 렌더링 문법이었다.
 
 문제가 있던 코드는 이런 형태였다.
 
@@ -114,7 +114,7 @@ src/pages/posts/[...slug].astro:97:9
 {licenseConfig.enable && <License title={entry.data.title} slug={getPostSlug(entry)} pubDate={entry.data.published} class="mb-6 rounded-xl license-container onload-animation" />
 ```
 
-마지막에 `}`가 빠져 있었다. Astro 7 compiler가 이 부분을 더 엄격하게 파싱하면서 뒤쪽의 `</div>`를 이상하게 해석했고, 결과적으로 `Unterminated regular expression` 에러가 난 것이다.
+마지막에 `}`가 빠져 있었다. Astro 7 compiler가 이 부분을 더 엄격하게 파싱하면서 뒤쪽의 `</div>`를 이상하게 해석했고 결과적으로 `Unterminated regular expression` 에러가 난 것이다.
 
 수정 후 코드는 다음처럼 정리했다.
 
@@ -206,7 +206,7 @@ allowBuilds:
   esbuild: true
 ```
 
-여기서 중요한 점은 `onlyBuiltDependencies`가 아니라 `allowBuilds`를 써야 한다는 것이다.
+여기서는 `onlyBuiltDependencies`가 아니라 `allowBuilds`를 써야 한다.
 
 ## minimum release age 정책에 걸린 경우
 
@@ -233,7 +233,7 @@ pnpm install
 Done in 2.6s using pnpm v11.9.0
 ```
 
-이 정책은 귀찮아 보이지만, supply-chain 공격을 줄이기 위한 장치다. 그래서 바로 우회하기보다는 lockfile을 새로 풀거나 시간이 지난 뒤 다시 설치하는 쪽이 더 안전하다.
+이 정책은 귀찮아 보이지만 supply-chain 공격을 줄이기 위한 장치다. 그래서 바로 우회하기보다는 lockfile을 새로 풀거나 시간이 지난 뒤 다시 설치하는 쪽이 더 안전하다.
 
 ## esbuild build script 승인
 
@@ -384,7 +384,7 @@ esbuild@0.28.1
 
 이번 작업에서 가장 크게 느낀 점은 dependency cleanup은 단순히 `pnpm up`만으로 끝나지 않는다는 것이다.
 
-`pnpm audit`은 보안 취약점 중심으로 보고, FOSSA는 outdated transitive dependency까지 더 넓게 보여준다. 그래서 audit이 0이어도 FOSSA에는 이슈가 남을 수 있다.
+`pnpm audit`은 보안 취약점 중심으로 보고 FOSSA는 outdated transitive dependency까지 더 넓게 보여준다. 그래서 audit이 0이어도 FOSSA에는 이슈가 남을 수 있다.
 
 그리고 transitive dependency를 줄이려면 결국 부모 패키지를 봐야 한다.
 
@@ -397,7 +397,7 @@ pnpm why commander
 
 이런 식으로 실제 경로를 따라가보면 문제가 어느 패키지 체인에서 나오는지 보인다. 이번에는 많은 경로가 `@swup/astro → microbundle`로 이어졌다.
 
-다만 dependency cleanup보다 중요한 것은 변경 범위를 잘 자르는 것이다. `@swup/astro`를 제거하면 dependency tree는 더 깨끗해질 수 있지만, 페이지 전환 UX가 바뀐다. 그래서 이번에는 Astro 7과 pnpm 11까지만 처리하고, swup 제거 여부는 나중에 별도 작업으로 남겨두었다.
+다만 dependency cleanup보다 변경 범위를 잘 자르는 일이 더 중요하다. `@swup/astro`를 제거하면 dependency tree는 더 깨끗해질 수 있지만 페이지 전환 UX가 바뀐다. 그래서 이번에는 Astro 7과 pnpm 11까지만 처리하고 swup 제거 여부는 나중에 별도 작업으로 남겨두었다.
 
 결과적으로 현재 상태는 다음과 같다.
 

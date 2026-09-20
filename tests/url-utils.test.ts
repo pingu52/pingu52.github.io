@@ -46,6 +46,12 @@ describe("url-utils", () => {
 		);
 	});
 
+	it("resolves registered leaf labels containing a slash before parsing paths", () => {
+		(import.meta.env as any).BASE_URL = "/";
+		assert.equal(getCategoryUrl("C / C++"), "/category/languages-tools/c-cpp/");
+		assert.equal(getCategoryUrl("  C / C++  "), "/category/languages-tools/c-cpp/");
+	});
+
 	it("throws for category label paths exceeding the maximum depth or missing taxonomy nodes", () => {
 		assert.throws(() => getCategoryUrl("Embedded System/BSP & Build/Extra"));
 		assert.throws(() => getCategoryUrl("Embedded System/Nonexistent"));

@@ -222,7 +222,7 @@ ls -1 "$DEST_PARENT"
 EE77A9292E604A90B789114BC88E9DCF
 ```
 
-`EE77...`은 데디케이트 서버가 처음 만든 월드이고, `1399...`가 이전할 Co-op 월드다.
+`EE77...`은 데디케이트 서버가 처음 만든 월드이고 `1399...`가 이전할 Co-op 월드다.
 
 Linux 서버의 `GameUserSettings.ini`를 연다.
 
@@ -237,7 +237,7 @@ nano \
 DedicatedServerName=139927D540631CFB61B947BEA9D05437
 ```
 
-따옴표나 앞뒤 공백을 넣지 않고, `SaveGames/0` 아래의 폴더명과 대소문자까지 정확히 맞춘다.
+따옴표나 앞뒤 공백을 넣지 않고 `SaveGames/0` 아래의 폴더명과 대소문자까지 정확히 맞춘다.
 
 ```bash
 grep '^DedicatedServerName=' \
@@ -336,7 +336,7 @@ Palworld 1.0 저장 형식을 지원하는 브라우저 기반 변환 도구를 
 도구는 선택한 방장 캐릭터의 플레이어 ID와 `Level.sav` 안의 관련 참조를 함께 변경한다. 다른 Co-op 참가자의 플레이어 파일은 그대로 유지된다.
 
 :::warning
-이 도구는 Pocketpair 공식 도구가 아니다. 페이지는 저장 파일을 서버에 업로드하지 않고 브라우저 안에서 처리한다고 설명하지만, 변환 결과를 적용하기 전에 원본 백업을 별도로 유지해야 한다.
+이 도구는 Pocketpair 공식 도구가 아니다. 페이지는 저장 파일을 서버에 업로드하지 않고 브라우저 안에서 처리한다고 설명하지만 변환 결과를 적용하기 전에 원본 백업을 별도로 유지해야 한다.
 :::
 
 ## 7. 변환된 월드를 서버에 적용
@@ -361,7 +361,7 @@ test -d "$CONVERTED/Players"
 pgrep -af PalServer
 ```
 
-기존 서버 월드를 한 번 더 백업하고, 활성 월드 폴더를 같은 ID로 교체한다.
+기존 서버 월드를 한 번 더 백업하고 활성 월드 폴더를 같은 ID로 교체한다.
 
 ```bash
 SERVER_BACKUP="$HOME/palworld-before-host-convert-$(date +%Y%m%d-%H%M%S)"
@@ -482,7 +482,7 @@ Pal/Saved/Config/LinuxServer/GameUserSettings.ini
 서버 접속 후 새로 생성된 Players/<ID>.sav의 파일명
 ```
 
-월드 폴더를 복사한 뒤 `DedicatedServerName`을 맞추고, 방장 캐릭터의 ID를 변환한 `Level.sav`와 `Players`를 함께 적용해야 기존 진행 상황을 유지할 수 있다.
+월드 폴더를 복사한 뒤 `DedicatedServerName`을 맞추고 방장 캐릭터의 ID를 변환한 `Level.sav`와 `Players`를 함께 적용해야 기존 진행 상황을 유지할 수 있다.
 
 ## 참고 자료
 

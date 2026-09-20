@@ -9,8 +9,8 @@ draft: false
 
 안녕하세요, pingu52입니다.
 
-Yocto/OpenEmbedded 빌드는 패키지 수가 많고, 호스트 환경·네트워크·병렬성·QA 규칙 등 변수가 많아서 **레시피 단위로 간헐/고질적인 빌드 실패**가 발생할 수 있습니다.  
-이 글에서는 ST OpenSTLinux 환경에서 실제로 만난 실패 유형을 예시로 들며, **벤더 레이어를 건드리지 않고** `meta-myboard` 같은 커스텀 레이어에서 `.bbappend`로 해결하는 방식(유지보수 가능한 패턴)을 정리합니다.
+Yocto/OpenEmbedded 빌드는 패키지 수가 많고 호스트 환경·네트워크·병렬성·QA 규칙 등 변수가 많아서 **레시피 단위로 간헐/고질적인 빌드 실패**가 발생할 수 있습니다.  
+이 글에서는 ST OpenSTLinux 환경에서 실제로 만난 실패 유형을 예시로 들며 **벤더 레이어를 건드리지 않고** `meta-myboard` 같은 커스텀 레이어에서 `.bbappend`로 해결하는 방식(유지보수 가능한 패턴)을 정리합니다.
 
 ---
 
@@ -87,7 +87,7 @@ CONNECTIVITY_CHECK_URIS = "https://www.google.com/ https://www.st.com/"
 간헐적으로 “있어야 할 파일이 없다” 유형의 실패가 난다면, Makefile 의존성이 완전하지 않아서 병렬 설치 시 순서가 꼬이는 경우가 있습니다.  
 이때는 문제 패키지에 한해 설치 단계의 병렬성을 끄는 것이 우회책이 될 수 있습니다.
 
-Yocto 문서에서도 **병렬 빌드 실패(parallel build failures)**가 간헐적으로 나타날 수 있으며, 워크어라운드로 `PARALLEL_MAKE`를 비우는 방법 등을 언급합니다.
+Yocto 문서에서도 **병렬 빌드 실패(parallel build failures)**가 간헐적으로 나타날 수 있으며 워크어라운드로 `PARALLEL_MAKE`를 비우는 방법 등을 언급합니다.
 
 ### 4.1 문서 예시
 
@@ -107,7 +107,7 @@ PARALLEL_MAKEINST:pn-binutils-cross-aarch64 = ""
 ## 5. avahi do_install 실패 해결: GIR_EXTRA_LIBS_PATH 보강
 
 `g-ir-scanner`는 임시 바이너리를 실행하면서 심볼을 분석합니다. 이때 동적 로더가 빌드 트리의 `.libs`에 있는 `libavahi*.so`를 찾지 못하면 실패합니다.  
-해결은 `avahi_0.8.bbappend`에서 gobject-introspection이 참조하는 라이브러리 경로를 추가해주는 방식이 깔끔합니다.
+`avahi_0.8.bbappend`에서 gobject-introspection이 참조하는 라이브러리 경로를 추가해 해결합니다.
 
 ### 5.1 bbappend 예시
 

@@ -15,7 +15,7 @@ draft: false
 
 이번 글은 그 다음 단계입니다.
 
-- Windows에 USB 디바이스는 정상 인식되는데 WSL2에서는 인식이 안되는 문제
+- Windows에 USB 디바이스는 정상 인식되는데 WSL2에서는 인식이 안 되는 문제
 
 해결은 **usbipd-win(USB/IP)** 입니다.
 
@@ -27,7 +27,7 @@ draft: false
 
 ## usbipd-win이란?
 
-Windows에서 USB 디바이스를 **USB/IP 방식으로 공유**하고, WSL2가 그 장치를 네트워크로 “붙여서” 쓰게 해주는 도구입니다.
+Windows에서 USB 디바이스를 **USB/IP 방식으로 공유**하고 WSL2가 그 장치를 네트워크로 “붙여서” 쓰게 해주는 도구입니다.
 
 ::github{repo="dorssel/usbipd-win"}
 
@@ -142,7 +142,7 @@ usbipd list
 `STATE`가 `Shared`로 바뀌면 정상입니다.
 
 :::tip
-`bind`는 **영구(persistent)** 입니다. 재부팅해도 유지되며, 보통 디바이스당 **한 번만** 해두면 됩니다.
+`bind`는 **영구(persistent)** 입니다. 재부팅해도 유지되며 보통 디바이스당 **한 번만** 해두면 됩니다.
 :::
 
 ---
@@ -151,7 +151,7 @@ usbipd list
 
 :::important
 attach 전에 **WSL 터미널을 미리 열어두세요.**  
-WSL2이 살아 있어야 attach가 안정적으로 됩니다.
+WSL2가 살아 있어야 attach가 안정적으로 됩니다.
 :::
 
 이제 attach:
@@ -204,7 +204,7 @@ ls -l /dev/ttyUSB* /dev/ttyACM* 2>/dev/null
 
 :::caution
 CH340/CP210x 같은 USB-UART는 장치에 따라 커널 모듈/권한 이슈로 `/dev/ttyUSB0`가 바로 안 생길 수 있습니다.  
-우선 `dmesg -w`로 연결 이벤트를 확인하고, 드라이버/권한 문제를 분리해서 보세요.
+우선 `dmesg -w`로 연결 이벤트를 확인하고 드라이버/권한 문제를 분리해서 보세요.
 :::
 
 ---

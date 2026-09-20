@@ -11,7 +11,7 @@ draft: false
 안녕하세요, pingu52입니다.
 
 이 글은 OSTEP Part I Virtualization의 출발점입니다.  
-Chapter 3 Dialogue on Virtualization은 비유로 방향을 잡아주고, Chapter 4 The Abstraction The Process에서 Process라는 핵심 abstraction을 정의합니다.
+Chapter 3 Dialogue on Virtualization은 비유로 방향을 잡아주고 Chapter 4 The Abstraction The Process에서 Process라는 핵심 abstraction을 정의합니다.
 
 이번 글의 목표는 딱 두 가지입니다.
 
@@ -27,14 +27,14 @@ Chapter 3 Dialogue on Virtualization은 비유로 방향을 잡아주고, Chapte
 <https://pingu52.github.io/posts/computer-science/os-architecture/ostep-02-os-introduction/>
 
 이번 글의 실습은 process-run.py로 Process states 전이를 관찰하는 데 집중합니다.  
-ostep-homework 저장소가 이미 있다면 그대로 사용하고, 없다면 이전 글의 방식과 동일하게 한 번만 clone해서 준비합니다.
+ostep-homework 저장소가 이미 있다면 그대로 사용하고 없다면 이전 글의 방식과 동일하게 한 번만 clone해서 준비합니다.
 
 
 
 ## 1. Dialogue on Virtualization
 
 Virtualization은 한 개의 physical resource를 여러 개의 virtual resource처럼 보이게 만드는 것입니다.  
-중요한 포인트는 사용자가 진짜로 자원이 여러 개 있다고 믿게 만드는 illusion입니다.
+사용자가 진짜로 자원이 여러 개 있다고 믿게 만드는 illusion이 중요합니다.
 
 CPU로 옮기면 이렇게 들립니다.
 
@@ -55,7 +55,7 @@ Chapter 4의 질문은 매우 직접적입니다.
 여기서 OS가 내놓는 답이 Process입니다.
 
 Process는 running program입니다.  
-여기서 program은 디스크에 저장된 파일 형태의 코드와 데이터 덩어리이고, 아직 실행 중이 아닙니다.  
+여기서 program은 디스크에 저장된 파일 형태의 코드와 데이터 덩어리이고 아직 실행 중이 아닙니다.  
 OS가 program을 메모리에 올리고 CPU가 실행하도록 준비시킨 순간, 그 실행 단위를 Process로 부릅니다.
 
 아래처럼 이해하는 편이 좋습니다.
@@ -67,7 +67,7 @@ OS가 program을 메모리에 올리고 CPU가 실행하도록 준비시킨 순�
 
 ## 3. Process가 있어야 CPU virtualization이 쉬워집니다
 
-CPU virtualization의 핵심은 동시에 실행되는 것처럼 보이는 효과입니다.  
+CPU virtualization에서는 동시에 실행되는 것처럼 보이는 효과가 중요합니다.  
 실제로 CPU가 한 개라면 동시에 실행은 불가능합니다. 그래서 OS는 다음을 반복합니다.
 
 - Process A를 잠깐 실행합니다
@@ -76,7 +76,7 @@ CPU virtualization의 핵심은 동시에 실행되는 것처럼 보이는 효�
 - 다시 바꿉니다
 
 이때 사용자는 동시에 실행되는 것처럼 느낍니다. 하지만 실제로는 매우 빠르게 번갈아 실행되는 것입니다.  
-이 방식은 concurrency를 만들어내지만, 성능 비용도 있습니다. CPU를 공유하면 각 Process는 단독 실행보다 느려질 수 있습니다.
+이 방식은 concurrency를 만들어내지만 성능 비용도 있습니다. CPU를 공유하면 각 Process는 단독 실행보다 느려질 수 있습니다.
 
 ---
 
@@ -87,7 +87,7 @@ CPU virtualization의 핵심은 동시에 실행되는 것처럼 보이는 효�
 time sharing은 자원을 시간 단위로 쪼개서 돌아가며 사용하는 방식입니다. CPU virtualization의 핵심 도구입니다.
 
 - CPU를 1초씩 나눠 A, B, C에게 번갈아 배정하는 식으로 이해하면 됩니다
-- 실제 OS는 1초보다 훨씬 짧은 단위로 바꾸며, 사람이 보기에는 동시에 실행되는 것처럼 보입니다
+- 실제 OS는 1초보다 훨씬 짧은 단위로 바꾸며 사람이 보기에는 동시에 실행되는 것처럼 보입니다
 
 ### 4.2 Space sharing
 
@@ -96,20 +96,20 @@ space sharing은 자원을 공간 단위로 나눠 고정 할당하는 방식입
 - 디스크는 공간을 나눠서 파일에게 블록을 배정합니다
 - 어떤 파일이 특정 블록을 쓰고 있으면, 그 블록이 해제되기 전까지 다른 파일이 쓰지 않습니다
 
-이처럼 CPU는 time sharing이 자연스럽고, 디스크는 space sharing이 자연스럽다는 대비가 이번 챕터의 요지 중 하나입니다.
+이처럼 CPU는 time sharing이 자연스럽고 디스크는 space sharing이 자연스럽다는 대비가 이번 챕터의 요지 중 하나입니다.
 
 ### 4.3 Timeline example without I/O
 
 ![Figure 3. Time sharing timeline without I/O](./images/fig03-time-sharing-no-io.png)
 
-Figure 3은 입출력이 없는 단순한 경우를 보여줍니다. Process0이 끝날 때까지 계속 실행되고, 그 다음 Process1이 실행됩니다.  
-이 경우에는 switch가 적고 단순하지만, interactive workload가 많으면 response time 측면에서 불리할 수 있습니다.
+Figure 3은 입출력이 없는 단순한 경우를 보여줍니다. Process0이 끝날 때까지 계속 실행되고 그 다음 Process1이 실행됩니다.  
+이 경우에는 switch가 적고 단순하지만 interactive workload가 많으면 response time 측면에서 불리할 수 있습니다.
 
 ### 4.4 Timeline example with I/O overlap
 
 ![Figure 4. Time sharing timeline with I/O overlap](./images/fig04-time-sharing-with-io.png)
 
-Figure 4는 Process0이 입출력을 시작한 뒤 대기 상태로 내려가고, 그 사이 OS가 Process1을 실행시키는 흐름입니다.  
+Figure 4는 Process0이 입출력을 시작한 뒤 대기 상태로 내려가고 그 사이 OS가 Process1을 실행시키는 흐름입니다.  
 OS 입장에서는 CPU를 놀리지 않는 것이 중요합니다. 그래서 입출력이 끝날 때까지 기다리는 Process0 대신, 준비된 Process1을 실행합니다.
 
 이 패턴이 multiprogramming의 동기입니다.
@@ -156,7 +156,7 @@ Address space는 Process가 접근할 수 있는 메모리 공간입니다. 보�
 
 ![Figure 1. Program loading and process address space](./images/fig01-process-address-space.png)
 
-Figure 1은 디스크에 있던 program이 메모리로 load되고, 그 결과 Process의 Address space가 구성되는 큰 흐름을 보여줍니다.  
+Figure 1은 디스크에 있던 program이 메모리로 load되고 그 결과 Process의 Address space가 구성되는 큰 흐름을 보여줍니다.  
 heap과 stack만큼은 확실히 기억하는 편이 좋습니다.
 
 - heap은 실행 중에 필요한 만큼 늘어나는 동적 메모리입니다
@@ -214,7 +214,7 @@ Figure 2는 전이를 한 눈에 보여줍니다.
 
 - Ready에서 Running으로 올라가는 순간이 scheduled
 - Running에서 Ready로 내려오는 순간이 descheduled
-- Running에서 입출력을 시작하면 Blocked로 내려가고, 입출력이 끝나면 Ready로 복귀합니다
+- Running에서 입출력을 시작하면 Blocked로 내려가고 입출력이 끝나면 Ready로 복귀합니다
 
 
 
@@ -283,7 +283,7 @@ python3 process-run.py -l 3:0,5:100,5:100,5:100 -S SWITCH_ON_IO -I IO_RUN_IMMEDI
 
 ## 11. 용어 정리
 
-- `추상화 (Abstraction)`: 복잡한 세부를 감추고, 프로그램이 쓰기 쉬운 형태로 일관된 interface를 제공합니다. Process, file, address space 같은 개념이 대표적인 abstraction입니다.
+- `추상화 (Abstraction)`: 복잡한 세부를 감추고 프로그램이 쓰기 쉬운 형태로 일관된 interface를 제공합니다. Process, file, address space 같은 개념이 대표적인 abstraction입니다.
 - `가상화 (Virtualization)`: 물리 자원 physical resource을 프로그램 관점에서 가상 자원 virtual resource처럼 보이게 만듭니다. CPU virtualization은 물리 CPU가 여러 개처럼 보이게 하는 효과를 말합니다.
 - `프로세스 (Process)`: running program입니다. 디스크에 저장된 program을 OS가 메모리에 올리고 실행 가능한 상태로 만든 실행 단위입니다.
 - `시분할 (time sharing)`: 자원을 시간 단위로 쪼개 여러 주체가 번갈아 쓰는 방식입니다. CPU virtualization의 핵심 기법입니다.
@@ -291,7 +291,7 @@ python3 process-run.py -l 3:0,5:100,5:100,5:100 -S SWITCH_ON_IO -I IO_RUN_IMMEDI
 - `주소 공간 (Address space)`: Process가 접근 가능한 메모리 범위입니다. 보통 code, static data, heap, stack으로 구성됩니다.
 - `레지스터 (Registers)`: CPU 내부의 빠른 저장소로, 실행 위치와 중간 결과 같은 machine state를 담습니다. context switch는 registers를 save and restore하는 과정입니다.
 - `프로그램 카운터 (program counter)`, 인스트럭션 포인터 instruction pointer: 다음에 실행할 instruction의 위치를 가리키는 register입니다.
-- `문맥교환 (context switch)`: 실행 중인 Process를 바꾸기 위해 기존 Process의 state를 저장하고, 다음 Process의 state를 복원하는 mechanism입니다.
+- `문맥교환 (context switch)`: 실행 중인 Process를 바꾸기 위해 기존 Process의 state를 저장하고 다음 Process의 state를 복원하는 mechanism입니다.
 - `스케줄링 (scheduling)`: Ready 상태의 Process 중에서 누구를 Running으로 올릴지 결정하는 과정입니다. scheduling policy는 그 선택 기준입니다.
 - `정책 (policy)`: 무엇을 선택할지에 대한 기준입니다. CPU를 누구에게 먼저 줄지, 언제 바꿀지 같은 선택을 포함합니다.
 - `메커니즘 (mechanism)`: 선택을 실제로 가능하게 만드는 구현 방법입니다. context switch 같은 저수준 동작이 여기에 해당합니다.
@@ -302,7 +302,7 @@ python3 process-run.py -l 3:0,5:100,5:100,5:100 -S SWITCH_ON_IO -I IO_RUN_IMMEDI
 - `프로세스 제어 블록 (PCB, Process Control Block)`: 각 Process의 핵심 정보를 담는 자료구조 entry입니다. state, register context, address space 정보, I/O 정보 등이 들어갑니다.
 - `멀티프로그래밍 (multiprogramming)`: I/O로 기다리는 시간이 생길 때 다른 Process를 실행해 CPU utilization을 높이려는 접근입니다.
 - `CPU 활용률 (CPU utilization)`: CPU가 유용한 일을 하고 있는 비율입니다. I/O 대기 시간을 다른 Process 실행으로 메우면 utilization이 올라갑니다.
-- `좀비 상태 (zombie state)`: Process가 exit했지만, 부모 Process가 wait로 종료 코드를 회수하지 않아 정리가 끝나지 않은 상태입니다.
+- `좀비 상태 (zombie state)`: Process가 exit했지만 부모 Process가 wait로 종료 코드를 회수하지 않아 정리가 끝나지 않은 상태입니다.
 
 ---
 

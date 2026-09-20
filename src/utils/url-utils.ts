@@ -126,6 +126,10 @@ export function createUrlUtils(taxonomyData: CategoryNode[]): UrlUtils {
 		}
 
 		const normalized = normalizeCategoryName(category);
+		// A registered label can contain '/', e.g. "C / C++".
+		const leafSlugPath = leafLabelMap.get(normalized);
+		if (leafSlugPath) return getCategorySlugPathUrl(leafSlugPath);
+
 		const labelPath = parseCategoryLabelPath(normalized);
 
 		if (labelPath.length === 0)
