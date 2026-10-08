@@ -61,8 +61,8 @@ LFS는 기존 블록을 덮어쓰지 않습니다. 변경이 생기면 데이터
 
 LFS는 이를 위해 write buffering을 사용합니다.
 
-- 작은 업데이트들을 메모리에 모아 둔다
-- 충분히 쌓이면 큰 덩어리로 한 번에 디스크에 쓴다
+- 작은 업데이트들을 메모리에 모아 둡니다
+- 충분히 쌓이면 큰 덩어리로 한 번에 디스크에 씁니다
 
 이때 큰 덩어리를 **세그먼트(segment)** 라고 부릅니다. 실제 세그먼트는 보통 몇 MB 단위입니다.
 
@@ -193,7 +193,7 @@ Cleaner가 블록 단위로 땜빵하듯 free를 만들면 안 됩니다.
 - 오래된 세그먼트 M개를 읽고
 - live block만 골라
 - N개의 새 세그먼트로 압축해 다시 쓰고 (N < M)
-- 기존 M 세그먼트를 통째로 free로 만든다
+- 기존 M 세그먼트를 통째로 free로 만듭니다
 
 ---
 
@@ -262,13 +262,13 @@ CR은 수십 초마다만 갱신되므로, 단순히 마지막 CR로 돌아가�
 
 ## 12. 요약
 
-- **핵심 철학**: 모든 업데이트를 append-only로 기록해 쓰기를 큰 순차 쓰기로 만든다
+- **핵심 철학**: 모든 업데이트를 append-only로 기록해 쓰기를 큰 순차 쓰기로 만듭니다
 - **segment와 write buffering**: 큰 contiguous write를 만들기 위한 메커니즘
 - **imap**: 움직이는 inode를 추적하기 위한 indirection 계층
 - **CR**: 최신 imap 조각을 찾기 위한 고정 시작점
-- **Cleaner**: segment 단위로 live block만 재배치해 큰 연속 free 공간을 만든다
-- **liveness 판정**: segment summary block과 imap, inode를 이용해 주소 일치로 판단한다
-- **crash recovery**: 2개의 CR과 roll-forward로 일관성과 최신성 사이를 절충한다
+- **Cleaner**: segment 단위로 live block만 재배치해 큰 연속 free 공간을 만듭니다
+- **liveness 판정**: segment summary block과 imap, inode를 이용해 주소 일치로 판단합니다
+- **crash recovery**: 2개의 CR과 roll-forward로 일관성과 최신성 사이를 절충합니다
 
 LFS의 아이디어는 copy-on-write 계열 파일 시스템과 스토리지 계층 전반에 영향을 남겼고 오늘날에도 큰 쓰기와 공간 회수라는 문제는 여전히 유효합니다.
 

@@ -20,7 +20,7 @@ draft: false
 ## 0. 먼저 짚고 가기: DP vs Starter Package
 
 - **Starter Package**: “보드가 부팅되는 기준 이미지”를 제공(초기 보드 점검/플래시 파티션 구성 확인에 중요)
-- **Distribution Package(DP)**: Yocto/OpenEmbedded 기반 **소스 트리**(레이어/레시피/빌드 스크립트 포함). 여기서 직접 빌드해서 이미지를 만든다.
+- **Distribution Package(DP)**: Yocto/OpenEmbedded 기반 **소스 트리**(레이어/레시피/빌드 스크립트 포함). 여기서 직접 빌드해서 이미지를 만듭니다.
 
 ST도 “Starter Package로 보드가 정상 부팅되는 것”을 먼저 확인한 뒤 DP로 넘어가길 권장합니다.
 

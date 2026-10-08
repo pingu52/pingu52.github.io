@@ -1,7 +1,7 @@
 ---
-title: "WSL2 세팅"
+title: "Windows 11 WSL2·Ubuntu 설치와 Yocto 빌드 환경 설정"
 published: 2025-12-27
-description: "Windows 11에서 WSL2로 Linux 빌드 환경을 안정적으로 세팅하는 방법을 정리합니다."
+description: "Windows 11에 WSL2와 Ubuntu를 설치하고 Yocto 빌드 환경을 구성합니다. 개발 도구와 의존성 패키지 설치, Linux 파일시스템 사용, VS Code 연동을 정리합니다."
 draft: false
 tags: ["WSL", "Windows11", "Linux", "Ubuntu"]
 category: "Virtualization"
@@ -92,8 +92,8 @@ WSL에서 Windows 드라이브는 `/mnt/c`, `/mnt/d`처럼 마운트됩니다.
 
 ### 권장 구조
 
-- 소스/빌드 디렉터리는 **WSL의 Linux 파일시스템(예: `~/repo`)** 에 둔다.
-- Windows에서 공유가 필요하면 나중에 `\\wsl$`로 접근한다.
+- 소스/빌드 디렉터리는 **WSL의 Linux 파일시스템(예: `~/repo`)** 에 둡니다.
+- Windows에서 공유가 필요하면 나중에 `\\wsl$`로 접근합니다.
 
 예시:
 
@@ -171,5 +171,5 @@ Yocto는 디스크/CPU/메모리를 정말 많이 씁니다.
 
 ## 요약
 
-- 설치는 `wsl --install`로 끝내고 Ubuntu에서는 `apt update/upgrade`부터 진행한다.
-- 대규모 빌드(특히 Yocto)는 **절대 `/mnt/c`에서 돌리지 말고**, WSL의 Linux 파일시스템(`~/work`)에 둔다.
+- 설치는 `wsl --install`로 끝내고 Ubuntu에서는 `apt update/upgrade`부터 진행합니다.
+- 대규모 빌드(특히 Yocto)는 **절대 `/mnt/c`에서 돌리지 말고**, WSL의 Linux 파일시스템(`~/work`)에 둡니다.

@@ -2,7 +2,7 @@
 import TaxonomyFeedPage from "@components/TaxonomyFeedPage.astro";
 import { PAGE_SIZE } from "@constants/constants";
 import I18nKey from "@i18n/i18nKey";
-import { i18nFormat } from "@i18n/translation";
+import { i18n, i18nFormat } from "@i18n/translation";
 import { getSortedPosts } from "@utils/content-utils";
 import {
 	buildTagStaticPaths,
@@ -25,7 +25,7 @@ const tagTitle =
 ---
 
 <TaxonomyFeedPage
-	title={tagTitle}
+	title={`${tagTitle} ${i18n(I18nKey.tags)}`}
 	page={page}
 	description={i18nFormat(I18nKey.taxonomyTagDescription, { name: tagTitle })}
 />
