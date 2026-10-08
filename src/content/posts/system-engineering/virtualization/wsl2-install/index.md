@@ -92,8 +92,8 @@ WSL에서 Windows 드라이브는 `/mnt/c`, `/mnt/d`처럼 마운트됩니다.
 
 ### 권장 구조
 
-- 소스/빌드 디렉터리는 **WSL의 Linux 파일시스템(예: `~/repo`)** 에 둔다.
-- Windows에서 공유가 필요하면 나중에 `\\wsl$`로 접근한다.
+- 소스/빌드 디렉터리는 **WSL의 Linux 파일시스템(예: `~/repo`)** 에 둡니다.
+- Windows에서 공유가 필요하면 나중에 `\\wsl$`로 접근합니다.
 
 예시:
 
@@ -171,5 +171,5 @@ Yocto는 디스크/CPU/메모리를 정말 많이 씁니다.
 
 ## 요약
 
-- 설치는 `wsl --install`로 끝내고 Ubuntu에서는 `apt update/upgrade`부터 진행한다.
-- 대규모 빌드(특히 Yocto)는 **절대 `/mnt/c`에서 돌리지 말고**, WSL의 Linux 파일시스템(`~/work`)에 둔다.
+- 설치는 `wsl --install`로 끝내고 Ubuntu에서는 `apt update/upgrade`부터 진행합니다.
+- 대규모 빌드(특히 Yocto)는 **절대 `/mnt/c`에서 돌리지 말고**, WSL의 Linux 파일시스템(`~/work`)에 둡니다.

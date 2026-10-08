@@ -219,10 +219,10 @@ int Hash_Lookup(hash_t *H, int key) {
 
 - `Thread-safe`: 멀티 스레드 환경에서 안전하게 동작하는 성질.
 - `Approximate Counter, Sloppy Counter`: 로컬 카운터를 두어 락 경쟁을 줄이고 주기적으로 글로벌 카운터에 반영하는 기법.
-- `Threshold S`: 로컬에서 글로벌로 옮기는 기준. 정확성과 성능의 트레이드오프를 만든다.
+- `Threshold S`: 로컬에서 글로벌로 옮기는 기준. 정확성과 성능의 트레이드오프를 만듭니다.
 - `Hand-over-hand locking, lock coupling`: 리스트 순회 시 다음 노드 락을 잡고 현재 노드 락을 푸는 방식.
-- `Coarse-grained Lock`: 자료구조 전체를 큰 락 하나로 보호하는 방식. 구현이 쉽지만 병렬성이 낮다.
-- `Fine-grained Lock`: 자료구조를 잘게 쪼개 여러 락으로 보호하는 방식. 병렬성은 높지만 오버헤드와 복잡성이 증가할 수 있다.
+- `Coarse-grained Lock`: 자료구조 전체를 큰 락 하나로 보호하는 방식. 구현이 쉽지만 병렬성이 낮습니다.
+- `Fine-grained Lock`: 자료구조를 잘게 쪼개 여러 락으로 보호하는 방식. 병렬성은 높지만 오버헤드와 복잡성이 증가할 수 있습니다.
 - `Dummy Node`: 큐에서 경계 조건을 단순화하기 위해 사용하는 초기 노드.
 
 ---
