@@ -1,7 +1,7 @@
 ---
-title: "WSL2 세팅"
+title: "Windows 11 WSL2·Ubuntu 설치와 Yocto 빌드 환경 설정"
 published: 2025-12-27
-description: "Windows 11에서 WSL2로 Linux 빌드 환경을 안정적으로 세팅하는 방법을 정리합니다."
+description: "Windows 11에 WSL2와 Ubuntu를 설치하고 Yocto 빌드 환경을 구성합니다. 개발 도구와 의존성 패키지 설치, Linux 파일시스템 사용, VS Code 연동을 정리합니다."
 draft: false
 tags: ["WSL", "Windows11", "Linux", "Ubuntu"]
 category: "Virtualization"

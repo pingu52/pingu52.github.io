@@ -4,7 +4,7 @@ import PostPage from "@components/PostPage.astro";
 import TaxonomyHeader from "@components/TaxonomyHeader.astro";
 import { PAGE_SIZE } from "@constants/constants";
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { i18n, i18nFormat } from "@i18n/translation";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import type { CategoryNode } from "@utils/category-taxonomy-utils";
 import {
@@ -157,9 +157,19 @@ const page = isLeaf
 			},
 		}
 	: null;
+const pageLabel = i18nFormat(I18nKey.taxonomySummaryPage, {
+	current: currentPage,
+	total: totalPages,
+});
+const categoryTitle = `${title} ${i18n(I18nKey.categories)}`;
+const metaTitle =
+	currentPage > 1 ? `${categoryTitle} - ${pageLabel}` : categoryTitle;
+const description = i18nFormat(I18nKey.taxonomyCategoryDescription, {
+	name: labelPath.join(" / "),
+});
 ---
 
-<MainGridLayout title={title}>
+<MainGridLayout title={metaTitle} description={currentPage > 1 ? `${description} ${pageLabel}` : description}>
 	<TaxonomyHeader
 		title={title}
 		count={displayCount}

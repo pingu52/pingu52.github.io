@@ -2,6 +2,8 @@
 import Pagination from "@components/control/Pagination.astro";
 import PostPage from "@components/PostPage.astro";
 import TaxonomyHeader from "@components/TaxonomyHeader.astro";
+import I18nKey from "@i18n/i18nKey";
+import { i18nFormat } from "@i18n/translation";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import type { Page } from "astro";
 
@@ -13,9 +15,16 @@ interface Props {
 
 const { title, page, description } = Astro.props;
 const len = page.data.length;
+const pageLabel = i18nFormat(I18nKey.taxonomySummaryPage, {
+	current: page.currentPage,
+	total: page.lastPage,
+});
+const metaTitle = page.currentPage > 1 ? `${title} - ${pageLabel}` : title;
+const metaDescription =
+	page.currentPage > 1 ? `${description || title} ${pageLabel}` : description;
 ---
 
-<MainGridLayout title={title} description={description}>
+<MainGridLayout title={metaTitle} description={metaDescription}>
 	<TaxonomyHeader title={title} count={page.total} currentPage={page.currentPage} lastPage={page.lastPage} />
 
 	<PostPage page={page}></PostPage>

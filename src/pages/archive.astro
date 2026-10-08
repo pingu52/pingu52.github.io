@@ -13,6 +13,7 @@ const sortedPostsList = await getSortedPostsList();
 	title={i18n(I18nKey.archive)}
 	description={i18n(I18nKey.archiveDescription)}
 >
+	<h1 class="sr-only">{i18n(I18nKey.archive)}</h1>
 	<!--
 	Progressive enhancement:
 	- No-JS (and many bots): server-rendered archive list is visible for SEO/accessibility.

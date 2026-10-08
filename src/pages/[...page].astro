@@ -2,7 +2,10 @@
 import type { GetStaticPaths } from "astro";
 import Pagination from "../components/control/Pagination.astro";
 import PostPage from "../components/PostPage.astro";
+import { siteConfig } from "../config";
 import { PAGE_SIZE } from "../constants/constants";
+import I18nKey from "../i18n/i18nKey";
+import { i18nFormat } from "../i18n/translation";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
 import { getSortedPosts } from "../utils/content-utils";
 
@@ -15,9 +18,18 @@ export const getStaticPaths = (async ({ paginate }) => {
 const { page } = Astro.props;
 
 const len = page.data.length;
+const pageLabel = i18nFormat(I18nKey.taxonomySummaryPage, {
+	current: page.currentPage,
+	total: page.lastPage,
+});
+const title =
+	page.currentPage > 1 ? `${siteConfig.subtitle} - ${pageLabel}` : undefined;
+const description =
+	"임베디드 Linux, Yocto BSP, ONVIF, C/C++와 운영체제 학습 기록을 모은 pingu52 개발 블로그입니다.";
 ---
 
-<MainGridLayout>
+<MainGridLayout title={title} description={page.currentPage > 1 ? `${description} ${pageLabel}` : description}>
+    <h1 class="sr-only">{title || `${siteConfig.title} - ${siteConfig.subtitle}`}</h1>
     <PostPage page={page}></PostPage>
     <Pagination class="mx-auto onload-animation" page={page} style={`animation-delay: calc(var(--content-delay) + ${(len)*50}ms)`}></Pagination>
 </MainGridLayout>
