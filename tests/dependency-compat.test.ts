@@ -1,12 +1,41 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import {
+	mkdirSync,
+	mkdtempSync,
+	readFileSync,
+	rmSync,
+	writeFileSync,
+} from "node:fs";
 import { createRequire } from "node:module";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { it } from "node:test";
 import type { Element, Root } from "hast";
 import katex from "katex";
 import rehypeKatex from "rehype-katex";
 
 const require = createRequire(import.meta.url);
+
+it("resolves Stylus brace imports through the updated glob API", (t) => {
+	const dir = mkdtempSync(join(tmpdir(), "stylus-compat-"));
+	t.after(() => rmSync(dir, { recursive: true, force: true }));
+	mkdirSync(join(dir, "partials"));
+	writeFileSync(join(dir, "partials", "a.styl"), ".first\n  color red\n");
+	writeFileSync(join(dir, "partials", "b.styl"), ".second\n  color blue\n");
+	const css = require("stylus").render('@import "partials/{a,b}.styl"', {
+		filename: join(dir, "entry.styl"),
+	});
+	assert.match(css, /\.first\s*\{\s*color: #f00;/);
+	assert.match(css, /\.second\s*\{\s*color: #00f;/);
+});
+
+it("generates PostCSS input identifiers through the updated Nanoid API", () => {
+	const coreRequire = createRequire(require.resolve("@expressive-code/core"));
+	const postcss = coreRequire("postcss");
+	const input = postcss.parse("a { color: red }").source.input;
+	assert.match(input.id, /^<input css [\w-]{6}>$/);
+	assert.equal(input.css, "a { color: red }");
+});
 
 it("preserves nested code styles with the patched selector parser", async () => {
 	const coreRequire = createRequire(require.resolve("@expressive-code/core"));

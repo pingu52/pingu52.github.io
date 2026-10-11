@@ -2,10 +2,14 @@ packages:
   - .
 
 overrides:
-  # shortcut: plugin-author builds are unsupported here; remove when Swup drops microbundle.
+  # shortcut: plugin-author CLI commands are unsupported here; remove after Swup cleans its dependencies.
   "@swup/plugin@3.0.1>microbundle": "-"
-  # shortcut: the glob CLI is unsupported here; remove when Stylus upgrades glob.
-  "glob@10.5.0>jackspeak": "-"
+  "@swup/plugin@3.0.1>shelljs": "-"
+  "@swup/plugin@3.0.1>shelljs-live": "-"
+  # shortcut: Stylus pins obsolete glob; remove when its range supports glob 13.
+  stylus>glob: 13.0.6
+  # shortcut: requires Node 22.12+ or 24 for CJS/ESM interop; remove when PostCSS updates Nanoid.
+  postcss>nanoid: 6.0.2
   # shortcut: parents still require vulnerable versions; remove when their ranges are patched.
   katex: 0.18.10
   postcss-selector-parser: 7.1.6
@@ -16,6 +20,3 @@ overrides:
 
 allowBuilds:
   esbuild: true
-
-minimumReleaseAgeExclude:
-  - nanoid@3.3.18
