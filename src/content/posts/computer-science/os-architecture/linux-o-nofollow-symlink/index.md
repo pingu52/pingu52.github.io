@@ -187,9 +187,9 @@ openat2: Too many levels of symbolic links
 
 | 필요한 동작 | 확인할 API·옵션 |
 | --- | --- |
-| 마지막 요소가 링크이면 읽기용 열기 거부 | `open()` + `O_RDONLY | O_NOFOLLOW` |
+| 마지막 요소가 링크이면 읽기용 열기 거부 | `open()` + `O_RDONLY \| O_NOFOLLOW` |
 | 중간 요소까지 링크 해석 거부 | `openat2()` + `RESOLVE_NO_SYMLINKS` |
-| 마지막 요소인 링크 자체의 정보 확인 | `O_PATH | O_NOFOLLOW` + `fstat()` |
+| 마지막 요소인 링크 자체의 정보 확인 | `O_PATH \| O_NOFOLLOW` + `fstat()` |
 | 특정 디렉터리 범위를 벗어나는 경로 거부 | 기준 디렉터리 fd + `RESOLVE_BENEATH` 등 |
 
 링크를 거부하는 것과 일반 파일만 허용하는 것도 별개다. 파일 형식 제한이 필요하면 열린 fd에 `fstat()`을 적용하는 등 그 조건을 따로 확인해야 한다.
