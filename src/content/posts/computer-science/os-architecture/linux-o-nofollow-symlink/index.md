@@ -2,7 +2,7 @@
 title: "[Linux] O_NOFOLLOW는 어디까지 심볼릭 링크를 막을까?"
 published: 2026-10-13
 description: "작은 C 예제로 O_NOFOLLOW가 마지막 경로 요소만 검사하는 동작을 확인하고 openat2의 RESOLVE_NO_SYMLINKS와 O_PATH 조합의 차이를 살펴봅니다."
-image: "./tux-terminal.png"
+image: "./nofollow-cover.png"
 tags: [Linux, C, FileSystem, System Call, Security]
 category: "OS & Arch"
 draft: false
@@ -201,5 +201,3 @@ openat2: Too many levels of symbolic links
 :::
 
 파일·디렉터리와 fd의 기본 개념은 [Files and Directories 글](/posts/computer-science/os-architecture/ostep-39-file-intro/)에서 이어서 볼 수 있다.
-
-썸네일은 Wikimedia Commons의 [Tux on a terminal](https://commons.wikimedia.org/wiki/File:Tux_on_a_terminal.svg)을 사용했다. Tux: Larry Ewing (`lewing@isc.tamu.edu`), The GIMP. 구성: Tux32. 사용 조건은 원본 페이지에 기재되어 있다.
