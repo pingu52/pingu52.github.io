@@ -62,9 +62,16 @@ export async function getTagList(): Promise<Tag[]> {
 		}
 	}
 
-	return Array.from(grouped.values())
-		.sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()))
-		.map((t) => ({ name: t.label, count: t.count }));
+	return (
+		Array.from(grouped.values())
+			// Most-used first so the collapsed sidebar preview shows the tags that matter.
+			.sort(
+				(a, b) =>
+					b.count - a.count ||
+					a.label.toLowerCase().localeCompare(b.label.toLowerCase()),
+			)
+			.map((t) => ({ name: t.label, count: t.count }))
+	);
 }
 
 export type Category = {
