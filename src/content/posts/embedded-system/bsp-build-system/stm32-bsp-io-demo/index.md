@@ -575,6 +575,8 @@ systemctl restart bsp-io-demo
 
 ## 참고
 
+- [rootfs 설정과 서비스를 레시피로 관리하고 이미지에 포함하기](/posts/embedded-system/bsp-build-system/yocto-rootfs-recipes/)
+
 - ST wiki: How to control a GPIO in userspace (libgpiod, userspace GPIO)
   <https://wiki.st.com/stm32mpu/wiki/How_to_control_a_GPIO_in_userspace>
 
