@@ -37,3 +37,22 @@ const style = Astro.props.style;
         overflow-y: auto;
     }
 </style>
+
+<script>
+    import { OverlayScrollbars } from "overlayscrollbars";
+
+    // Delegated so it survives swup page swaps; runs after WidgetLayout removes `.collapsed`.
+    document.addEventListener("click", (e) => {
+        if (!(e.target as Element).closest('widget-layout[data-id="tags"] .expand-btn')) return;
+        const tags = document.getElementById("tags");
+        if (!tags || OverlayScrollbars(tags)) return;
+        OverlayScrollbars(tags, {
+            scrollbars: {
+                theme: "scrollbar-base scrollbar-auto",
+                autoHide: "leave",
+                autoHideDelay: 500,
+                autoHideSuspend: false,
+            },
+        });
+    });
+</script>
