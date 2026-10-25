@@ -13,8 +13,31 @@ import { it } from "node:test";
 import type { Element, Root } from "hast";
 import katex from "katex";
 import rehypeKatex from "rehype-katex";
+import sanitizeHtml from "sanitize-html";
 
 const require = createRequire(import.meta.url);
+
+it("discards all noscript content after an implied ancestor close", () => {
+	const options = {
+		allowedTags: ["div", "img"],
+		allowedAttributes: { img: ["src"] },
+		nonTextTags: ["script", "style", "textarea", "option", "noscript"],
+	};
+	assert.equal(
+		sanitizeHtml(
+			'<div><noscript></div><img src="https://example.com/tracker.gif"></noscript>',
+			options,
+		),
+		"<div></div>",
+	);
+	assert.equal(
+		sanitizeHtml(
+			'<div><img src="https://example.com/image.png"></div>',
+			options,
+		),
+		'<div><img src="https://example.com/image.png" /></div>',
+	);
+});
 
 it("resolves Stylus brace imports through the updated glob API", (t) => {
 	const dir = mkdtempSync(join(tmpdir(), "stylus-compat-"));
