@@ -66,7 +66,7 @@ ONVIF 적합성은 상호 운용을 위한 인터페이스 범위를 의미합�
 
 ## 3. Device와 Client
 
-ONVIF 통신은 크게 Device와 Client의 관계로 볼 수 있습니다.
+ONVIF에서는 요청을 보내는 쪽을 Client, 요청을 받아 처리하는 쪽을 Device라고 부릅니다.
 
 - **Device**: ONVIF Service를 제공하는 쪽입니다. IP 카메라나 비디오 인코더가 대표적입니다.
 - **Client**: Device의 Service를 호출하는 쪽입니다. VMS, NVR, 관리 프로그램 등이 해당합니다.
@@ -204,7 +204,7 @@ ONVIF와 RTSP를 같은 계층의 경쟁 기술로 보면 흐름이 잘 이해�
 
 즉, RTSP 주소를 이미 알고 있다면 ONVIF 호출 없이 영상만 재생할 수도 있습니다. 하지만 이 경우 장치 자동 발견, capability 조회, 표준화된 미디어 설정, PTZ와 이벤트 같은 ONVIF 기능은 별개의 문제로 남습니다.
 
-한 문장으로 정리하면 **ONVIF로 장치와 스트림을 협상하고 RTSP/RTP로 스트림을 제어하고 전달한다**고 볼 수 있습니다.
+**ONVIF로 장치와 스트림 정보를 얻고, RTSP로 재생을 제어하고, RTP로 미디어 데이터를 받습니다.**
 
 ## 9. ONVIF Profile은 기능 호환성의 기준이다
 
@@ -275,7 +275,7 @@ Media Profile에는 video source와 encoder, audio, PTZ, analytics, metadata con
 - ONVIF Profile은 제품의 기능 호환 범위를 나타내며 Media Profile은 Device 내부의 stream configuration 묶음입니다.
 - ONVIF 적합성은 제품 품질이나 시스템 전체의 보안을 보장하지 않습니다.
 
-다음 글에서는 이 구조의 첫 단계인 WS-Discovery를 직접 전송하고 `ProbeMatch` 응답에서 Device Service 주소를 확인해 보겠습니다.
+다음 글에서는 WS-Discovery Probe를 보내고 `ProbeMatch` 응답에서 Device Service 주소를 찾습니다.
 
 ## 참고 자료
 

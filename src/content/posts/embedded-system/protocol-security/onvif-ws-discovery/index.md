@@ -415,7 +415,7 @@ HTTPS를 사용하면 URI와 SOAP body는 TLS 안에서 암호화되므로 동�
 - Discovery 메시지도 SOAP이지만 UDP로 전달되고 이후 Device Service SOAP 요청은 HTTP 또는 HTTPS로 전달됩니다.
 - 캡처에서 `POST /onvif/device_service`만 보인다면 WS-Discovery가 수행됐다고 단정할 수 없습니다.
 
-다음 글에서는 `XAddrs`로 얻은 Device Service를 시작점으로 `GetServices`, Media Service의 `GetProfiles`, `GetStreamUri`를 차례로 호출해 스트림 URI를 얻는 과정을 살펴보겠습니다.
+다음 글의 출발점은 `XAddrs`에 담긴 Device Service 주소입니다. 여기서 `GetServices`로 Media Service를 찾고, `GetProfiles`와 `GetStreamUri`로 스트림 URI를 얻습니다.
 
 ## 참고 자료
 

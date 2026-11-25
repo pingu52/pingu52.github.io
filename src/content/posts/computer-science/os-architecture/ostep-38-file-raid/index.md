@@ -154,7 +154,7 @@ $$
 - **Random read**: $(N-1)\cdot R$
 - **Small random write**: 패리티 디스크가 병목
 
-특히 small random write는 패리티 디스크가 논리 쓰기마다 **패리티 블록 read + write**를 수행해야 해서, 전체 처리량이 패리티 디스크 처리량에 의해 제한됩니다. 단순화 모델에서는
+작은 블록을 임의 위치에 쓸 때는 논리 쓰기 한 번마다 패리티 디스크가 **패리티 블록을 읽고 다시 씁니다**. 이 디스크가 처리할 수 있는 쓰기 횟수가 전체 처리량의 상한입니다. 단순화 모델에서는
 
 $$
 \mathrm{Throughput}_{\mathrm{RAID4,\,rand\,write}}
