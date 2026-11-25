@@ -80,7 +80,7 @@ SSD 내부는 플래시 칩들 + volatile memory(SRAM/DRAM) + 컨트롤 로직�
 
 ## 3. 나쁜 접근: direct-mapped FTL
 
-PDF에서 말하는 **direct-mapped** 는 페이지 단위 매핑이 아니라, 훨씬 단순하고 위험한 고정 매핑입니다.
+PDF에서 설명하는 **direct-mapped** 방식은 논리 페이지와 물리 페이지를 일대일로 고정합니다.
 
 - 논리 페이지 $N$은 물리 페이지 $N$에 고정
 - write(논리 페이지 $N$)를 처리하려면

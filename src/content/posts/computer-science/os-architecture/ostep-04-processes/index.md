@@ -55,7 +55,7 @@ Chapter 4의 질문은 매우 직접적입니다.
 여기서 OS가 내놓는 답이 Process입니다.
 
 Process는 running program입니다.  
-여기서 program은 디스크에 저장된 파일 형태의 코드와 데이터 덩어리이고 아직 실행 중이 아닙니다.  
+여기서 program은 디스크에 저장된 코드와 데이터를 가리킵니다.
 OS가 program을 메모리에 올리고 CPU가 실행하도록 준비시킨 순간, 그 실행 단위를 Process로 부릅니다.
 
 아래처럼 이해하는 편이 좋습니다.
@@ -142,7 +142,7 @@ Policy는 목표에 따라 달라집니다.
 
 ## 6. Process를 구성하는 machine state
 
-Process는 단순히 코드 파일이 아닙니다. 실행 중인 상태 전체가 Process입니다.  
+Process는 실행 중인 프로그램의 상태 전체를 가리킵니다.
 그래서 OS는 Process를 다룰 때 machine state를 관리해야 합니다.
 
 ### 6.1 Address space
@@ -218,7 +218,7 @@ Figure 2는 전이를 한 눈에 보여줍니다.
 
 
 
-- Blocked는 CPU가 느린 것이 아니라 입출력이 느려서 기다리는 상태입니다
+- 입출력 완료를 기다리는 동안 프로세스는 Blocked 상태에 머뭅니다
 
 ---
 

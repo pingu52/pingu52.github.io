@@ -19,7 +19,7 @@ category: "게임"
 
 이번에는 기존 Windows 11 PC를 그대로 사용하면서 WSL2 Ubuntu에서 Linux용 Palworld Dedicated Server를 실행하는 방식으로 바꿨다. 게임 클라이언트와 서버 프로세스를 분리할 수 있고 서버 관리는 Linux 명령으로 처리할 수 있다는 점이 마음에 들었다.
 
-Palworld 1.0 공식 가이드는 Linux 64비트와 SteamCMD 구성을 지원한다. 다만 WSL2 자체가 공식 지원 대상으로 명시된 것은 아니므로, 이 글의 구성은 **Windows 위의 WSL2에서 공식 Linux 서버를 실행하는 형태**다.
+Palworld 1.0 공식 가이드는 Linux 64비트와 SteamCMD 구성을 지원한다. 공식 가이드에서 지원 대상으로 명시한 환경은 Linux이고, 이 글에서는 **Windows 위의 WSL2에서 공식 Linux 서버를 실행한다**.
 
 ## 구성
 
@@ -51,7 +51,7 @@ WSL2 PalServer:8211/UDP
 네트워크는 다음 세 가지를 기준으로 구성했다.
 
 - WSL2는 `mirrored` 네트워크 모드로 사용한다.
-- 공유기는 WSL IP가 아니라 Windows PC의 내부 IP로 포트포워딩한다.
+- 공유기의 포트포워딩 대상에는 Windows PC의 내부 IP를 입력한다.
 - 게임 접속에 필요한 `UDP 8211`만 연다.
 
 ## 준비 사항
@@ -215,7 +215,7 @@ palserver
 └─ PalServer.sh
 ```
 
-서버 파일은 `/mnt/c`가 아니라 WSL의 Linux 파일시스템인 `~/work/palserver`에 두었다. Linux 명령으로 작업하는 파일은 WSL 파일시스템에 둘 때 성능이 더 좋고 저장 데이터도 Windows 마운트 경로와 분리할 수 있다.
+서버 파일은 WSL의 Linux 파일시스템인 `~/work/palserver`에 두었다. Linux 명령으로 작업하는 파일은 WSL 파일시스템에 둘 때 성능이 더 좋고 저장 데이터도 Windows 마운트 경로와 분리할 수 있다.
 
 ## 5. 서버 최초 실행
 
@@ -315,7 +315,7 @@ OptionSettings=(...)
 | `PalStaminaDecreaceRate` | `0.7` | 팰 스태미나 소모 감소 |
 | `PalEggDefaultHatchingTime` | `1.0` | 거대 알 기준 부화 시간 1시간 |
 
-`Rate`가 붙었다고 해서 값을 올릴수록 항상 빨라지는 것은 아니다.
+`Rate` 값을 올렸을 때 무엇이 얼마나 달라지는지는 설정 항목마다 다르다.
 
 - 획득량과 공격력 계열은 값이 높을수록 증가한다.
 - `DecreaceRate`는 값이 낮을수록 허기나 스태미나가 천천히 줄어든다.
@@ -410,7 +410,7 @@ ipconfig
 내부 포트: 8211
 ```
 
-포워딩 대상은 WSL의 `172.x.x.x` 주소가 아니라 **Windows PC의 LAN 주소**다.
+포워딩 대상은 **Windows PC의 LAN 주소**다. WSL의 `172.x.x.x` 주소는 가상 네트워크 안에서 쓰인다.
 
 mirrored networking에서는 Windows에서 WSL IP로 다시 포트포워딩하는 규칙을 만들지 않는다. 공유기, Windows 방화벽, Hyper-V 방화벽만 같은 `UDP 8211`을 통과시키면 된다.
 

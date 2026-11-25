@@ -30,7 +30,7 @@ Yocto에서 커널 레시피를 바꾸고 빌드를 마쳤는데 보드는 예�
 | rootfs | 필요한 모듈 패키지와 펌웨어가 포함됐는지 |
 | 부팅 설정 | 교체한 파일이나 이미지 구성을 실제로 선택하는지 |
 
-rootfs까지 매번 통째로 교체해야 한다는 뜻은 아니다. 커널과 모듈을 별도 패키지로 업데이트할 수도 있다. 이때도 커널과 설치된 모듈을 맞춰야 하므로 업데이트 순서와 되돌릴 방법을 함께 정한다.
+rootfs를 유지하고 커널과 모듈만 별도 패키지로 업데이트할 수도 있다. 이때도 커널과 설치된 모듈을 맞춰야 하므로 업데이트 순서와 되돌릴 방법을 함께 정한다.
 
 ## 실제로 선택된 레시피와 소스를 확인한다
 
@@ -64,7 +64,7 @@ grep -E '^(MACHINE|PN|PV|SRCREV|S|B|KERNEL_DEVICETREE|KERNEL_IMAGETYPE|DEPLOY_DI
 
 커널을 바꾸면 이전 fragment에 적은 옵션이 최종 `.config`에 그대로 남지 않을 수 있다. 옵션 이름이 바뀌거나 의존 조건을 충족하지 못할 수도 있다. 레이어의 fragment뿐 아니라 configure 뒤의 결과를 대조한다.
 
-`kernel_configcheck`를 제공하는 레시피에서는 다음 순서로 태스크와 설정을 확인할 수 있다. 모든 벤더 커널이 이 태스크를 제공하는 것은 아니므로 목록을 먼저 본다.
+`kernel_configcheck`를 제공하는 레시피에서는 다음 순서로 태스크와 설정을 확인할 수 있다. 이 태스크를 제공하는지는 벤더 커널의 태스크 목록에서 확인한다.
 
 ```bash
 bitbake -c listtasks virtual/kernel
@@ -78,13 +78,13 @@ bitbake -c kernel_configcheck virtual/kernel
 
 DTB도 파일 생성 여부에서 끝내지 않는다. 보드 모델, 루트 저장장치의 연결, 드라이버의 `compatible`과 필요한 속성, 사용하는 overlay를 확인한다. `KERNEL_DEVICETREE`는 커널 레시피에서 생성할 DTB를 지정하는 변수다. BSP가 별도 devicetree 레시피나 사전 빌드 파일을 쓴다면 그 경로도 따로 확인한다. [Yocto KERNEL_DEVICETREE](https://docs.yoctoproject.org/6.0/ref-manual/variables.html#term-KERNEL_DEVICETREE)
 
-기존 DTB를 새 커널에서 계속 쓸 수 있는 경우도 있다. 다만 벤더 드라이버와 함께 전달받은 DTB라면 새 소스의 binding과 맞는지 확인해야 한다. 파일을 같은 디렉터리에 복사했다는 이유만으로 호환된다고 판단하지 않는다.
+기존 DTB를 새 커널에서 계속 쓸 수 있는 경우도 있다. 다만 벤더 드라이버와 함께 전달받은 DTB라면 새 소스의 binding과 맞는지 확인해야 한다. 호환 여부는 커널 드라이버가 요구하는 속성을 DTB가 제공하는지로 확인한다.
 
 ## 외부 모듈을 다시 빌드하고 이미지에 포함한다
 
 기존 `.ko` 파일을 새 커널의 모듈 디렉터리에 복사하는 것으로 교체를 끝내면 안 된다. 외부 모듈은 새 커널의 설정과 빌드 결과를 사용해 다시 빌드한다. Yocto에서는 `module` 클래스를 사용하는 레시피로 이 경로를 연결할 수 있다. [Yocto module 클래스](https://docs.yoctoproject.org/6.0/ref-manual/classes.html#module)
 
-`CONFIG_MODVERSIONS`를 켠 커널은 모듈이 사용하는 exported symbol의 CRC도 검사한다. `modules_prepare`만으로 필요한 `Module.symvers`가 만들어지는 것은 아니다. 외부 모듈에 필요한 커널 빌드 결과가 준비돼 있어야 한다. [Linux 외부 모듈 빌드](https://docs.kernel.org/kbuild/modules.html)
+`CONFIG_MODVERSIONS`를 켠 커널은 모듈이 사용하는 exported symbol의 CRC도 검사한다. `CONFIG_MODVERSIONS`를 쓰는 구성에서는 커널을 빌드해 `Module.symvers`를 준비해야 한다. 외부 모듈에 필요한 커널 빌드 결과가 준비돼 있어야 한다. [Linux 외부 모듈 빌드](https://docs.kernel.org/kbuild/modules.html)
 
 그다음에는 모듈이 rootfs에 설치되는지 확인한다. **모듈 빌드 성공과 모듈 패키지의 이미지 포함은 다른 단계다.** 필요한 `kernel-module-*` 패키지가 선택됐는지 이미지 manifest와 생성된 rootfs에서 대조한다. 모듈과 함께 쓰는 펌웨어 파일도 확인한다.
 

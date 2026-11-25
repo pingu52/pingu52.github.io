@@ -52,9 +52,9 @@ Client                                            ONVIF Device
 
 1. 클라이언트는 `Probe`를 IPv4 multicast로 보냅니다.
 2. 조건에 맞는 장치는 `ProbeMatches`로 클라이언트에 unicast 응답합니다.
-3. `XAddrs`는 별도 메시지가 아니라 `ProbeMatches` 안에 들어 있는 Device Service 주소 필드입니다.
+3. `XAddrs`는 `ProbeMatches` 응답에 들어 있는 Device Service 주소 필드입니다.
 
-따라서 흐름을 `Probe → ProbeMatches → XAddrs`라고 축약해 말할 수는 있지만 `XAddrs`라는 세 번째 패킷이 오는 것은 아닙니다.
+따라서 패킷을 캡처하면 `Probe`와 `ProbeMatches`가 보이고, 주소는 응답의 `XAddrs`에서 읽습니다.
 
 두 단계 모두 SOAP 메시지를 사용합니다.
 
@@ -69,7 +69,7 @@ Client                                            ONVIF Device
 
 여기서 한 번 버전을 짚고 넘어가야 합니다.
 
-2026년 6월에 공개된 ONVIF Core 26.06은 OASIS WS-Discovery 1.1의 2009년 namespace가 아니라, **2005년 4월 XMLSOAP WS-Discovery**를 규범 참조합니다.
+2026년 6월에 공개된 ONVIF Core 26.06은 **2005년 4월 XMLSOAP WS-Discovery**를 규범 참조합니다. OASIS WS-Discovery 1.1은 별도의 2009년 namespace를 씁니다.
 
 ONVIF Discovery 메시지에서 사용하는 주요 namespace는 다음과 같습니다.
 
@@ -98,7 +98,7 @@ WS-Discovery의 IPv4 multicast 목적지는 다음과 같습니다.
 
 IPv6에서는 link-local multicast 주소 `FF02::C`와 UDP 3702를 사용하지만 이번 글의 실습 범위는 IPv4로 한정합니다.
 
-`239.255.255.250`은 broadcast 주소가 아니라 multicast 주소입니다. 따라서 다음 상황에서는 일반 IP 통신이 되더라도 자동 검색만 실패할 수 있습니다.
+`239.255.255.250`은 multicast 그룹 주소입니다. 따라서 다음 상황에서는 일반 IP 통신이 되더라도 자동 검색만 실패할 수 있습니다.
 
 - 잘못된 네트워크 인터페이스로 Probe를 보낸 경우
 - 장치나 클라이언트의 방화벽이 UDP 3702를 차단한 경우
@@ -154,7 +154,7 @@ ONVIF Core는 discoverable mode의 장치가 `Probe`와 `Resolve`를 수신하�
 | `To` | WS-Discovery의 논리적 목적지입니다. |
 | `Types` | 찾으려는 service type입니다. 여기서는 ONVIF Device Service의 `tds:Device`를 지정합니다. |
 
-이번 예제는 검색 대상을 명확히 하려고 `tds:Device`를 넣었습니다. 다만 ONVIF Base Device Test에는 `Types`와 `Scopes`를 생략한 Probe 시험도 있습니다. 이 두 필드가 모든 Probe에서 필수라는 뜻은 아닙니다.
+이번 예제는 검색 대상을 명확히 하려고 `tds:Device`를 넣었습니다. 다만 ONVIF Base Device Test에는 `Types`와 `Scopes`를 생략한 Probe 시험도 있습니다.
 
 과거 ONVIF 예제와 구형 장치의 패킷에서는 `dn:NetworkVideoTransmitter`가 보일 수도 있습니다. 현재 Core 26.06의 Device type은 `tds:Device`이므로 새 예제는 이를 기준으로 작성하되, 오래된 캡처를 분석할 때는 두 이름이 등장한 배경을 구분해야 합니다.
 
@@ -204,7 +204,7 @@ ONVIF Core는 discoverable mode의 장치가 `Probe`와 `Resolve`를 수신하�
 ```
 
 :::note
-`192.0.2.10`은 문서 예시를 위한 TEST-NET 주소입니다. 실제 장치 주소가 아닙니다.
+`192.0.2.10`은 문서 예시를 위한 TEST-NET 주소입니다.
 :::
 
 응답에서는 다음 순서로 확인합니다.

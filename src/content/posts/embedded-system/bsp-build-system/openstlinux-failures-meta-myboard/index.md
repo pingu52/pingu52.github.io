@@ -32,7 +32,7 @@ Yocto/OpenEmbedded 빌드는 패키지 수가 많고 호스트 환경·네트워
 
 ![connectivity check 실패 예시](./images/connectivity-check-error.png)
 
-빌드 자체가 아니라 “환경 점검” 단계에서 외부 접속 확인이 실패해 중단되는 케이스입니다.
+빌드에 들어가기 전 환경 점검에서 외부 접속에 실패해 멈춘 경우입니다.
 
 ---
 

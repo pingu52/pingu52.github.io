@@ -20,7 +20,7 @@ Yocto 보드에서 설정 파일을 고치고 서비스를 등록하면 당장�
 
 ## 보드의 rootfs와 빌드 입력은 다르다
 
-rootfs는 보드에서 `/`로 보이는 루트 파일시스템이다. Yocto 빌드에서는 이미지에 넣을 패키지를 선택하고 `do_rootfs`에서 루트 파일시스템을 구성한다. 실행 중인 보드의 파일을 자동으로 읽어 새 이미지를 만드는 방식은 아니다. [Yocto 이미지 생성 과정](https://docs.yoctoproject.org/6.0/overview-manual/concepts.html#image-generation)
+rootfs는 보드에서 `/`로 보이는 루트 파일시스템이다. Yocto 빌드에서는 이미지에 넣을 패키지를 선택하고 `do_rootfs`에서 루트 파일시스템을 구성한다. 따라서 보드에서 직접 바꾼 파일을 새 이미지에 넣으려면 그 변경을 빌드 입력에 반영해야 한다. [Yocto 이미지 생성 과정](https://docs.yoctoproject.org/6.0/overview-manual/concepts.html#image-generation)
 
 우선 어디를 고쳤는지 확인하자. 같은 파일 수정이라도 위치에 따라 남길 방법이 다르다.
 
@@ -54,7 +54,7 @@ MACHINE = "qemux86-64"
 INIT_MANAGER = "systemd"
 ```
 
-실제 BSP를 사용한다면 그 BSP의 `MACHINE`과 배포판 설정을 따른다. `INIT_MANAGER = "systemd"`는 init 시스템을 선택하는 설정이라 기존 제품 빌드에 예제용으로 덧붙일 값은 아니다. [Yocto init 시스템 선택](https://docs.yoctoproject.org/6.0/dev-manual/init-manager.html#using-systemd)
+실제 BSP를 사용한다면 그 BSP의 `MACHINE`과 배포판 설정을 따른다. `INIT_MANAGER = "systemd"`는 빌드 전체의 init 시스템을 선택한다. 기존 제품에는 그 제품이 사용하는 설정을 적용한다. [Yocto init 시스템 선택](https://docs.yoctoproject.org/6.0/dev-manual/init-manager.html#using-systemd)
 
 레이어에 추가할 파일은 다음과 같다. `create-layer`가 만든 `conf/layer.conf`는 그대로 사용한다.
 
@@ -111,7 +111,7 @@ RemainAfterExit=yes
 WantedBy=multi-user.target
 ```
 
-`Type=oneshot`이므로 메시지를 출력한 뒤 프로세스는 종료한다. `RemainAfterExit=yes`는 성공적으로 끝난 뒤에도 unit을 active 상태로 남기는 설정이다. 계속 실행되는 데몬을 만든 예제는 아니다. [systemd.service](https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html#Type=)
+`Type=oneshot`이므로 메시지를 출력한 뒤 프로세스는 종료한다. `RemainAfterExit=yes`는 성공적으로 끝난 뒤에도 unit을 active 상태로 남기는 설정이다. [systemd.service](https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html#Type=)
 
 세 파일을 패키지로 만들 레시피를 작성한다.
 
@@ -152,7 +152,7 @@ SYSTEMD_AUTO_ENABLE:${PN} = "enable"
 
 `SRC_URI`에 등록한 로컬 파일은 unpack 단계에서 빌드 작업 영역으로 들어온다. 이 예제는 Yocto 6.0의 `${UNPACKDIR}`를 소스 디렉터리 `${S}`로 사용한다. 오래된 예제의 `${WORKDIR}` 경로를 그대로 섞어 쓰면 버전에 따라 파일을 찾지 못할 수 있다. [UNPACKDIR와 S](https://docs.yoctoproject.org/6.0/ref-manual/variables.html#term-UNPACKDIR)
 
-`do_install`은 `${D}` 아래에 파일을 설치한다. **`${D}`는 보드의 `/`가 아니라 패키징을 준비하는 빌드 호스트의 임시 디렉터리**다. 그 뒤 `do_package`가 파일을 패키지로 나눈다. `${D}`에서 파일을 찾았다고 최종 이미지에 들어갔다고 판단하면 한 단계를 건너뛴 셈이다. [Yocto do_install](https://docs.yoctoproject.org/6.0/ref-manual/tasks.html#do-install)
+`do_install`은 `${D}` 아래에 파일을 설치한다. **`${D}`는 패키징을 준비하는 빌드 호스트의 임시 디렉터리**다. 그 뒤 `do_package`가 파일을 패키지로 나눈다. `${D}`에서 파일을 찾았다고 최종 이미지에 들어갔다고 판단하면 한 단계를 건너뛴 셈이다. [Yocto do_install](https://docs.yoctoproject.org/6.0/ref-manual/tasks.html#do-install)
 
 여기서는 스크립트와 설정만 설치하므로 `allarch`를 사용하고 컴파일은 생략한다. 보드 전용 바이너리를 설치하는 레시피에 이 설정을 그대로 가져오면 안 된다.
 
@@ -179,7 +179,7 @@ inherit packagegroup
 RDEPENDS:${PN} = "demo-runtime"
 ```
 
-packagegroup은 파일을 직접 설치하는 앱이 아니라 설치할 패키지 묶음을 정의한다. 빌드할 때 필요한 레시피는 `DEPENDS`, 패키지를 설치할 때 필요한 패키지는 `RDEPENDS`로 구분한다. [Yocto DEPENDS와 RDEPENDS](https://docs.yoctoproject.org/6.0/ref-manual/variables.html#term-DEPENDS)
+packagegroup은 함께 설치할 패키지 묶음을 정의한다. 빌드할 때 필요한 레시피는 `DEPENDS`, 패키지를 설치할 때 필요한 패키지는 `RDEPENDS`로 구분한다. [Yocto DEPENDS와 RDEPENDS](https://docs.yoctoproject.org/6.0/ref-manual/variables.html#term-DEPENDS)
 
 실습용 이미지 레시피는 `core-image-minimal`을 바탕으로 작성한다.
 
@@ -254,11 +254,11 @@ journalctl -b -u demo-runtime.service --no-pager
 
 ## 기본 설정을 넣는 일과 사용자 설정을 보존하는 일
 
-레시피의 `CONFFILES`는 패키지 관리자가 업데이트할 때 수정된 설정 파일을 다룰 수 있도록 표시하는 변수다. **새 rootfs 이미지로 파일시스템을 교체할 때 설정을 자동으로 복구해 주는 기능은 아니다.** [Yocto CONFFILES](https://docs.yoctoproject.org/6.0/ref-manual/variables.html#term-CONFFILES)
+레시피의 `CONFFILES`는 패키지 관리자가 업데이트할 때 수정된 설정 파일을 다룰 수 있도록 표시하는 변수다. **새 rootfs 이미지로 파일시스템을 교체한다면 설정을 보존할 방법도 별도로 준비해야 한다.** [Yocto CONFFILES](https://docs.yoctoproject.org/6.0/ref-manual/variables.html#term-CONFFILES)
 
 예제의 `/etc/demo-runtime.conf`는 이미지에 넣을 기본값이다. 장비에서 사용자가 바꾼 값을 펌웨어 업데이트 후에도 남겨야 한다면 저장 위치와 업데이트 절차를 별도로 정해야 한다.
 
-설정 전용 파티션이나 별도로 유지하는 볼륨에 사용자 값을 두고 앱이 이미지의 기본값과 사용자 값을 구분해 읽도록 만들 수 있다. `/var` 아래에 저장한다고 저절로 보존되는 것도 아니다. 그 경로가 어느 파일시스템에 있고 업데이트 시 어떻게 처리되는지 확인해야 한다.
+설정 전용 파티션이나 별도로 유지하는 볼륨에 사용자 값을 두고 앱이 이미지의 기본값과 사용자 값을 구분해 읽도록 만들 수 있다. `/var`의 파일도 업데이트 뒤에 남으려면 저장 위치가 유지돼야 한다. 그 경로가 어느 파일시스템에 있고 업데이트 시 어떻게 처리되는지 확인해야 한다.
 
 처음 부팅할 때 기본 설정을 만드는 방식이라면 기존 파일이 없을 때만 생성해야 한다. 매번 기본값으로 덮어쓰면 저장 공간을 분리해도 사용자 설정은 사라진다. 설정 형식이 바뀌는 업데이트에서는 기존 값을 어떻게 옮길지도 정해야 한다.
 

@@ -111,7 +111,7 @@ $$vruntime_i = vruntime_i + \frac{weight_0}{weight_i} \cdot runtime_i$$
 
 ## 4. 요약 (Summary)
 
-이번 장에서는 성능 최적화가 아닌 **비례 배분(Fair Share)** 을 위한 스케줄러들을 살펴봤습니다.
+이번 장에서는 작업마다 정해진 비율로 CPU 시간을 나눠 주는 **비례 배분(Fair Share)** 스케줄러들을 살펴봤습니다.
 
 1. **Lottery Scheduling**: **무작위성(Randomness)** 과 **티켓**을 이용해 단순하고 유연하게 몫을 배분하지만 단기적으로는 불공정할 수 있습니다.
 2. **Stride Scheduling**: 결정론적 알고리즘으로 정확한 배분을 보장하지만 신규 작업 처리가 까다롭습니다.

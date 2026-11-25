@@ -45,7 +45,7 @@ RTSP PLAY                     PASS  (응답: 200 OK)
 100 frames / 최대 8000 ms 대기 FAIL  (수집: 0 frames)
 ```
 
-이 결과로 확인할 수 있는 것은 “시험 도구의 프레임 수집 단계가 성공하지 못했다”는 사실입니다. **프레임 0개가 곧 네트워크 패킷 0개라는 뜻은 아닙니다.** 도구가 어떤 조건을 만족해야 프레임으로 집계하는지, 그 아래 계층에서 무엇을 받았는지는 별도 근거가 필요합니다.
+이 결과로 확인할 수 있는 것은 “시험 도구의 프레임 수집 단계가 성공하지 못했다”는 사실입니다. **프레임이 0개여도 패킷이 도착했을 수 있습니다.** 도구가 어떤 조건을 만족해야 프레임으로 집계하는지, 그 아래 계층에서 무엇을 받았는지는 별도 근거가 필요합니다.
 
 | 관측 지점 | 성공을 확인하는 근거 | 아직 보장하지 않는 것 |
 | --- | --- | --- |
@@ -76,11 +76,11 @@ RTSP 2.0은 RFC 7826으로 따로 정의됐으며 기본적인 버전 협상 외
 
 SOAP 인증이 끝났어도 RTSP 인증은 별개입니다. 첫 `401` 이후 인증 재요청이 성공했는지 확인해야 하며 첫 응답 한 줄만 보고 실패로 분류하지 않습니다.
 
-또한 `PLAY` 응답의 `RTP-Info`는 수신 패킷 목록이 아닙니다. 서버가 알려 준 sequence·timestamp 기준값이므로, 실제 수신 여부는 수신 측에서 확인해야 합니다. [RFC 2326 §12.33](https://www.rfc-editor.org/rfc/rfc2326.html#section-12.33)
+`PLAY` 응답의 `RTP-Info`에는 서버가 알려 준 sequence와 timestamp 기준값이 들어갑니다. 실제로 도착한 패킷은 수신 측에서 확인합니다. [RFC 2326 §12.33](https://www.rfc-editor.org/rfc/rfc2326.html#section-12.33)
 
 ## 3. SDP에서 무엇을 받을지 먼저 확인한다
 
-다음은 **H.264 unicast를 설명하기 위한 SDP 발췌**입니다. 앞 절의 실제 JPEG multicast 시험 결과를 옮긴 것이 아닙니다.
+다음은 **H.264 unicast를 설명하기 위한 SDP 발췌**입니다.
 
 ```text
 m=video 0 RTP/AVP 96
@@ -89,7 +89,7 @@ a=fmtp:96 packetization-mode=1
 a=control:trackID=0
 ```
 
-`m=`은 media 종류와 payload type을, `a=rtpmap`은 payload type과 codec·clock rate의 연결을 나타냅니다. 여기서 `90000`은 90,000 FPS가 아니라 RTP timestamp의 clock rate입니다. `96` 역시 H.264의 고정 번호가 아니므로 해당 SDP의 매핑을 확인해야 합니다. [RFC 4566 §5.14, §6](https://www.rfc-editor.org/rfc/rfc4566.html#section-5.14)
+`m=`은 media 종류와 payload type을, `a=rtpmap`은 payload type과 codec·clock rate의 연결을 나타냅니다. 여기서 `90000`은 RTP timestamp의 clock rate를 Hz로 표시한 값입니다. `96`에 대응하는 codec은 해당 SDP의 매핑에서 확인합니다. [RFC 4566 §5.14, §6](https://www.rfc-editor.org/rfc/rfc4566.html#section-5.14)
 
 위처럼 RTSP로 포트를 협상하는 SDP의 `m=`에는 `0`이 올 수 있습니다. 이를 보고 UDP 목적지 포트를 0으로 정하지 말고 `SETUP` 결과를 확인합니다. [RFC 2326 부록 C.1.2](https://www.rfc-editor.org/rfc/rfc2326.html#appendix-C.1.2)
 
@@ -105,7 +105,7 @@ a=control:trackID=0
 
 ## 4. SETUP 응답을 기준으로 수신 경로를 나눈다
 
-`rtsp://` 주소만으로 미디어가 UDP인지 TCP인지 판단할 수 없습니다. 다음은 서로 다른 `SETUP` 응답의 **Transport 헤더 예제**입니다.
+미디어가 UDP와 TCP 중 어느 쪽을 쓰는지는 RTSP 전송 협상 결과에서 확인합니다. 다음은 서로 다른 `SETUP` 응답의 **Transport 헤더 예제**입니다.
 
 ```text
 # UDP unicast
@@ -145,7 +145,7 @@ multicast는 장치 IP로 향하는 unicast 경로만 확인해서는 부족합�
 
 확인할 것은 SDP·Transport의 그룹 주소와 포트, 클라이언트의 membership, 송신 인터페이스와 TTL, 그리고 스위치의 multicast 전달 상태입니다. ONVIF multicast SDP의 `c=`에는 유효한 multicast 주소가 있어야 합니다. [ONVIF Streaming §5.2.2.5](https://www.onvif.org/specs/2606/ONVIF-Streaming-Spec-v2606.pdf)
 
-이 항목들은 이번 실패의 확정 원인이 아니라 **다음 캡처에서 확인할 후보**입니다. IGMP 패킷이 하나 보였다는 사실도 실제 미디어 전달을 보장하지 않습니다.
+이 항목들은 **다음 캡처에서 확인할 원인 후보**입니다. IGMP 패킷이 하나 보였다는 사실도 실제 미디어 전달을 보장하지 않습니다.
 
 :::tip
 TCP 성공·UDP 실패는 UDP 수신 경로를 더 볼 이유가 됩니다. 그러나 전송 방식을 바꾸면 서버 내부의 처리 경로도 달라질 수 있으므로, 그것만으로 방화벽 문제라고 확정하지는 않습니다.
@@ -174,7 +174,7 @@ ip.dst == 239.255.42.42 && (udp.port == 50000 || udp.port == 50001)
 tcp.stream eq 3
 ```
 
-필터는 한 번에 하나씩 적용합니다. 예제의 포트·그룹·stream 번호는 실제 협상값으로 바꿔야 합니다. multicast의 목적지는 장치 IP가 아니라 그룹 주소이므로 `ip.dst == 장치_IP`만으로 수신 트래픽을 찾으면 놓칠 수 있습니다.
+필터는 한 번에 하나씩 적용합니다. 예제의 포트·그룹·stream 번호는 실제 협상값으로 바꿔야 합니다. multicast 패킷은 그룹 주소를 목적지로 쓰므로 `ip.dst == 장치_IP`만으로 수신 트래픽을 찾으면 놓칠 수 있습니다.
 
 협상 내용을 확인한 뒤 필요하면 **Decode As**로 RTP 해석을 지정합니다. 임의의 UDP를 RTP로 강제 해석한 화면 자체를 증거로 삼지는 않습니다. RTP Streams와 Stream Analysis에서는 sequence, delta, jitter, 추정 손실 등을 볼 수 있지만 캡처 누락도 함께 검토해야 합니다. [Wireshark RTP Streams·Stream Analysis](https://www.wireshark.org/docs/wsug_html_chunked/ChTelRTP.html)
 
@@ -188,13 +188,13 @@ RTP 헤더에서 먼저 비교할 값은 다음과 같습니다.
 | Timestamp | 같은 시점의 미디어 조각과 다음 시점을 구분할 수 있는가? |
 | Marker | 해당 codec의 경계 규칙에 맞는가? |
 
-sequence는 패킷 순서용이지 프레임 번호가 아닙니다. timestamp도 수신 시각이나 Unix 시간이 아니라 미디어 clock에 따른 값입니다. RTCP Sender Report는 RTP와 NTP 시간의 대응 등을 제공하지만 그 존재만으로 영상 디코딩을 보장하지 않습니다. [RFC 3550 §5.1, §6.4.1](https://www.rfc-editor.org/rfc/rfc3550.html#section-5.1)
+sequence는 RTP 패킷의 순서를 표시합니다. timestamp는 미디어 clock에 맞춰 증가합니다. RTCP Sender Report는 RTP와 NTP 시간의 대응 등을 제공하지만 그 존재만으로 영상 디코딩을 보장하지 않습니다. [RFC 3550 §5.1, §6.4.1](https://www.rfc-editor.org/rfc/rfc3550.html#section-5.1)
 
 여기서 말하는 “도착”은 **그 캡처 지점에서 관찰했다**는 뜻입니다. 애플리케이션이 다른 포트나 인터페이스에 bind했다면 NIC에서 보인 패킷도 수신 콜백에는 오지 않을 수 있습니다.
 
 ## 6. RTP packet과 영상 frame은 같은 단위가 아니다
 
-제목의 “RTP frame 수신”은 RTP로 운반된 영상 프레임을 받는 과정을 뜻합니다. RTP 자체가 모든 codec에 공통인 영상 프레임 형식을 정의하는 것은 아닙니다.
+제목의 “RTP frame 수신”은 RTP로 운반된 영상 프레임을 받는 과정을 뜻합니다. 영상 프레임을 RTP 패킷에 담는 형식은 codec마다 다릅니다.
 
 ```text
 수신 소켓
@@ -225,7 +225,7 @@ JPEG의 quantization 정보 등 복원에 필요한 헤더도 확인 대상입�
 
 H.264에서는 큰 NAL unit을 FU-A로 나누거나 여러 NAL unit을 STAP-A로 묶을 수 있습니다. 따라서 RTP packet 하나, NAL unit 하나, 영상 frame 하나를 일대일로 세면 안 됩니다. [RFC 6184 §5.6–5.8](https://www.rfc-editor.org/rfc/rfc6184.html#section-5.6)
 
-H.264 RTP의 marker는 access unit의 마지막 패킷을 알리는 단서지만 앞선 조각의 완전성이나 디코딩 성공 증명은 아닙니다. SPS/PPS 같은 parameter set과 참조 영상이 필요한 상태인지도 봐야 합니다. 중간에 접속한 경우에는 디코딩을 시작할 수 있는 지점, 예를 들어 IDR picture까지의 대기도 구분합니다. [RFC 6184 §5.1, §8.5](https://www.rfc-editor.org/rfc/rfc6184.html#section-5.1)
+H.264 RTP의 marker는 access unit의 마지막 패킷을 표시합니다. 앞선 조각이 모두 도착했는지와 디코딩 결과는 각각 확인해야 합니다. SPS/PPS 같은 parameter set과 참조 영상이 필요한 상태인지도 봐야 합니다. 중간에 접속한 경우에는 디코딩을 시작할 수 있는 지점, 예를 들어 IDR picture까지의 대기도 구분합니다. [RFC 6184 §5.1, §8.5](https://www.rfc-editor.org/rfc/rfc6184.html#section-5.1)
 
 즉 “패킷은 있는데 프레임이 없다”면 네트워크만 계속 바꾸기보다 **수신 소켓 → payload 복원 → 디코더** 사이에서 어디까지 진행됐는지 확인하는 편이 낫습니다.
 
@@ -233,7 +233,7 @@ H.264 RTP의 marker는 access unit의 마지막 패킷을 알리는 단서지만
 
 직접 만든 클라이언트와 별개로 같은 스트림을 읽어 보면 비교 기준이 생깁니다. FFmpeg RTSP demuxer의 `udp`, `tcp`, `udp_multicast`는 각각 다른 미디어 전송 경로를 선택합니다. [FFmpeg RTSP 문서](https://ffmpeg.org/ffmpeg-protocols.html#rtsp)
 
-다음은 **Linux에서 인증 없는 격리 실습 스트림을 확인하는 예제**입니다. 문서용 주소를 그대로 실행하지 말고 본인이 관리하는 장치가 반환한 URI로 바꿉니다. 실제 운영 장치의 인증을 끄라는 의미는 아닙니다.
+다음은 **Linux에서 인증 없는 격리 실습 스트림을 확인하는 예제**입니다. 문서용 주소를 그대로 실행하지 말고 본인이 관리하는 장치가 반환한 URI로 바꿉니다. 운영 장치는 인증을 유지합니다.
 
 ```bash
 STREAM_URI='rtsp://192.0.2.10/live/'
@@ -250,9 +250,9 @@ UDP unicast를 비교할 때는 입력 옵션의 `tcp`만 `udp`로 바꿉니다.
 
 여기서 주의할 점은 다음과 같습니다.
 
-- `-timeout 5000000`은 RTSP의 TCP socket I/O timeout이며 단위는 마이크로초입니다. 모든 단계의 전체 실행 시간을 제한하는 옵션은 아닙니다.
-- 바깥의 GNU `timeout`은 30초 뒤 종료를 요청하고 종료되지 않으면 추가 5초 뒤 강제 종료합니다. 제한에 걸린 종료 코드 `124`나 강제 종료의 `137`은 프레임 0개라는 뜻이 아니므로 로그와 함께 읽습니다.
-- `-frames:v 100`은 출력 프레임 수의 상한입니다. 수신이 멈췄을 때 100개를 기다리는 작업이 자동으로 끝난다는 뜻은 아닙니다.
+- `-timeout 5000000`은 RTSP의 TCP socket I/O timeout이며 단위는 마이크로초입니다. 명령 전체의 제한 시간은 아래 GNU `timeout`에서 정합니다.
+- 바깥의 GNU `timeout`은 30초 뒤 종료를 요청하고 종료되지 않으면 추가 5초 뒤 강제 종료합니다. 종료 코드 `124`는 시간 제한, `137`은 강제 종료를 가리킵니다. 수신한 프레임 수는 로그에서 확인합니다.
+- `-frames:v 100`은 출력 프레임 수의 상한입니다. 수신이 멈추면 100개를 채울 때까지 계속 기다릴 수 있습니다.
 - `-c copy`를 쓰지 않으므로 디코딩 경로를 거칩니다. `frame=` 증가와 decode 오류를 함께 확인합니다. `-f null -`은 화면 표시를 시험하지는 않습니다.
 
 옵션 의미는 [FFmpeg RTSP 입력 옵션](https://ffmpeg.org/ffmpeg-protocols.html#rtsp), [FFmpeg main options](https://ffmpeg.org/ffmpeg.html#Main-options), [GNU timeout](https://www.gnu.org/software/coreutils/manual/html_node/timeout-invocation.html)을 기준으로 합니다.
@@ -283,7 +283,7 @@ PLAY 응답 시각
 마지막 frame 시각 / 마지막 keep-alive 응답 시각
 ```
 
-이는 특정 도구의 기존 출력 형식이 아니라 **추가할 진단 로그의 예시**입니다. 한 줄의 `stream started`보다 어느 단계가 멈췄는지 보여 주는 데 유용합니다.
+아래 형식은 **추가할 진단 로그의 예시**입니다. 한 줄의 `stream started`보다 어느 단계가 멈췄는지 보여 주는 데 유용합니다.
 
 ## 9. 실패 경계를 다음 행동으로 연결하기
 
@@ -298,9 +298,9 @@ PLAY 응답 시각
 | decoded frame 증가, 화면은 정지 | 렌더링, 출력 큐, timestamp 처리 |
 | 처음에는 정상, 이후 중단 | keep-alive·timeout, 마지막 송수신 시각, 서버 작업 상태 |
 
-각 행은 원인을 확정하는 표가 아니라 **다음 관측 위치를 고르는 표**입니다. 디코더가 손상된 데이터를 일부 복구할 수도 있고 캡처가 일부 패킷을 놓칠 수도 있으므로, 카운터 하나만으로 정상·비정상을 결정하지 않습니다.
+각 행에서 **다음으로 관측할 위치**를 고릅니다. 디코더가 손상된 데이터를 일부 복구할 수도 있고 캡처가 일부 패킷을 놓칠 수도 있으므로, 카운터 하나만으로 정상·비정상을 결정하지 않습니다.
 
-서버 내부의 상태·객체 수명이 어긋나서 성공 응답 후 데이터가 나오지 않는 경우도 있습니다. 그 구현 측면은 별도 글인 [비동기 서버의 수명 관리](/posts/languages-tools/c-cpp/async-server-object-lifetime/)에서 다뤘습니다. 다만 그 사례의 원인을 이번 JPEG multicast 실패에 그대로 대입한 것은 아닙니다.
+서버 내부의 상태·객체 수명이 어긋나서 성공 응답 후 데이터가 나오지 않는 경우도 있습니다. 그 구현 측면은 별도 글인 [비동기 서버의 수명 관리](/posts/languages-tools/c-cpp/async-server-object-lifetime/)에서 다뤘습니다. 이번 JPEG multicast 실패 원인은 추가 캡처로 확인해야 합니다.
 
 :::warning
 패킷 캡처에는 인증 헤더, URI의 계정·query 값, Session 식별자뿐 아니라 실제 영상과 음성이 들어갈 수 있습니다. 공개 글에는 필요한 필드만 비식별화해 옮기고 원본 캡처를 그대로 첨부하지 마세요. 암호를 URI나 명령행에 직접 넣는 예제도 피해야 합니다.
@@ -319,7 +319,7 @@ RTSPS/TLS 또는 SRTP로 보호된 구간은 복호화 자료 없이 같은 수�
 3. RTP packet 도착과 codec 데이터 복원, 디코딩을 따로 기록합니다.
 4. 처음부터 안 오는 문제와 일정 시간 뒤 끊기는 문제를 구분합니다.
 
-`200 OK`는 중요한 성공 신호입니다. 다만 영상 수신의 마지막 성공 신호는 아닙니다. **어디까지 성공했는지 정확히 말할 수 있어야, 다음에 볼 로그와 패킷도 정확해집니다.**
+`200 OK`를 받으면 RTSP 요청의 성공을 확인한 셈입니다. 영상 수신은 RTP 패킷과 디코딩 결과까지 확인합니다. **어디까지 성공했는지 정확히 말할 수 있어야, 다음에 볼 로그와 패킷도 정확해집니다.**
 
 ## 참고 자료
 

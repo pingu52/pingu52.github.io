@@ -12,7 +12,7 @@ draft: false
 
 지난 시간까지 우리는 SSD와 FTL을 다뤘습니다. 이번 장은 스토리지 신뢰성의 마지막 퍼즐인 **데이터 무결성(data integrity)** 입니다.
 
-디스크 고장은 단순한 fail-stop만 있는 것이 아닙니다. 현대 스토리지는 부분 실패(fail-partial)를 자주 보입니다.
+디스크가 아예 멈추는 고장(fail-stop)도 있지만, 현대 스토리지에서는 일부 기능이나 데이터만 손상되는 부분 실패(fail-partial)도 자주 나타납니다.
 
 - **잠재적 섹터 오류(Latent Sector Error, LSE)**: 해당 블록을 읽으려 하면 디스크가 에러를 반환
 - **데이터 손상(block corruption)**: 에러는 없는데 데이터 내용이 달라져서 조용히 틀린 값을 반환
@@ -162,7 +162,7 @@ lost write는 더 까다롭습니다.
 
 ## 9. 오버헤드
 
-체크섬은 공짜가 아닙니다. 공간과 시간 오버헤드가 있습니다.
+체크섬을 저장하려면 공간이 들고 계산과 검증에는 시간이 듭니다.
 
 ### 9.1 공간
 
@@ -185,7 +185,7 @@ $$
 
 ## 10. 요약
 
-- 디스크는 fail-stop만 있는 것이 아니라 fail-partial 실패 모드도 가진다
+- 디스크 고장에는 fail-stop과 fail-partial이 있다
 - LSE는 탐지가 쉽고 복구는 redundancy로 해결한다
 - corruption은 탐지가 핵심이며 체크섬이 표준 해법이다
 - misdirected write는 checksum에 physical ID를 포함해 탐지할 수 있다

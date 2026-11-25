@@ -18,7 +18,7 @@ category: "Server & Infra"
 
 `pnpm audit` 기준으로는 취약점을 모두 없앨 수 있었지만 FOSSA 화면에는 여전히 오래된 하위 의존성들이 남아 있었습니다. 특히 `ansi-regex`, `chalk`, `commander`, `cssnano`, `ejs`, `entities` 같은 패키지들이 계속 보였습니다.
 
-그래서 이번에는 단순 override가 아니라, 블로그의 기반 프레임워크인 Astro를 7로 올리고 pnpm도 11로 올리는 방식으로 의존성 트리를 한 번 정리했습니다.
+이번에는 블로그의 기반인 Astro를 7로, 패키지 관리자인 pnpm을 11로 올려 의존성 트리를 정리했습니다.
 
 ## 목표
 
@@ -206,7 +206,7 @@ allowBuilds:
   esbuild: true
 ```
 
-여기서는 `onlyBuiltDependencies`가 아니라 `allowBuilds`를 써야 합니다.
+이 버전에서는 빌드를 허용할 패키지를 `allowBuilds`에 적습니다.
 
 ## minimum release age 정책에 걸린 경우
 
