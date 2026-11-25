@@ -14,13 +14,13 @@ tags:
 category: "Virtualization"
 ---
 
-Windows에서는 ChatGPT/Codex 앱을 사용하고 실제 개발은 WSL의 Codex CLI로 진행하다 보니 한 가지 불편한 점이 생겼습니다.
+Windows에서는 ChatGPT/Codex 앱을, WSL에서는 Codex CLI를 썼습니다.
 
-**양쪽에서 작업한 대화 기록을 하나의 최근 목록으로 보고 싶었다.**
+**양쪽에서 나눈 대화를 한 목록에서 이어 보고 싶었습니다.**
 
 같은 OpenAI 계정으로 로그인했으니 자동으로 공유될 것 같았지만 기본 상태에서는 그렇지 않았습니다. Windows 앱과 WSL CLI가 서로 다른 `.codex` 디렉터리를 사용하기 때문입니다.
 
-이번 글에서는 다음 과정을 실제로 진행하며 확인한 내용을 정리합니다.
+두 환경의 기록을 합치면서 아래 순서로 작업했습니다.
 
 - Windows 앱의 Codex Agent를 WSL로 전환
 - Windows와 WSL이 하나의 `CODEX_HOME` 사용
@@ -39,7 +39,7 @@ Codex 내부 DB 스키마는 버전에 따라 달라질 수 있습니다. 앱과
 
 ## 검증 환경
 
-이번 작업을 진행한 환경은 다음과 같습니다.
+아래 표는 동기화를 시험할 때 쓴 환경입니다.
 
 | 구분 | 버전 |
 | --- | --- |
@@ -412,7 +412,7 @@ CLI에서 새 세션을 만든 시점에 Windows 앱이 이미 실행 중이라�
 7. sync watermark와 catalog revision을 갱신합니다.
 8. `PRAGMA quick_check`와 활성 행 수를 확인합니다.
 
-실제 복구 결과는 다음과 같았습니다.
+복구 후 카탈로그에서 활성 스레드 10개를 확인했고, `quick_check`는 `ok`를 반환했습니다.
 
 ```text
 displayable_threads=10

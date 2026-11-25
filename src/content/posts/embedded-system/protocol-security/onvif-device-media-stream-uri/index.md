@@ -451,7 +451,7 @@ Service를 호출하고 stream URI를 저장할 때는 다음 정보를 민감�
 - ProfileToken과 stream URI는 장치가 반환한 값을 그대로 사용하며 Client가 token이나 URI path를 조립하지 않습니다.
 - `GetStreamUri`가 성공하면 이어서 영상이 재생되는지 확인합니다. 8절의 multicast/UDP 시험에서는 RTSP `PLAY`까지 통과하고도 frame 수신은 실패했습니다.
 
-다음 글에서는 반환된 URI로 RTSP `DESCRIBE`, `SETUP`, `PLAY`를 수행하고 RTP packet과 실제 frame 수신을 구분해 확인하겠습니다.
+다음 글에서는 이 URI로 RTSP `DESCRIBE`, `SETUP`, `PLAY`를 보냅니다. 이후 RTP 패킷이 도착한 시점과 영상 프레임을 복원한 시점을 각각 확인합니다.
 
 ## 참고 자료
 

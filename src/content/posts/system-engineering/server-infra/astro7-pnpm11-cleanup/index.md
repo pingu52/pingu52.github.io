@@ -399,12 +399,10 @@ pnpm why commander
 
 다만 dependency cleanup보다 변경 범위를 잘 자르는 일이 더 중요합니다. `@swup/astro`를 제거하면 dependency tree는 더 깨끗해질 수 있지만 페이지 전환 UX가 바뀝니다. 그래서 이번에는 Astro 7과 pnpm 11까지만 처리하고 swup 제거 여부는 나중에 별도 작업으로 남겨두었습니다.
 
-결과적으로 현재 상태는 다음과 같습니다.
+Astro 7과 pnpm 11로 옮긴 뒤 확인한 결과입니다.
 
 - Astro 7 적용 완료
 - pnpm 11 적용 완료
 - pnpm audit 취약점 0개
 - 기존 페이지 전환 유지
 - FOSSA에 남은 swup 계열 transitive dependency는 별도 검토 대상으로 분리
-
-이 정도면 이번 PR의 경계가 꽤 깔끔하게 잡혔다고 볼 수 있습니다.
