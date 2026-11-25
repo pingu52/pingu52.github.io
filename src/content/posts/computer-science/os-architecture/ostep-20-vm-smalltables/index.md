@@ -57,7 +57,7 @@ Linear Page Table이 큰 이유는 **사용하지 않는 가상 주소 영역까
 
 이때 Segmentation의 Base/Bounds 개념을 재활용합니다.
 
-- **Base**: “세그먼트 자체의 시작”이 아니라 **해당 세그먼트 Page Table의 물리 주소**
+- **Base**: **해당 세그먼트 Page Table의 시작 물리 주소**
 - **Bounds**: 해당 Page Table의 끝(=유효한 페이지 개수)
 
 ### 장점
@@ -66,7 +66,7 @@ Linear Page Table이 큰 이유는 **사용하지 않는 가상 주소 영역까
 
 ### 단점: External Fragmentation(다시 등장)
 
-이 방식은 Page Table이 “페이지 단위”가 아니라 **PTE 개수 단위로(가변 크기)** 메모리를 차지하게 됩니다.
+이 방식에서는 **PTE 개수에 따라** Page Table이 차지하는 메모리 크기가 달라집니다.
 즉, 물리 메모리에서 **딱 맞는 빈 공간을 찾아 넣는 문제**가 생기며 결과적으로 **External Fragmentation 성격의 복잡성**을 다시 불러옵니다.
 
 또한 문맥 교환 시 세그먼트별 Base/Bounds도 함께 교체되어야 하므로 구현/관리 부담이 늘어납니다.
@@ -237,7 +237,7 @@ Multi-level과는 다른 방향으로, 공간을 더 줄이는 접근이 **Inver
 
 - “프로세스마다 Page Table”을 두는 대신,
 - 시스템에 **단 하나의 Page Table**만 두고
-- 엔트리는 “가상 페이지”가 아니라 **물리 페이지(Physical Page)마다 하나씩** 둡니다.
+- 엔트리는 **물리 페이지(Physical Page)마다 하나씩** 둡니다.
 
 즉, 각 엔트리는 대략 다음 정보를 담습니다.
 

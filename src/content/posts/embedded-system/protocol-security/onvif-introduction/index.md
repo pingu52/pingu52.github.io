@@ -46,7 +46,7 @@ IP 카메라와 VMS(Video Management System), NVR(Network Video Recorder)이 모
 
 ONVIF는 2008년 Axis Communications, Bosch Security Systems, Sony Corporation이 설립한 포럼입니다. 현재 범위는 네트워크 비디오뿐 아니라 출입 통제와 분석 메타데이터 등으로 확장되어 있습니다.
 
-ONVIF는 특정 카메라 제품이나 하나의 프로그램 이름이 아닙니다. ONVIF는 표준을 만들고 그 표준을 구현한 Device와 Client가 공통된 방식으로 통신할 수 있도록 인터페이스를 정의합니다.
+ONVIF는 표준을 만들고 그 표준을 구현한 Device와 Client가 공통된 방식으로 통신할 수 있도록 인터페이스를 정의합니다.
 
 ## 2. ONVIF가 표준화하는 것과 하지 않는 것
 
@@ -58,10 +58,10 @@ ONVIF는 네트워크 경계에서 Device와 Client가 주고받는 요청, 응�
 | ONVIF가 재사용하는 것 | XML, SOAP, WSDL, HTTP, WS-Discovery, RTSP, RTP 등 기존 표준 |
 | ONVIF가 보장하지 않는 것 | 화질과 성능 같은 제품 품질, 모든 제조사 확장 기능, 설치 환경 전체의 보안성 |
 
-따라서 제품 설명에 ONVIF가 적혀 있다고 해서 모든 ONVIF 기능을 제공한다는 뜻은 아닙니다. 어떤 **ONVIF Profile**을 지원하는지와 필요한 기능이 해당 Profile의 필수 또는 조건부 항목에 포함되는지까지 확인해야 합니다.
+제품마다 지원하는 ONVIF 기능이 다릅니다. 어떤 **ONVIF Profile**을 지원하는지와 필요한 기능이 해당 Profile의 필수 또는 조건부 항목에 포함되는지까지 확인해야 합니다.
 
 :::warning
-ONVIF 적합성은 상호 운용을 위한 인터페이스 범위를 의미합니다. 제품의 화질, 안정성, 보안 수준까지 인증한다는 의미는 아닙니다.
+ONVIF 적합성은 상호 운용을 위한 인터페이스 범위를 의미합니다. 제품의 화질과 안정성, 보안 수준은 별도로 평가해야 합니다.
 :::
 
 ## 3. Device와 Client
@@ -103,7 +103,7 @@ ONVIF를 이해하기 어려운 이유 중 하나는 통신 과정 전체가 하
 
 Core Specification은 장치 발견, 장치 관리, 이벤트 프레임워크를 정의합니다. 미디어 설정, PTZ, Imaging, Analytics, Recording과 같은 기능은 각각 별도의 Service Specification으로 나뉩니다.
 
-이 구조는 운영체제의 system call처럼 하나의 거대한 요청으로 모든 일을 처리하는 방식이 아닙니다. Device가 제공하는 Service를 확인하고 목적에 맞는 Service의 연산을 차례로 호출하는 방식에 가깝습니다.
+Device가 제공하는 Service를 확인하고 목적에 맞는 연산을 차례로 호출합니다.
 
 ## 5. 장치를 찾는 WS-Discovery
 
@@ -126,7 +126,7 @@ WS-Discovery의 ad hoc mode에서는 Client가 UDP multicast로 `Probe` 메시�
 ONVIF Device는 discoverable mode일 때 `Probe`를 수신하고 일치하면 Device Service에 접근할 수 있는 주소를 `XAddrs`에 담아 응답합니다.
 
 :::note
-WS-Discovery는 일반적인 IPv4 broadcast가 아니라 multicast를 사용합니다. 라우터나 VLAN 경계를 넘어 multicast가 전달된다고 가정할 수 없으므로, IP 통신은 가능하지만 자동 검색만 되지 않는 상황도 별도로 구분해야 합니다.
+WS-Discovery의 IPv4 검색 요청은 multicast로 보냅니다. 라우터나 VLAN 경계를 넘어 multicast가 전달된다고 가정할 수 없으므로, IP 통신은 가능하지만 자동 검색만 되지 않는 상황도 별도로 구분해야 합니다.
 :::
 
 ## 6. SOAP와 WSDL로 장치를 제어한다
@@ -223,7 +223,7 @@ IP 비디오를 공부할 때 자주 만나는 Profile은 다음과 같습니다
 
 2026년 8월 현재 Profile S는 지원 종료(deprecation) 절차가 진행 중입니다. 2027년 3월 31일 이후에는 제조사가 새 제품이나 새 firmware/software version을 Profile S 적합 제품으로 제출할 수 없습니다.
 
-이 날짜에 기존 Profile S 시스템이 동작을 멈춘다는 뜻은 아닙니다. ONVIF는 배포된 Profile S 기반 시스템의 동작에는 영향이 없으며 등록된 특정 software/firmware version의 적합성도 제조사가 선언을 철회하기 전까지 유지된다고 설명합니다. 다만 지원 종료의 배경이 현재 권고에 맞지 않는 username token authentication인 만큼, 새 제품이나 구현을 검토할 때는 Profile T와 TLS/HTTPS 등 필요한 보안 기능을 함께 확인해야 합니다.
+ONVIF는 배포된 Profile S 기반 시스템의 동작에는 영향이 없으며 등록된 특정 software/firmware version의 적합성도 제조사가 선언을 철회하기 전까지 유지된다고 설명합니다. 다만 지원 종료의 배경이 현재 권고에 맞지 않는 username token authentication인 만큼, 새 제품이나 구현을 검토할 때는 Profile T와 TLS/HTTPS 등 필요한 보안 기능을 함께 확인해야 합니다.
 
 접근 통제 영역에는 Profile A, C, D가 있지만 이번 네트워크 비디오 개념편에서는 다루지 않습니다.
 
@@ -250,7 +250,7 @@ Media Profile에는 video source와 encoder, audio, PTZ, analytics, metadata con
 - 낮은 bitrate의 sub stream용 Media Profile
 - metadata와 analytics configuration이 포함된 Media Profile
 
-이 Media Profile들이 존재한다고 해서 제품이 ONVIF Profile T나 M에 적합하다는 뜻은 아닙니다. 제품 적합성 Profile과 장치 내부의 stream configuration을 반드시 구분해야 합니다.
+제품의 ONVIF Profile T나 M 적합성은 별도로 확인합니다. 제품 적합성 Profile과 장치 내부의 stream configuration을 반드시 구분해야 합니다.
 
 ## 11. “ONVIF 지원”을 볼 때 확인할 것
 
@@ -264,11 +264,11 @@ Media Profile에는 video source와 encoder, audio, PTZ, analytics, metadata con
 
 “ONVIF compatible”이라는 제조사의 표현과 공식 Profile conformant product는 같은 의미로 단정할 수 없습니다. ONVIF 공식 설명에 따르면 Profile 적합성을 주장하려는 제품은 ONVIF test tool을 통과해야 하며 회원사가 정해진 적합성 절차에 따라 등록합니다.
 
-또한 ONVIF Profile 적합 제품끼리라도 모든 조합과 제조사 고유 기능이 동일하게 동작한다고 보장되는 것은 아닙니다. Profile이 정의한 범위와 실제 필요한 기능의 교집합을 확인해야 합니다.
+같은 ONVIF Profile에 적합해도 제품 조합에 따라 제조사 고유 기능의 동작이 달라질 수 있습니다. Profile이 정의한 범위와 실제 필요한 기능의 교집합을 확인해야 합니다.
 
 ## 12. 정리
 
-- ONVIF는 IP 카메라 영상만을 위한 단일 streaming protocol이 아니라, IP 기반 물리 보안 제품의 상호 운용을 위한 network interface specification 모음입니다.
+- ONVIF는 IP 기반 물리 보안 제품이 함께 동작하도록 정한 네트워크 인터페이스 명세 모음입니다.
 - Device는 Service를 제공하고 Client는 정해진 Web Service 연산으로 이를 요청합니다.
 - WS-Discovery는 Device를 찾고 SOAP/WSDL 기반 Service는 장치와 미디어를 설정합니다.
 - RTSP는 streaming session을 제어하고 실제 media는 주로 RTP로 전달됩니다.

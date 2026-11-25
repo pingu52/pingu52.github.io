@@ -35,8 +35,7 @@ FOSSA에서 확인한 이슈는 크게 두 종류였습니다.
 pnpm audit
 ```
 
-모든 항목이 직접 설치한 패키지에서 나온 것은 아니었습니다.
-대부분은 다음처럼 여러 단계 아래에 있는 transitive dependency에서 발생했습니다.
+대부분의 경고는 직접 설치한 패키지가 몇 단계 아래에서 끌어오는 간접 의존성에서 나왔습니다.
 
 ```text
 @swup/astro
@@ -47,13 +46,11 @@ pnpm audit
             └─ serialize-javascript
 ```
 
-즉, 단순히 `package.json`에 보이는 dependency만 업데이트한다고 바로 해결되는 구조가 아니었습니다.
+예를 들어 `serialize-javascript` 경고를 처리하려면 `@swup/astro`에서 시작해 어느 패키지가 해당 버전을 끌어오는지 추적해야 했습니다.
 
 ## 1차 목표
 
-이번 작업의 목표는 모든 FOSSA 항목을 한 번에 정리하는 것이 아니었습니다.
-
-우선 main에 안전하게 들어갈 수 있는 1차 범위를 정했습니다.
+첫 PR은 로컬 취약점 검사와 Astro 6 전환을 마치고 main에 반영할 수 있는 범위로 잡았습니다.
 
 - pnpm audit 기준 취약점 제거
 - Astro 6으로 dependency 업데이트
@@ -201,13 +198,11 @@ import { render } from "astro:content";
 const { Content, headings } = await render(entry);
 ```
 
-이 변경은 post page뿐 아니라 card에서 frontmatter를 렌더링하던 부분에도 적용했습니다.
+글 본문 페이지와 카드에서 frontmatter를 렌더링하는 코드에 같은 변경을 적용했습니다.
 
 ## 이미지 경로 문제
 
-가장 헷갈렸던 부분은 이미지 경로였습니다.
-
-블로그 글 구조가 전부 같은 방식이 아니었기 때문입니다.
+이미지 경로를 구할 때는 글을 저장하는 두 가지 방식이 문제였습니다.
 
 ```text
 src/content/posts/computer-science/os-architecture/ostep-45-file-integrity/index.md
@@ -333,7 +328,7 @@ pnpm audit
 `postsCollection`에 억지로 넓은 타입을 붙이면 `post.data`가 전부 `unknown`으로 무너졌습니다.
 
 그래서 이 프로젝트에서는 `--isolatedDeclarations`를 제거하는 쪽으로 정리했습니다.
-블로그는 library가 아니라 Astro app이고 현재 script도 `--noEmit`이라 선언 파일을 만들지 않습니다.
+블로그는 Astro 앱으로 배포합니다. 타입 검사 스크립트는 `--noEmit`으로 실행해 검사 결과만 확인합니다.
 
 ```json
 {
@@ -370,14 +365,14 @@ pnpm audit
 The requested module '@utils/post-utils' does not provide an export named 'getPostSlug'
 ```
 
-확인해보니 테스트 loader가 실제 파일이 아니라 stub을 보고 있었습니다.
+테스트 loader가 읽는 경로를 따라가 보니 stub이었습니다.
 
 ```text
 tests/ts-loader.mjs
 └─ @utils/post-utils -> tests/stubs/post-utils.ts
 ```
 
-그래서 실제 코드가 아니라 `tests/stubs/post-utils.ts`에 export를 추가할 필요가 있었습니다.
+그래서 loader가 읽는 `tests/stubs/post-utils.ts`에 export를 추가할 필요가 있었습니다.
 
 ```ts
 export function getPostSlug(post: { id: string }): string {
@@ -426,8 +421,7 @@ pnpm audit
 pnpm test
 ```
 
-이번 작업에서 중요한 것은 `pnpm audit`만 보는 것이 아니었습니다.
-Dependency를 올리면서 프레임워크 API까지 같이 바뀌었기 때문에, build와 content rendering까지 같이 확인할 필요가 있었습니다.
+의존성을 올리면서 프레임워크 API도 바뀌었습니다. `pnpm audit`으로 취약점을 확인하고, 사이트를 빌드해 본문과 카드가 렌더링되는지도 점검해야 했습니다.
 
 ## PR 범위 분리
 

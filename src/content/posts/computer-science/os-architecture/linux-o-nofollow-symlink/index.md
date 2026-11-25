@@ -102,7 +102,7 @@ open: Too many levels of symbolic links
 open succeeded
 ```
 
-두 번째 메시지는 `ELOOP`의 문자열 표현이다. 링크를 반복해서 따라가 한도에 도달한 경우에도 같은 오류가 발생하므로 메시지만 보고 실제 링크 순환이 있다고 단정할 수는 없다. 여기서는 `file-link` 하나를 마지막 요소에서 거부한 결과다.
+두 번째 메시지는 `ELOOP`의 문자열 표현이다. 링크를 따라가는 횟수가 한도에 이르러도 같은 오류가 발생한다. 이 예제에서는 마지막 요소인 `file-link` 하나만으로 오류가 났다.
 
 세 번째 호출은 성공했다. `O_NOFOLLOW`가 있어도 `dir-link`를 따라가 `data/plain.txt`를 연다. 경로 중간에 링크가 없다는 보장은 얻지 못했다.
 
@@ -197,7 +197,7 @@ openat2: Too many levels of symbolic links
 :::note
 두 C 예제는 x86-64 Linux(WSL2), GCC 13.3.0에서 컴파일하고 실행했다. 일반 파일, 마지막 요소의 링크, 중간 디렉터리의 링크에 대한 결과를 확인했으며 `O_PATH` fd의 링크 정보 조회와 읽기 거부도 별도로 확인했다.
 
-예제 파일은 직접 만든 임시 디렉터리에만 두었다. 커널의 파일 접근 격리 전체를 검증하는 프로그램은 아니다.
+위 결과는 직접 만든 임시 디렉터리에서 예제의 파일과 링크로 확인한 동작에 한정된다.
 :::
 
 파일·디렉터리와 fd의 기본 개념은 [Files and Directories 글](/posts/computer-science/os-architecture/ostep-39-file-intro/)에서 이어서 볼 수 있다.

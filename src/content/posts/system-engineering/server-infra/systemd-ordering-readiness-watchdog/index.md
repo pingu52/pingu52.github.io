@@ -16,7 +16,7 @@ lang: "ko"
 
 **시작 순서, 초기화 완료, 동작 중 진행 상태를 나눠 봐야 한다.** `After=`로 순서를 정해도 앱 내부의 초기화가 끝났는지는 알 수 없다. `Restart=on-failure`를 넣어도 종료하지 않고 멈춘 프로세스를 그것만으로 찾아내지는 못한다.
 
-이 글은 systemd 255와 Python 3.11을 사용하는 WSL2의 사용자 서비스 관리자에서 확인한 예제로 설명한다. 실제 보드의 장치 초기화나 하드웨어 watchdog을 시험한 결과는 아니다. 서비스를 rootfs에 설치하는 레시피는 [Yocto rootfs 수정사항을 레시피로 관리하기](/posts/embedded-system/bsp-build-system/yocto-rootfs-recipes/)에서 다뤘다.
+이 글은 systemd 255와 Python 3.11을 사용하는 WSL2의 사용자 서비스 관리자에서 확인한 예제로 설명한다. 실제 보드의 장치 초기화와 하드웨어 watchdog은 별도 시험이 필요하다. 서비스를 rootfs에 설치하는 레시피는 [Yocto rootfs 수정사항을 레시피로 관리하기](/posts/embedded-system/bsp-build-system/yocto-rootfs-recipes/)에서 다뤘다.
 
 ## 먼저 어떤 상태를 기다리는지 정한다
 
@@ -63,7 +63,7 @@ After=demo-setup.service
 
 `Type=exec`는 실행 파일을 찾지 못하거나 실행할 수 없는 문제를 시작 실패로 다루는 데 도움이 된다. 하지만 실행에 성공했다는 사실이 소켓 바인딩, 설정 로드, 장치 초기화의 완료를 뜻하지는 않는다. [systemd.service의 Type](https://www.freedesktop.org/software/systemd/man/255/systemd.service.html#Type=)
 
-`Type=notify`를 쓰면 앱이 준비를 마친 뒤 알림을 보낼 수 있다. 그러면 이 서비스 뒤로 순서를 지정한 unit도 그 시작 완료를 기다린다. 알림을 너무 일찍 보내면 기다리는 쪽도 일찍 진행한다. `READY=1`은 서비스 관리자가 대신 검사해 주는 건강 진단이 아니다.
+`Type=notify`를 쓰면 앱이 준비를 마친 뒤 알림을 보낼 수 있다. 그러면 이 서비스 뒤로 순서를 지정한 unit도 그 시작 완료를 기다린다. 알림을 너무 일찍 보내면 기다리는 쪽도 일찍 진행한다. `READY=1`을 보내기 전에 준비 상태를 판단하는 쪽은 앱이다.
 
 `After=network-online.target`도 같은 관점으로 읽어야 한다. 로컬 네트워크 초기화와 원격 서버의 응답 가능 여부는 다르다. 원격 API가 꼭 필요하다면 연결 실패 처리와 재시도 정책은 앱에도 있어야 한다. [네트워크 준비 상태의 의미](https://systemd.io/NETWORK_ONLINE/)
 
@@ -118,9 +118,9 @@ while True:
     notify("WATCHDOG=1")
 ```
 
-`NOTIFY_SOCKET`은 서비스 관리자가 전달한 Unix 소켓 주소다. `@`로 시작하면 추상 소켓 주소로 바꿔 연결한다. `WATCHDOG_USEC`는 초가 아니라 마이크로초이므로, 위 코드는 그 절반을 초로 환산한다. 이 예제에서는 알림 간격을 최대 1초로 제한한다. [알림 프로토콜](https://www.freedesktop.org/software/systemd/man/latest/sd_notify.html), [watchdog 환경 변수](https://www.freedesktop.org/software/systemd/man/latest/sd_watchdog_enabled.html)
+`NOTIFY_SOCKET`은 서비스 관리자가 전달한 Unix 소켓 주소다. `@`로 시작하면 추상 소켓 주소로 바꿔 연결한다. `WATCHDOG_USEC`의 단위는 마이크로초이므로 위 코드는 그 절반을 초로 환산한다. 이 예제에서는 알림 간격을 최대 1초로 제한한다. [알림 프로토콜](https://www.freedesktop.org/software/systemd/man/latest/sd_notify.html), [watchdog 환경 변수](https://www.freedesktop.org/software/systemd/man/latest/sd_watchdog_enabled.html)
 
-이 프로그램은 systemd가 알림 소켓과 watchdog 환경 변수를 제공하는 조건을 전제로 한다. 터미널에서 `python3 worker.py`만 실행하는 예제는 아니다. C/C++ 데몬에서는 직접 소켓을 구현하기보다 `sd_notify()`와 `sd_watchdog_enabled()` 같은 libsystemd API를 사용하는 편이 낫다.
+이 프로그램은 systemd 서비스로 실행한다. systemd가 제공하는 알림 소켓과 watchdog 환경 변수를 사용하기 때문이다. C/C++ 데몬에서는 직접 소켓을 구현하기보다 `sd_notify()`와 `sd_watchdog_enabled()` 같은 libsystemd API를 사용하는 편이 낫다.
 
 ## 임시 사용자 서비스로 실행한다
 
@@ -142,7 +142,7 @@ systemd-run --user --no-block --collect \
   /usr/bin/python3 "$PWD/worker.py"
 ```
 
-`--no-block`는 시작 작업이 끝날 때까지 명령을 기다리지 않게 한다. 따라서 초기화 중인 상태를 관찰할 수 있다. 명령이 반환됐다는 사실만으로 서비스 준비가 완료된 것은 아니다. `--collect`는 종료 후 불필요한 임시 unit을 정리하도록 한다. [systemd-run](https://www.freedesktop.org/software/systemd/man/255/systemd-run.html)
+`--no-block`는 시작 작업이 끝날 때까지 명령을 기다리지 않게 한다. 따라서 초기화 중인 상태를 관찰할 수 있다. 서비스가 준비됐는지는 unit의 상태로 확인한다. `--collect`는 종료 후 불필요한 임시 unit을 정리하도록 한다. [systemd-run](https://www.freedesktop.org/software/systemd/man/255/systemd-run.html)
 
 ```bash
 systemctl --user show blog-readiness-demo.service \
@@ -185,7 +185,7 @@ systemctl --user stop blog-readiness-demo.service
 
 예를 들어 프레임 처리 파이프라인을 감시한다면 최근 작업 완료 시각이나 각 단계의 진행 상태를 확인한 뒤 heartbeat를 보낼 수 있다. 입력이 원래 없는 상태와 처리가 교착된 상태도 구분해야 한다. 단순히 프레임이 잠시 들어오지 않았다는 이유로 서비스를 계속 재시작하면 정상적인 대기까지 실패로 취급하게 된다.
 
-서비스 watchdog과 하드웨어 watchdog도 별개다. 여기서 확인한 `WatchdogSec=`는 프로세스가 알림을 보내는지 감시한다. 시스템 전체의 멈춤에 대응하는 `/dev/watchdog`와 `RuntimeWatchdogSec=` 설정까지 시험한 것은 아니다. [시스템 watchdog 설정](https://www.freedesktop.org/software/systemd/man/255/systemd-system.conf.html#RuntimeWatchdogSec=)
+이번 시험에서는 서비스의 `WatchdogSec=`로 프로세스가 알림을 보내는지 확인했다. 시스템 전체의 멈춤에 대응하는 하드웨어 watchdog은 `/dev/watchdog`와 `RuntimeWatchdogSec=`를 통해 별도로 설정한다. [시스템 watchdog 설정](https://www.freedesktop.org/software/systemd/man/255/systemd-system.conf.html#RuntimeWatchdogSec=)
 
 ## 확인한 범위
 

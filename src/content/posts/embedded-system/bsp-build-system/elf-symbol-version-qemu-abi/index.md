@@ -40,7 +40,7 @@ readelf --dyn-syms --wide "$libcrypto"    # 제공하는 심볼과 버전
 
 ## SONAME과 함수가 같아도 교체가 실패하는 예제
 
-빈 디렉터리에서 아래 Bash 예제를 실행한다. GNU ld와 glibc를 사용하는 Linux 환경이 기준이다. 작은 공유 라이브러리 두 개에 같은 함수와 같은 SONAME을 주고 **버전 노드 이름만** 바꾼다. OpenSSL 릴리스 간 결함을 재현하는 실험이 아니라 어떤 ELF 정보가 로더의 판단을 바꾸는지 보기 위한 대조군이다.
+빈 디렉터리에서 아래 Bash 예제를 실행한다. GNU ld와 glibc를 사용하는 Linux 환경이 기준이다. 작은 공유 라이브러리 두 개에 같은 함수와 같은 SONAME을 주고 **버전 노드 이름만** 바꾼다. 이렇게 두 파일을 만들면 로더가 심볼 버전을 어디서 검사하는지 따로 확인할 수 있다.
 
 ```bash
 compiler=(cc)
@@ -69,7 +69,7 @@ done
 "${compiler[@]}" app.c -Loriginal -l:libcodec.so.1 -o app
 ```
 
-`app`은 한 번만 빌드했다. `-Loriginal`은 링크할 때의 검색 디렉터리다. 실행할 때도 반드시 그 디렉터리를 사용한다는 뜻은 아니다. x86-64 Linux에서 실행 시 검색 경로만 바꿔 다음 결과를 얻었다.
+`app`은 한 번만 빌드했다. `-Loriginal`은 링크할 때의 검색 디렉터리다. 실행할 때는 동적 로더가 자신의 검색 순서에 따라 파일을 고른다. x86-64 Linux에서 실행 시 검색 경로만 바꿔 다음 결과를 얻었다.
 
 ```bash
 LD_LIBRARY_PATH="$PWD/original" LD_BIND_NOW=1 ./app
@@ -96,7 +96,7 @@ qemu-aarch64 -L "$ROOTFS" -E LD_BIND_NOW=1 \
     -E LD_LIBRARY_PATH="$PWD/replacement" ./app
 ```
 
-AArch64 GCC 13.3.0과 QEMU 8.2.7로 실행해 원본은 `level=7`, 교체본은 `CODEC_1` 누락으로 종료되는 것을 확인했다. QEMU의 `-L`은 타깃 ELF 인터프리터 경로에 적용할 접두 경로이며, `-E`는 실행할 프로그램의 환경 변수를 설정한다. user-mode QEMU는 호스트 커널로 시스템 호출을 전달한다. 전체 보드나 파일시스템 격리를 재현하는 방식은 아니다. [QEMU user-mode 문서](https://www.qemu.org/docs/master/user/main.html)
+AArch64 GCC 13.3.0과 QEMU 8.2.7로 실행해 원본은 `level=7`, 교체본은 `CODEC_1` 누락으로 종료되는 것을 확인했다. QEMU의 `-L`은 타깃 ELF 인터프리터 경로에 적용할 접두 경로이며, `-E`는 실행할 프로그램의 환경 변수를 설정한다. user-mode QEMU는 호스트 커널로 시스템 호출을 전달한다. 보드 부팅과 파일시스템 격리는 별도 환경에서 시험해야 한다. [QEMU user-mode 문서](https://www.qemu.org/docs/master/user/main.html)
 
 예제에서는 두 라이브러리를 번갈아 선택하려고 `LD_LIBRARY_PATH`를 일부러 지정했다. **출하 이미지 검사에서는 서비스의 평소 검색 경로를 먼저 그대로 사용해야 한다.** SDK 라이브러리 경로를 앞에 추가하면 이미지에서 빠진 파일이 SDK 경로로 채워진다. 타깃 glibc 로더의 `--list`로 선택 경로를 확인하고, 필요한 경우 게스트에 `LD_DEBUG=libs,versions`를 지정해 탐색·버전 검사 기록을 본다. [glibc 동적 로더 실행](https://sourceware.org/glibc/manual/latest/html_node/Dynamic-Linker-Invocation.html)
 

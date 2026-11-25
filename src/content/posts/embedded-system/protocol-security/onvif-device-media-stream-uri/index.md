@@ -21,7 +21,7 @@ draft: false
 다만 `GetServicesResponse`, `GetProfilesResponse`, `GetStreamUriResponse`의 SOAP 원문은 보존되지 않았습니다. `GetProfiles`와 `GetStreamUri`는 시험 도구의 송수신 성공 기록으로 확인한 결과입니다.
 
 :::note
-이 글에서 시험 기록으로 확인한 결과와 공식 명세를 구분합니다. 아래 SOAP 응답 XML은 보존된 패킷을 옮긴 것이 아니라 **ONVIF 공식 WSDL을 기준으로 단순화한 예제**입니다. 주소와 token도 문서용 값으로 바꿨습니다.
+이 글에서 시험 기록으로 확인한 결과와 공식 명세를 구분합니다. 아래 SOAP 응답 XML은 **ONVIF 공식 WSDL에 맞춰 만든 예제**입니다. 주소와 token도 문서용 값으로 바꿨습니다.
 :::
 
 ## 시리즈 구성
@@ -55,7 +55,7 @@ RTSP stream URI
 RTP/RTCP media packets
 ```
 
-이번 글의 완료 조건은 **장치가 반환한 RTSP URI를 얻는 것**까지입니다. URI를 얻는 순간 영상 전송이 시작되는 것은 아닙니다. 그 뒤에는 별도의 RTSP 세션 설정과 RTP/RTCP 수신, codec 처리 과정이 남아 있습니다.
+이번 글의 완료 조건은 **장치가 반환한 RTSP URI를 얻는 것**까지입니다. URI를 받은 뒤에 영상 세션을 엽니다. 그 뒤에는 별도의 RTSP 세션 설정과 RTP/RTCP 수신, codec 처리 과정이 남아 있습니다.
 
 단계마다 확인할 수 있는 사실도 다릅니다.
 
@@ -70,7 +70,7 @@ RTP/RTCP media packets
 
 ## 2. Device Service와 Media Service는 다른 endpoint다
 
-WS-Discovery가 돌려준 `XAddrs`는 Device Service의 주소입니다. 이 주소는 장치 관리의 진입점이지, 모든 ONVIF 요청을 보내는 공용 주소가 아닙니다.
+WS-Discovery가 돌려준 `XAddrs`는 Device Service의 주소입니다. 이 주소에서 장치 관리를 시작하고 다른 서비스 요청은 해당 서비스의 주소로 보냅니다.
 
 ```text
 http://192.0.2.10/onvif/device_service
@@ -119,16 +119,16 @@ http://www.onvif.org/ver10/device/wsdl/GetServices
 </s:Envelope>
 ```
 
-`Version`은 ONVIF Core 전체의 버전이 아니라 해당 Service 명세의 버전입니다. 위 숫자는 응답 구조를 보여 주기 위한 문서용 값이며 실제 장치의 응답값이 아닙니다.
+`Version`에는 해당 Service 명세의 버전이 들어갑니다. 위 숫자는 응답 구조를 설명하려고 넣은 예시 값입니다.
 
 중요한 값은 `Namespace`와 `XAddr`입니다.
 
 - `Namespace`로 Media1과 Media2를 구분합니다.
-- 다음 SOAP 요청은 Device Service가 아니라 반환된 Media Service `XAddr`로 보냅니다.
+- 다음 SOAP 요청은 응답에서 받은 Media Service `XAddr`로 보냅니다.
 - `/onvif/media_service` 같은 경로를 Client가 추측하거나 고정하지 않습니다.
 - scheme, host, port, path를 나눠 재조립하지 말고 장치가 돌려준 URI를 endpoint로 사용합니다.
 
-기존 시험 기록의 `GetServices` 요청도 `IncludeCapability=false`였고 응답 원문은 남아 있지 않아 성공까지 확인한 것은 아닙니다.
+기존 시험 기록의 `GetServices` 요청도 `IncludeCapability=false`였고 기록에는 요청만 남아 있어 응답 결과는 미확인 상태입니다.
 
 :::note
 `GetCapabilities`로도 과거 ONVIF Service의 주소를 얻을 수 있지만 하위 호환을 위한 인터페이스입니다. 임의의 namespace를 가진 새 Service까지 열거하려면 `GetServices`를 사용하는 편이 적합합니다.
@@ -253,7 +253,7 @@ Media1의 `StreamSetup` 조합은 다음처럼 읽습니다.
 | `RTP-Unicast` | `HTTP` | RTSP와 RTP를 HTTP/TCP로 tunnel |
 | `RTP-Multicast` | `UDP` | RTP over UDP multicast |
 
-`tt:Stream`의 정확한 XSD 값은 underscore가 아니라 hyphen을 사용한 `RTP-Unicast`입니다. `tt:Protocol`의 `TCP` 값은 deprecated이므로 RTSP/TCP를 요청할 때는 `RTSP`를 사용합니다.
+`tt:Stream`의 XSD 값은 하이픈을 넣은 `RTP-Unicast`입니다. `tt:Protocol`의 `TCP` 값은 deprecated이므로 RTSP/TCP를 요청할 때는 `RTSP`를 사용합니다.
 
 다음은 명세를 단순화한 응답 예제입니다.
 
@@ -275,7 +275,7 @@ Media1의 `StreamSetup` 조합은 다음처럼 읽습니다.
 </s:Envelope>
 ```
 
-Media1 명세에서 세 수명 필드는 `false`, `false`, `PT0S`로 설정됩니다. 여기서 `PT0S`는 “0초 뒤 즉시 만료”가 아니라 이 stream URI가 무기한 유효함을 나타내는 ONVIF의 정의입니다. 첫 연결, 재부팅, 시간 경과, Profile 변경만을 이유로 URI를 무효화하지 않는다는 의미이며 Profile 삭제나 factory reset, 장치 주소 변경 뒤에도 같은 URI가 유지된다고 확대할 수는 없습니다. URI 수명과 RTSP 세션의 keep-alive timeout도 서로 다른 값입니다.
+Media1 명세에서 세 수명 필드는 `false`, `false`, `PT0S`로 설정됩니다. ONVIF에서 이 필드의 `PT0S`는 stream URI의 무기한 유효성을 뜻합니다. 첫 연결, 재부팅, 시간 경과, Profile 변경만을 이유로 URI를 무효화하지 않는다는 의미이며 Profile 삭제나 factory reset, 장치 주소 변경 뒤에도 같은 URI가 유지된다고 확대할 수는 없습니다. URI 수명과 RTSP 세션의 keep-alive timeout도 서로 다른 값입니다.
 
 URI의 path 역시 장치별 구현입니다. 예제처럼 token이 그대로 들어간다고 가정해 URI를 조립하지 말고 `tt:Uri`의 반환값 전체를 opaque URI로 취급해야 합니다.
 
@@ -313,7 +313,7 @@ Media2의 `GetStreamUri`에는 Media1의 `StreamSetup` 대신 `Protocol` 문자�
 </tr2:GetStreamUri>
 ```
 
-응답도 `MediaUri` 구조가 아니라 `Uri` 하나입니다.
+응답에는 `Uri` 하나가 들어갑니다.
 
 ```xml
 <tr2:GetStreamUriResponse
@@ -376,7 +376,7 @@ soap_post \
 
 반면 Media Service의 `GetProfiles`와 `GetStreamUri`는 `READ_MEDIA` access class입니다. 보호된 Media 요청에서는 첫 `401`의 `WWW-Authenticate` challenge를 받은 뒤 HTTP Digest 인증값과 함께 재요청하는 과정이 정상일 수 있습니다. Core 26.06은 HTTP Digest를 기본으로 하며 legacy WS-Security UsernameToken을 사용하는 구현이라면 `Nonce`와 `Created`를 포함하고 Client와 Device의 시간 차이도 확인해야 합니다.
 
-SOAP 인증에 성공했다고 RTSP 인증까지 끝난 것은 아닙니다. 반환된 URI에 접근할 때는 RTSP 계층의 인증을 별도로 처리해야 합니다.
+반환된 URI에 접근할 때는 RTSP 계층의 인증을 별도로 처리해야 합니다.
 
 :::warning
 암호를 명령행 인수, XML 파일, shell history에 직접 남기지 마세요. `Authorization`, WS-Security `UsernameToken`, nonce와 digest 값, 실제 stream URI도 로그를 공유하기 전에 삭제하거나 치환해야 합니다.
@@ -404,7 +404,7 @@ RTP packets received
 frames decoded and displayed
 ```
 
-이 결과는 해당 실행의 실패 경계를 좁히는 근거입니다. 이후 별도 환경에서는 관련 시험이 통과했으므로 장치가 계속 같은 상태였다고 해석해서도 안 됩니다. `GetStreamUri`까지 성공했다면 처음부터 Discovery나 SOAP parsing만 다시 볼 것이 아니라 그 다음 계층을 조사해야 하며 구체적인 RTSP/RTP 진단은 4편으로 분리합니다.
+이 결과는 해당 실행의 실패 경계를 좁히는 근거입니다. 이후 별도 환경에서는 관련 시험이 통과했으므로 장치가 계속 같은 상태였다고 해석해서도 안 됩니다. `GetStreamUri`까지 성공했다면 다음으로 확인할 계층은 RTSP와 RTP입니다. 구체적인 진단 방법은 4편에서 다룹니다.
 
 ## 9. 단계별 실패 지점 찾기
 
@@ -441,15 +441,15 @@ Service를 호출하고 stream URI를 저장할 때는 다음 정보를 민감�
 
 가능하다면 장치가 지원하는 HTTPS endpoint와 검증 가능한 인증서를 사용합니다. SOAP을 HTTPS로 보호했더라도 반환된 URI가 `rtsp://`라면 이후 RTSP/RTP 구간의 보호 수준은 별도로 검토해야 합니다. Media2의 `Rtsps*` 지원 여부도 장치 capability와 Profile 요구사항을 기준으로 확인해야 합니다.
 
-이 글의 `192.0.2.10`은 RFC 5737의 문서용 TEST-NET 주소입니다. 실제 endpoint, token, 인증값을 옮긴 것이 아닙니다.
+이 글의 `192.0.2.10`은 RFC 5737의 문서용 TEST-NET 주소입니다. endpoint, token, 인증값은 모두 설명용 예시입니다.
 
 ## 11. 정리
 
 - Media 요청은 경로를 추측하지 않고 `GetServices`가 반환한 `XAddr`로 보냅니다.
-- Media1의 `GetProfiles` 응답에서 ProfileToken을 얻고 token 이름이나 순서가 아니라 연결된 configuration을 보고 stream을 선택합니다.
+- Media1의 `GetProfiles` 응답에서 ProfileToken을 얻고 각 token에 연결된 configuration을 보고 stream을 선택합니다.
 - Media1과 Media2는 namespace뿐 아니라 `GetProfiles`, `GetStreamUri`의 XML 구조와 protocol 값도 다릅니다.
 - ProfileToken과 stream URI는 장치가 반환한 값을 그대로 사용하며 Client가 token이나 URI path를 조립하지 않습니다.
-- `GetStreamUri` 성공은 영상 재생 성공이 아닙니다. 8절의 multicast/UDP 시험에서는 RTSP `PLAY`까지 통과하고도 frame 수신은 실패했습니다.
+- `GetStreamUri`가 성공하면 이어서 영상이 재생되는지 확인합니다. 8절의 multicast/UDP 시험에서는 RTSP `PLAY`까지 통과하고도 frame 수신은 실패했습니다.
 
 다음 글에서는 반환된 URI로 RTSP `DESCRIBE`, `SETUP`, `PLAY`를 수행하고 RTP packet과 실제 frame 수신을 구분해 확인하겠습니다.
 

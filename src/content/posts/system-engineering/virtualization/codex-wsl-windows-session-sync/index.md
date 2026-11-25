@@ -49,7 +49,7 @@ Codex 내부 DB 스키마는 버전에 따라 달라질 수 있습니다. 앱과
 | Windows 앱 번들 Codex | `0.146.0-alpha.3.1` |
 | WSL 셸 | zsh |
 
-CLI와 앱 번들 Codex의 버전이 완전히 같지 않았다는 점이 중요합니다. 실제로 대화 데이터가 아니라 보조 DB의 migration checksum이 달라 한 차례 시작 오류가 발생했습니다.
+CLI와 앱에 포함된 Codex의 버전이 달랐습니다. 한 차례 시작 오류가 난 원인은 보조 DB의 마이그레이션 체크섬 불일치였습니다.
 
 ---
 
@@ -69,7 +69,7 @@ WSL의 Codex CLI는 기본적으로 Linux 홈 아래를 사용합니다.
 
 따라서 같은 계정으로 로그인했더라도 기본값에서는 설정, 인증 캐시, 세션 기록이 자동으로 공유되지 않습니다.
 
-`CODEX_HOME`에는 설정 파일만 있는 것이 아닙니다. 세션 JSONL, SQLite 상태 DB, 인증 정보, 로그와 캐시 등 Codex의 로컬 상태가 함께 들어갑니다.
+`CODEX_HOME`에는 설정 파일과 세션 JSONL, SQLite 상태 DB, 인증 정보, 로그와 캐시 등 Codex의 로컬 상태가 함께 들어갑니다.
 
 이번 환경에서 확인한 주요 파일은 다음과 같았습니다.
 
@@ -214,7 +214,9 @@ cp -a "$WIN_CODEX_HOME" "$BACKUP_ROOT/windows-codex-home"
 
 이번 작업에서 생성된 실제 첫 백업도 `.codex-merge-backups/<timestamp>` 구조로 보존했습니다.
 
-### 3.3 파일 복사가 아니라 세션 ID 기준으로 병합
+<span id="33-파일-복사가-아니라-세션-id-기준으로-병합"></span>
+
+### 3.3 세션 ID를 기준으로 병합
 
 단순히 `cp -a ~/.codex/* /mnt/c/.../.codex/`를 실행하지 않았습니다. 다음 순서로 별도의 병합 스크립트를 만들어 처리했습니다.
 
@@ -275,7 +277,7 @@ migration 1 was previously applied but has been modified
 - 누락되거나 오래된 rollout 경로: 0개
 - 충돌 지점: `logs_2.sqlite`의 migration checksum
 
-WSL CLI `0.145.0`과 Windows 앱 번들 `0.146.0-alpha.3.1`이 같은 버전 번호의 migration에 서로 다른 checksum을 사용했습니다. 즉 물리적인 SQLite 손상이 아니라, 서로 다른 Codex 빌드가 생성한 보조 DB의 스키마 이력 충돌이었습니다.
+WSL CLI `0.145.0`과 Windows 앱 번들 `0.146.0-alpha.3.1`이 같은 버전 번호의 migration에 서로 다른 checksum을 사용했습니다. 서로 다른 Codex 빌드가 만든 보조 DB의 스키마 이력이 충돌한 겁니다.
 
 ### 4.1 migration checksum 확인
 
@@ -451,7 +453,7 @@ GUI에서 만든 세션은 공용 상태 DB에 바로 기록되어 CLI에서도 
 
 반대 방향은 CLI 세션 자체는 정상 저장되지만 이미 실행 중인 Windows 앱의 최근 목록 카탈로그가 즉시 갱신되지 않았습니다. 앱 완전 재시작을 먼저 시도하고 그래도 안 보일 때 파생 카탈로그를 백업 후 재색인할 필요가 있었습니다.
 
-이 동작은 위 검증 버전에서 직접 관찰한 결과이며 공식 문서가 GUI 최근 목록의 내부 갱신 시점을 보장하는 것은 아닙니다. 앱 업데이트 후에는 다시 확인할 필요가 있습니다.
+GUI의 최근 목록이 이 시점에 갱신되는 동작은 위 버전에서 직접 확인했습니다. 앱 버전이 바뀌면 목록에 반영되는 시점도 다시 확인해야 합니다.
 
 ---
 

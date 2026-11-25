@@ -59,7 +59,7 @@ Page Fault는 디스크 I/O가 필요하므로 처리는 반드시 OS의 **Page 
 ### 처리 순서 (Control Flow)
 
 1. **예외 발생**: 하드웨어가 PTE를 확인하다 Present 0을 발견하고 Page Fault Exception을 발생시킵니다.
-2. **OS 개입 및 위치 확인**: OS는 해당 페이지가 스왑 공간의 어디에 저장되어 있는지 확인합니다. 일반적으로 Present 0인 동안 PTE의 PFN 필드는 실제 PFN이 아니라 **디스크 주소(Disk Address)** 정보를 담도록 재해석해 사용합니다.
+2. **OS 개입 및 위치 확인**: OS는 해당 페이지가 스왑 공간의 어디에 저장되어 있는지 확인합니다. 일반적으로 Present 비트가 0이면 PTE의 PFN 필드를 **디스크 주소(Disk Address)** 정보를 담는 데 사용합니다.
 3. **빈 프레임 확보**:
    - Free Frame이 있으면 바로 사용합니다.
    - 없으면 **Victim Page**를 골라 내보내기(Eviction)를 수행합니다.
